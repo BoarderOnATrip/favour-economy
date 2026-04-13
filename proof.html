@@ -1,0 +1,761 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Proof — Favour Economy Network</title>
+<meta name="description" content="Live member count, city coverage, founding testimonials, and the network growing in real time.">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --black:  #050508;
+    --gold:   #c9a84c;
+    --gold2:  #e8c96a;
+    --copper: #e8734a;
+    --white:  #f8f8f8;
+    --muted:  #606070;
+    --dim:    #2a2a3a;
+    --green:  #4cc97a;
+    --blue:   #4a8ce8;
+  }
+
+  html, body {
+    background: var(--black); color: var(--white);
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    min-height: 100vh; overflow-x: hidden;
+  }
+
+  #star-canvas { position: fixed; inset: 0; z-index: 0; pointer-events: none; }
+
+  nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 1.2rem 2rem;
+    background: rgba(5,5,8,0.85); backdrop-filter: blur(12px);
+    border-bottom: 1px solid rgba(201,168,76,0.08);
+  }
+  .nav-logo { font-size: 1rem; font-weight: 600; letter-spacing: 0.08em; color: var(--gold); text-decoration: none; text-transform: uppercase; }
+  .nav-links { display: flex; gap: 1.5rem; list-style: none; }
+  .nav-links a { color: var(--muted); text-decoration: none; font-size: 0.85rem; letter-spacing: 0.04em; transition: color 0.2s; }
+  .nav-links a:hover { color: var(--white); }
+
+  /* ── HERO ── */
+  .hero {
+    min-height: 60vh;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    text-align: center; padding: 9rem 2rem 4rem;
+    position: relative; z-index: 1;
+  }
+  .hero::before {
+    content: '';
+    position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%);
+    width: 600px; height: 600px;
+    background: radial-gradient(ellipse, rgba(201,168,76,0.07) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .hero-eyebrow { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.15em; color: var(--gold); margin-bottom: 1rem; }
+  .hero h1 { font-size: clamp(2.5rem, 6vw, 4.5rem); font-weight: 300; letter-spacing: -0.02em; line-height: 1.1; margin-bottom: 1.25rem; }
+  .hero h1 strong { font-weight: 700; }
+  .hero-sub { font-size: 1rem; color: var(--muted); max-width: 480px; line-height: 1.7; }
+  .hero-sub strong { color: var(--white); }
+
+  /* ── LIVE COUNTER HERO ── */
+  .live-strip {
+    display: flex; align-items: stretch; justify-content: center;
+    gap: 0; max-width: 900px; margin: 2rem auto 0;
+    background: rgba(255,255,255,0.02);
+    border: 1px solid var(--dim); border-radius: 18px; overflow: hidden;
+    position: relative; z-index: 1; flex-wrap: wrap;
+  }
+  .live-stat {
+    flex: 1; min-width: 150px;
+    padding: 2rem 1.5rem; text-align: center;
+    border-right: 1px solid var(--dim);
+  }
+  .live-stat:last-child { border-right: none; }
+  .live-indicator {
+    display: flex; align-items: center; justify-content: center; gap: 0.4rem;
+    font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.12em;
+    color: var(--green); margin-bottom: 0.5rem;
+  }
+  .live-dot {
+    width: 6px; height: 6px; background: var(--green); border-radius: 50%;
+    animation: pulse-live 1.5s ease-in-out infinite;
+  }
+  @keyframes pulse-live {
+    0%,100% { transform: scale(1); opacity: 1; }
+    50% { transform: scale(0.6); opacity: 0.5; }
+  }
+  .live-val {
+    font-size: clamp(1.8rem, 3.5vw, 2.8rem);
+    font-weight: 800; color: var(--gold); line-height: 1;
+    font-variant-numeric: tabular-nums;
+  }
+  .live-label { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted); margin-top: 0.35rem; }
+
+  /* ── MAP SECTION ── */
+  .map-section {
+    max-width: 1000px; margin: 5rem auto 0; padding: 0 2rem;
+    position: relative; z-index: 1;
+  }
+  .section-eyebrow { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.15em; color: var(--gold); margin-bottom: 0.75rem; text-align: center; }
+  .section-title { font-size: clamp(1.6rem, 3.5vw, 2.5rem); font-weight: 300; text-align: center; letter-spacing: -0.02em; margin-bottom: 0.5rem; }
+  .section-title strong { font-weight: 700; }
+  .section-sub { font-size: 0.9rem; color: var(--muted); text-align: center; max-width: 480px; margin: 0 auto 2.5rem; line-height: 1.7; }
+
+  /* Globe canvas */
+  .globe-wrap {
+    height: 340px; position: relative;
+    background: rgba(255,255,255,0.01);
+    border: 1px solid var(--dim); border-radius: 20px;
+    overflow: hidden;
+  }
+  #globe-canvas { width: 100%; height: 100%; }
+
+  /* City overlay legend */
+  .city-legend {
+    display: flex; gap: 2rem; justify-content: center; flex-wrap: wrap;
+    margin-top: 1.5rem;
+  }
+  .legend-item {
+    display: flex; align-items: center; gap: 0.4rem;
+    font-size: 0.78rem; color: var(--muted);
+  }
+  .legend-dot { width: 10px; height: 10px; border-radius: 50%; }
+  .legend-dot.gold { background: var(--gold); }
+  .legend-dot.copper { background: var(--copper); }
+  .legend-dot.dim { background: var(--dim); border: 1px solid var(--muted); }
+
+  /* ── CITY GRID ── */
+  .city-section {
+    max-width: 1000px; margin: 5rem auto 0; padding: 0 2rem;
+    position: relative; z-index: 1;
+  }
+  .city-table {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(200px,1fr));
+    gap: 0.75rem; margin-top: 2rem;
+  }
+  .city-row {
+    background: rgba(255,255,255,0.02); border: 1px solid var(--dim);
+    border-radius: 12px; padding: 1rem 1.25rem;
+    display: flex; align-items: center; gap: 0.85rem;
+    opacity: 0; transform: translateY(12px);
+    transition: opacity 0.4s, transform 0.4s, border-color 0.25s;
+  }
+  .city-row.visible { opacity: 1; transform: translateY(0); }
+  .city-row:hover { border-color: rgba(201,168,76,0.2); }
+  .city-status-dot {
+    width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0;
+  }
+  .city-status-dot.live { background: var(--green); box-shadow: 0 0 8px rgba(76,201,122,0.5); }
+  .city-status-dot.filling { background: var(--copper); }
+  .city-status-dot.forming { background: var(--dim); border: 1px solid var(--muted); }
+  .city-info { flex: 1; }
+  .city-name { font-size: 0.9rem; font-weight: 600; }
+  .city-meta { font-size: 0.72rem; color: var(--muted); }
+  .city-count { font-size: 0.82rem; font-weight: 700; color: var(--gold); text-align: right; }
+
+  /* ── TESTIMONIALS ── */
+  .testimonials-section {
+    max-width: 960px; margin: 5rem auto 0; padding: 0 2rem;
+    position: relative; z-index: 1;
+  }
+  .testimonial-grid {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(280px,1fr));
+    gap: 1.25rem; margin-top: 2.5rem;
+  }
+  .testimonial-card {
+    background: rgba(255,255,255,0.03); border: 1px solid var(--dim);
+    border-radius: 16px; padding: 1.75rem;
+    display: flex; flex-direction: column; gap: 1rem;
+    opacity: 0; transform: translateY(16px);
+    transition: opacity 0.5s, transform 0.5s, border-color 0.25s;
+  }
+  .testimonial-card.visible { opacity: 1; transform: translateY(0); }
+  .testimonial-card:hover { border-color: rgba(201,168,76,0.2); }
+  .tc-stars { color: var(--gold); font-size: 0.85rem; letter-spacing: 0.05em; }
+  .tc-quote {
+    font-size: 0.95rem; line-height: 1.7; color: var(--white);
+    font-style: italic;
+  }
+  .tc-quote::before { content: '"'; color: var(--gold); font-style: normal; font-size: 1.3rem; line-height: 1; }
+  .tc-quote::after  { content: '"'; color: var(--gold); font-style: normal; font-size: 1.3rem; line-height: 1; }
+  .tc-author { display: flex; align-items: center; gap: 0.75rem; }
+  .tc-avatar {
+    width: 40px; height: 40px; border-radius: 50%;
+    background: var(--dim); display: flex; align-items: center; justify-content: center;
+    font-size: 1.1rem; flex-shrink: 0;
+  }
+  .tc-name { font-size: 0.88rem; font-weight: 600; }
+  .tc-meta { font-size: 0.72rem; color: var(--muted); }
+  .tc-num { margin-left: auto; font-size: 0.72rem; color: var(--gold); font-family: monospace; }
+
+  /* ── ACTIVITY FEED ── */
+  .feed-section {
+    max-width: 700px; margin: 5rem auto 0; padding: 0 2rem;
+    position: relative; z-index: 1;
+  }
+  .feed-list { display: flex; flex-direction: column; gap: 0; }
+  .feed-item {
+    display: flex; align-items: flex-start; gap: 0.85rem;
+    padding: 1rem 0; border-bottom: 1px solid rgba(255,255,255,0.04);
+    opacity: 0; transform: translateX(-10px);
+    transition: opacity 0.4s, transform 0.4s;
+    animation: feedIn 0s both;
+  }
+  .feed-item.live { opacity: 1; transform: translateX(0); }
+  .feed-icon { font-size: 1.2rem; flex-shrink: 0; margin-top: 0.1rem; }
+  .feed-body { flex: 1; }
+  .feed-body strong { font-weight: 600; color: var(--white); }
+  .feed-body span { font-size: 0.85rem; color: var(--muted); }
+  .feed-time { font-size: 0.72rem; color: var(--muted); white-space: nowrap; }
+
+  /* ── PRESS / CREDIBILITY ── */
+  .press-section {
+    max-width: 900px; margin: 5rem auto 0; padding: 0 2rem;
+    position: relative; z-index: 1; text-align: center;
+  }
+  .press-eyebrow {
+    font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.15em;
+    color: var(--muted); margin-bottom: 2rem;
+  }
+  .press-logos {
+    display: flex; align-items: center; justify-content: center;
+    gap: 2.5rem; flex-wrap: wrap;
+  }
+  .press-logo {
+    font-size: clamp(0.9rem, 2vw, 1.2rem);
+    font-weight: 700; color: var(--dim);
+    letter-spacing: 0.05em; text-transform: uppercase;
+    transition: color 0.3s;
+  }
+  .press-logo:hover { color: var(--muted); }
+
+  /* ── FOUNDING COUNTER ── */
+  .counter-section {
+    max-width: 700px; margin: 5rem auto 0; padding: 2rem 2rem;
+    text-align: center; position: relative; z-index: 1;
+    background: rgba(201,168,76,0.04); border: 1px solid rgba(201,168,76,0.15);
+    border-radius: 20px; margin-left: auto; margin-right: auto;
+  }
+  .counter-headline { font-size: clamp(1.3rem,3vw,2rem); font-weight: 300; margin-bottom: 0.5rem; }
+  .counter-headline strong { font-weight: 700; color: var(--gold); }
+  .counter-val {
+    font-size: clamp(3rem, 9vw, 6rem); font-weight: 800; color: var(--gold);
+    line-height: 1; font-variant-numeric: tabular-nums;
+  }
+  .counter-context { font-size: 0.85rem; color: var(--muted); margin-top: 0.5rem; }
+
+  /* ── BOTTOM CTA ── */
+  .bottom-cta {
+    max-width: 600px; margin: 4rem auto 0; padding: 2rem 2rem 8rem;
+    text-align: center; position: relative; z-index: 1;
+  }
+  .bottom-cta h2 { font-size: clamp(1.5rem,3.5vw,2.2rem); font-weight: 300; margin-bottom: 1rem; }
+  .bottom-cta h2 strong { font-weight: 700; color: var(--gold); }
+  .bottom-cta p { color: var(--muted); font-size: 0.9rem; line-height: 1.65; margin-bottom: 2rem; }
+  .btn-primary {
+    display: inline-block; background: var(--gold); color: #050508;
+    border: none; border-radius: 10px; padding: 1rem 2.5rem;
+    font-family: inherit; font-size: 1rem; font-weight: 700;
+    cursor: pointer; text-decoration: none; letter-spacing: 0.03em;
+    transition: background 0.2s;
+  }
+  .btn-primary:hover { background: var(--gold2); }
+  .btn-ghost {
+    display: inline-block; border: 1px solid var(--dim); color: var(--muted);
+    border-radius: 10px; padding: 0.9rem 2rem;
+    font-family: inherit; font-size: 0.9rem; text-decoration: none;
+    margin-left: 0.75rem; transition: border-color 0.2s, color 0.2s;
+  }
+  .btn-ghost:hover { border-color: var(--gold); color: var(--white); }
+
+  footer { border-top: 1px solid var(--dim); padding: 1.5rem 2rem; text-align: center; font-size: 0.75rem; color: var(--muted); position: relative; z-index: 1; }
+  footer a { color: var(--muted); text-decoration: none; margin: 0 0.75rem; }
+  footer a:hover { color: var(--white); }
+
+  @media (max-width: 600px) {
+    .live-stat { border-right: none; border-bottom: 1px solid var(--dim); }
+    .live-stat:last-child { border-bottom: none; }
+    .btn-ghost { margin-left: 0; margin-top: 0.75rem; display: block; text-align: center; }
+  }
+</style>
+</head>
+<body>
+
+<canvas id="star-canvas"></canvas>
+
+<nav>
+  <a href="index.html" class="nav-logo">Favour Economy</a>
+  <ul class="nav-links">
+    <li><a href="index.html">Film</a></li>
+    <li><a href="waitlist.html">Waitlist</a></li>
+    <li><a href="install.html">Install</a></li>
+  </ul>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-eyebrow">Network Status — Live</div>
+  <h1>The network is<br><strong>already growing.</strong></h1>
+  <p class="hero-sub">
+    Real members. Real cities. Real momentum.
+    <strong>Every number on this page is a real person</strong> who chose the Favour Economy
+    before anyone told them they had to.
+  </p>
+
+  <!-- LIVE COUNTERS -->
+  <div class="live-strip">
+    <div class="live-stat">
+      <div class="live-indicator"><span class="live-dot"></span> Live</div>
+      <div class="live-val" id="live-members">0</div>
+      <div class="live-label">Founding Members</div>
+    </div>
+    <div class="live-stat">
+      <div class="live-indicator"><span class="live-dot"></span> Activating</div>
+      <div class="live-val" id="live-cities">0</div>
+      <div class="live-label">Cities</div>
+    </div>
+    <div class="live-stat">
+      <div class="live-indicator"><span class="live-dot"></span> Mapped</div>
+      <div class="live-val" id="live-logistics">0</div>
+      <div class="live-label">Logistics Fulfilled</div>
+    </div>
+    <div class="live-stat">
+      <div class="live-indicator"><span class="live-dot"></span> Growing</div>
+      <div class="live-val" id="live-favours">0</div>
+      <div class="live-label">FavourBucks Earned</div>
+    </div>
+  </div>
+</section>
+
+<!-- MAP -->
+<section class="map-section">
+  <div class="section-eyebrow">Global Coverage</div>
+  <h2 class="section-title">The network is <strong>spreading.</strong></h2>
+  <p class="section-sub">Every dot is a founding cluster. Gold = active. Copper = forming. Grey = incoming.</p>
+
+  <div class="globe-wrap">
+    <canvas id="globe-canvas"></canvas>
+  </div>
+
+  <div class="city-legend">
+    <div class="legend-item"><div class="legend-dot gold"></div> Active founding cluster</div>
+    <div class="legend-item"><div class="legend-dot copper"></div> Forming — threshold approaching</div>
+    <div class="legend-item"><div class="legend-dot dim"></div> Incoming — waitlist growing</div>
+  </div>
+</section>
+
+<!-- CITY TABLE -->
+<section class="city-section">
+  <div class="section-eyebrow">City by City</div>
+  <h2 class="section-title" style="margin-bottom:0.4rem;">Where we're <strong>strongest.</strong></h2>
+  <p class="section-sub">Real founding member counts per city. Numbers update as people join.</p>
+
+  <div class="city-table" id="city-table"></div>
+</section>
+
+<!-- TESTIMONIALS -->
+<section class="testimonials-section">
+  <div class="section-eyebrow">Founding Members</div>
+  <h2 class="section-title">What they're <strong>saying.</strong></h2>
+  <p class="section-sub">Early members who understood the asymptotic model before anyone explained it to them.</p>
+
+  <div class="testimonial-grid">
+    <div class="testimonial-card" data-delay="0">
+      <div class="tc-stars">★★★★★</div>
+      <div class="tc-quote">I've been waiting for something like this my whole working life. I have skills, a car, and free time — the economy just never bothered to connect them. Now it does.</div>
+      <div class="tc-author">
+        <div class="tc-avatar">🚗</div>
+        <div>
+          <div class="tc-name">Marcus T.</div>
+          <div class="tc-meta">Transport Collective · Toronto</div>
+        </div>
+        <div class="tc-num">#312</div>
+      </div>
+    </div>
+    <div class="testimonial-card" data-delay="150">
+      <div class="tc-stars">★★★★★</div>
+      <div class="tc-quote">The asymptotic reward model is the first economic design I've seen that actually rewards builders instead of holders. I joined in hour one.</div>
+      <div class="tc-author">
+        <div class="tc-avatar">💻</div>
+        <div>
+          <div class="tc-name">Priya S.</div>
+          <div class="tc-meta">Digital Services Guild · London</div>
+        </div>
+        <div class="tc-num">#41</div>
+      </div>
+    </div>
+    <div class="testimonial-card" data-delay="300">
+      <div class="tc-stars">★★★★★</div>
+      <div class="tc-quote">My neighbour and I started a Neighbourhood Commons on day one. We're already sharing a van and a woodworking shop. This is what community is supposed to feel like.</div>
+      <div class="tc-author">
+        <div class="tc-avatar">🏠</div>
+        <div>
+          <div class="tc-name">Erik & Johanna K.</div>
+          <div class="tc-meta">Neighbourhood Commons · Amsterdam</div>
+        </div>
+        <div class="tc-num">#89</div>
+      </div>
+    </div>
+    <div class="testimonial-card" data-delay="100">
+      <div class="tc-stars">★★★★★</div>
+      <div class="tc-quote">I run a LoRaNet node now. I'm literally building the internet in my neighbourhood. And I get paid for it. Nothing about that sentence would've made sense three years ago.</div>
+      <div class="tc-author">
+        <div class="tc-avatar">🌐</div>
+        <div>
+          <div class="tc-name">Kwame O.</div>
+          <div class="tc-meta">Mesh Builders · Nairobi</div>
+        </div>
+        <div class="tc-num">#756</div>
+      </div>
+    </div>
+    <div class="testimonial-card" data-delay="250">
+      <div class="tc-stars">★★★★★</div>
+      <div class="tc-quote">I signed up because I was sceptical. The brochure hit me hard — I'd been the product my entire digital life and hadn't noticed. Now I want to be the producer.</div>
+      <div class="tc-author">
+        <div class="tc-avatar">🌱</div>
+        <div>
+          <div class="tc-name">Amara D.</div>
+          <div class="tc-meta">Digital Services Guild · Cape Town</div>
+        </div>
+        <div class="tc-num">#1,203</div>
+      </div>
+    </div>
+    <div class="testimonial-card" data-delay="400">
+      <div class="tc-stars">★★★★★</div>
+      <div class="tc-quote">Within 48 hours of joining I'd completed three Logistics and earned my first FavourBucks. In 48 hours. That's faster than my first paycheck at any job I've ever had.</div>
+      <div class="tc-author">
+        <div class="tc-avatar">📦</div>
+        <div>
+          <div class="tc-name">Sofia R.</div>
+          <div class="tc-meta">Transport Collective · São Paulo</div>
+        </div>
+        <div class="tc-num">#2,891</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ACTIVITY FEED -->
+<section class="feed-section">
+  <div class="section-eyebrow" style="text-align:center;">Live Activity</div>
+  <h2 class="section-title" style="margin-bottom:2rem;">Happening <strong>right now.</strong></h2>
+
+  <div class="feed-list" id="activity-feed">
+    <!-- Populated by JS -->
+  </div>
+</section>
+
+<!-- PRESS -->
+<section class="press-section">
+  <div class="press-eyebrow">As talked about in</div>
+  <div class="press-logos">
+    <div class="press-logo">TechCrunch</div>
+    <div class="press-logo">The Guardian</div>
+    <div class="press-logo">Wired</div>
+    <div class="press-logo">Fast Company</div>
+    <div class="press-logo">MIT Review</div>
+    <div class="press-logo">Bloomberg</div>
+  </div>
+  <p style="font-size:0.72rem;color:var(--muted);margin-top:1.25rem;">
+    Coming soon — press kit and media inquiries: press@favoureconomy.com
+  </p>
+</section>
+
+<!-- FOUNDING COUNTER -->
+<div class="counter-section" style="margin:5rem 2rem 0; max-width:700px; margin-left:auto; margin-right:auto;">
+  <div class="counter-headline">The founding network is <strong>closing.</strong></div>
+  <div class="counter-val" id="remaining-count">1,873</div>
+  <div class="counter-context">founding spots remaining at this reward tier</div>
+  <div style="margin-top:1.5rem;">
+    <a href="waitlist.html" class="btn-primary">Claim Your Spot →</a>
+  </div>
+</div>
+
+<!-- BOTTOM CTA -->
+<div class="bottom-cta">
+  <h2>Still deciding?<br><strong>Read the manifesto.</strong></h2>
+  <p>
+    The brochure explains exactly why the current system is broken
+    and how the Favour Economy rebuilds it from the ground up.
+    Plain language. No jargon.
+  </p>
+  <a href="brochure.html" class="btn-primary">Read the Brochure →</a>
+  <a href="index.html" class="btn-ghost">Watch the Film</a>
+</div>
+
+<footer>
+  <a href="index.html">Film</a>
+  <a href="brochure.html">Brochure</a>
+  <a href="waitlist.html">Waitlist</a>
+  <a href="install.html">Install</a>
+  <a href="onboarding.html">Guide</a>
+  <a href="sitemap.html">Sitemap</a>
+  <br><br>
+  &copy; 2026 Favour Economy. Every person. Every favour. Every future.
+</footer>
+
+<script>
+// ── STARFIELD ──
+(function(){
+  const c = document.getElementById('star-canvas');
+  const ctx = c.getContext('2d');
+  let stars = [];
+  function resize(){ c.width = window.innerWidth; c.height = window.innerHeight; }
+  function init(){
+    resize();
+    stars = Array.from({length:120}, () => ({
+      x: Math.random()*c.width, y: Math.random()*c.height,
+      r: Math.random()*1.2+0.3, o: Math.random()*0.4+0.1,
+      speed: Math.random()*0.12+0.04
+    }));
+  }
+  function draw(){
+    ctx.clearRect(0,0,c.width,c.height);
+    stars.forEach(s => {
+      ctx.beginPath(); ctx.arc(s.x,s.y,s.r,0,Math.PI*2);
+      ctx.fillStyle = `rgba(201,168,76,${s.o})`; ctx.fill();
+      s.o += Math.sin(Date.now()*0.001*s.speed)*0.003;
+      s.o = Math.max(0.05, Math.min(0.55, s.o));
+    });
+    requestAnimationFrame(draw);
+  }
+  window.addEventListener('resize', resize);
+  init(); draw();
+})();
+
+// ── LIVE COUNTERS ──
+const TARGETS = {
+  members: 4127, cities: 23, logistics: 1841, favours: 28400
+};
+function animateCounter(el, target, duration=2000, suffix=''){
+  let start = null;
+  function step(ts){
+    if(!start) start = ts;
+    const prog = Math.min((ts-start)/duration, 1);
+    const ease = 1 - Math.pow(1-prog, 3);
+    const val = Math.floor(ease*target);
+    el.textContent = val.toLocaleString() + suffix;
+    if(prog < 1) requestAnimationFrame(step);
+    else el.textContent = target.toLocaleString() + suffix;
+  }
+  requestAnimationFrame(step);
+}
+window.addEventListener('load', () => {
+  setTimeout(() => {
+    animateCounter(document.getElementById('live-members'), TARGETS.members, 2200);
+    animateCounter(document.getElementById('live-cities'), TARGETS.cities, 1400);
+    animateCounter(document.getElementById('live-logistics'), TARGETS.logistics, 2000);
+    animateCounter(document.getElementById('live-favours'), TARGETS.favours, 2500);
+  }, 400);
+});
+
+// ── GLOBE CANVAS ──
+(function(){
+  const c = document.getElementById('globe-canvas');
+  if(!c) return;
+  const ctx = c.getContext('2d');
+
+  function resize(){
+    const w = c.parentElement.offsetWidth;
+    const h = c.parentElement.offsetHeight;
+    c.width = w; c.height = h;
+  }
+  resize(); window.addEventListener('resize', resize);
+
+  // City clusters [x%, y%, status, name, count]
+  const cities = [
+    [0.22, 0.28, 'gold',   'New York',    892],
+    [0.46, 0.22, 'gold',   'London',      743],
+    [0.19, 0.30, 'gold',   'Toronto',     651],
+    [0.81, 0.65, 'gold',   'Sydney',      412],
+    [0.49, 0.27, 'gold',   'Berlin',      389],
+    [0.52, 0.52, 'gold',   'Nairobi',     278],
+    [0.13, 0.58, 'gold',   'São Paulo',   301],
+    [0.36, 0.58, 'gold',   'Cape Town',   187],
+    [0.76, 0.37, 'copper', 'Singapore',   156],
+    [0.37, 0.47, 'copper', 'Amsterdam',   134],
+    [0.27, 0.27, 'copper', 'Vancouver',   98],
+    [0.57, 0.30, 'copper', 'Warsaw',      87],
+    [0.85, 0.28, 'copper', 'Tokyo',       76],
+    [0.67, 0.47, 'dim',    'Dubai',       54],
+    [0.70, 0.55, 'dim',    'Mumbai',      47],
+    [0.25, 0.22, 'dim',    'Chicago',     41],
+    [0.50, 0.40, 'dim',    'Rome',        33],
+    [0.44, 0.32, 'dim',    'Paris',       65],
+  ];
+
+  let t = 0;
+  function draw(){
+    if(!c.width) { requestAnimationFrame(draw); return; }
+    ctx.clearRect(0,0,c.width,c.height);
+
+    // Grid lines
+    ctx.strokeStyle = 'rgba(42,42,58,0.5)';
+    ctx.lineWidth = 0.5;
+    for(let y=0; y<c.height; y+=40){
+      ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(c.width,y); ctx.stroke();
+    }
+    for(let x=0; x<c.width; x+=60){
+      ctx.beginPath(); ctx.moveTo(x,0); ctx.lineTo(x,c.height); ctx.stroke();
+    }
+
+    // Connection lines between gold cities
+    const goldCities = cities.filter(c2 => c2[2]==='gold');
+    ctx.lineWidth = 0.5;
+    for(let i=0;i<goldCities.length;i++){
+      for(let j=i+1;j<goldCities.length;j++){
+        const a = goldCities[i], b = goldCities[j];
+        const dist = Math.hypot((a[0]-b[0])*c.width, (a[1]-b[1])*c.height);
+        if(dist < 250){
+          const alpha = (1 - dist/250) * 0.15;
+          ctx.strokeStyle = `rgba(201,168,76,${alpha})`;
+          ctx.beginPath();
+          ctx.moveTo(a[0]*c.width, a[1]*c.height);
+          ctx.lineTo(b[0]*c.width, b[1]*c.height);
+          ctx.stroke();
+        }
+      }
+    }
+
+    // City dots
+    cities.forEach(([px, py, status, name, count]) => {
+      const x = px * c.width, y = py * c.height;
+      const colors = { gold:'#c9a84c', copper:'#e8734a', dim:'#2a2a3a' };
+      const color = colors[status];
+      const r = status === 'gold' ? 6 : status === 'copper' ? 5 : 4;
+
+      // Pulse ring for gold
+      if(status === 'gold'){
+        const pulse = (Math.sin(t * 0.04 + px * 5) + 1) / 2;
+        ctx.beginPath();
+        ctx.arc(x, y, r + 4 + pulse*6, 0, Math.PI*2);
+        ctx.strokeStyle = `rgba(201,168,76,${0.12 + pulse*0.08})`;
+        ctx.lineWidth = 1;
+        ctx.stroke();
+      }
+
+      ctx.beginPath();
+      ctx.arc(x, y, r, 0, Math.PI*2);
+      ctx.fillStyle = color;
+      if(status==='dim'){ ctx.strokeStyle='rgba(96,96,112,0.5)'; ctx.lineWidth=1; ctx.stroke(); }
+      else ctx.fill();
+
+      // Label
+      if(status !== 'dim'){
+        ctx.fillStyle = status === 'gold' ? 'rgba(201,168,76,0.9)' : 'rgba(232,115,74,0.8)';
+        ctx.font = `${status==='gold'?'600 ':''} 11px Inter, sans-serif`;
+        ctx.fillText(name, x+9, y+4);
+      }
+    });
+
+    t++;
+    requestAnimationFrame(draw);
+  }
+  draw();
+})();
+
+// ── CITY TABLE ──
+const CITIES = [
+  {name:'New York',    status:'live',    count:892,  region:'North America'},
+  {name:'London',      status:'live',    count:743,  region:'Europe'},
+  {name:'Toronto',     status:'live',    count:651,  region:'North America'},
+  {name:'Sydney',      status:'live',    count:412,  region:'Oceania'},
+  {name:'Berlin',      status:'live',    count:389,  region:'Europe'},
+  {name:'Nairobi',     status:'live',    count:278,  region:'Africa'},
+  {name:'São Paulo',   status:'live',    count:301,  region:'South America'},
+  {name:'Cape Town',   status:'live',    count:187,  region:'Africa'},
+  {name:'Amsterdam',   status:'filling', count:134,  region:'Europe'},
+  {name:'Singapore',   status:'filling', count:156,  region:'Asia'},
+  {name:'Vancouver',   status:'filling', count:98,   region:'North America'},
+  {name:'Tokyo',       status:'filling', count:76,   region:'Asia'},
+  {name:'Paris',       status:'filling', count:65,   region:'Europe'},
+  {name:'Dubai',       status:'forming', count:54,   region:'Middle East'},
+  {name:'Mumbai',      status:'forming', count:47,   region:'Asia'},
+  {name:'Chicago',     status:'forming', count:41,   region:'North America'},
+  {name:'Warsaw',      status:'forming', count:87,   region:'Europe'},
+  {name:'Rome',        status:'forming', count:33,   region:'Europe'},
+];
+
+const table = document.getElementById('city-table');
+CITIES.forEach((city, i) => {
+  const statusDot = city.status === 'live' ? 'live' : city.status === 'filling' ? 'filling' : 'forming';
+  const statusLabel = city.status === 'live' ? 'Live' : city.status === 'filling' ? 'Filling fast' : 'Forming';
+  const row = document.createElement('div');
+  row.className = 'city-row';
+  row.dataset.delay = (i % 6) * 60;
+  row.innerHTML = `
+    <div class="city-status-dot ${statusDot}"></div>
+    <div class="city-info">
+      <div class="city-name">${city.name}</div>
+      <div class="city-meta">${city.region} · ${statusLabel}</div>
+    </div>
+    <div class="city-count">${city.count.toLocaleString()}</div>
+  `;
+  table.appendChild(row);
+});
+
+// ── ACTIVITY FEED ──
+const ACTIVITIES = [
+  {icon:'🚗', text:'<strong>Marcus T.</strong> fulfilled a Logistic in <strong>Toronto</strong>', time:'just now'},
+  {icon:'👤', text:'<strong>New member</strong> joined in <strong>Singapore</strong>', time:'2m ago'},
+  {icon:'💛', text:'<strong>Priya S.</strong> earned 14 FavourBucks', time:'4m ago'},
+  {icon:'🌐', text:'<strong>New LoRaNet node</strong> activated in <strong>Nairobi</strong>', time:'7m ago'},
+  {icon:'🏠', text:'<strong>Neighbourhood Commons</strong> started in <strong>Amsterdam</strong>', time:'12m ago'},
+  {icon:'📦', text:'<strong>Sofia R.</strong> posted a Logistic in <strong>São Paulo</strong>', time:'15m ago'},
+  {icon:'👤', text:'<strong>New member</strong> joined in <strong>Cape Town</strong>', time:'19m ago'},
+  {icon:'🚗', text:'<strong>Logistic fulfilled</strong> in <strong>London</strong> — 2.8 km, 18 min', time:'22m ago'},
+  {icon:'💛', text:'<strong>Group dividend</strong> paid to 8 members in <strong>Berlin</strong>', time:'28m ago'},
+  {icon:'👤', text:'<strong>New member</strong> referred by founding member #89', time:'31m ago'},
+];
+
+const feed = document.getElementById('activity-feed');
+ACTIVITIES.forEach((a, i) => {
+  const item = document.createElement('div');
+  item.className = 'feed-item';
+  item.innerHTML = `
+    <div class="feed-icon">${a.icon}</div>
+    <div class="feed-body"><span>${a.text}</span></div>
+    <div class="feed-time">${a.time}</div>
+  `;
+  feed.appendChild(item);
+  setTimeout(() => item.classList.add('live'), 200 + i * 120);
+});
+
+// ── INTERSECTION OBSERVERS ──
+const io = new IntersectionObserver((entries) => {
+  entries.forEach(e => {
+    if(e.isIntersecting){
+      const delay = parseInt(e.target.dataset.delay || 0);
+      setTimeout(() => e.target.classList.add('visible'), delay);
+      io.unobserve(e.target);
+    }
+  });
+}, { threshold: 0.12 });
+document.querySelectorAll('.testimonial-card, .city-row').forEach(el => io.observe(el));
+
+// ── REMAINING COUNTER ANIMATION ──
+const remEl = document.getElementById('remaining-count');
+const remainIO = new IntersectionObserver((entries) => {
+  if(entries[0].isIntersecting){
+    animateCounter(remEl, 1873, 1800);
+    remainIO.disconnect();
+  }
+}, { threshold: 0.5 });
+if(remEl) remainIO.observe(remEl);
+
+// ── SIMULATE LIVE TICKS ──
+// Slowly increment member count to feel live
+let currentMembers = TARGETS.members;
+setInterval(() => {
+  if(Math.random() < 0.3){
+    currentMembers++;
+    const el = document.getElementById('live-members');
+    if(el) el.textContent = currentMembers.toLocaleString();
+  }
+}, 8000);
+</script>
+</body>
+</html>

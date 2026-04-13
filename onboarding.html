@@ -1,0 +1,836 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Getting Started — Favour Economy</title>
+<meta name="description" content="Your first Logistic. Your first FavourBuck. Your Surface. Your Group. Five minutes to your first earning.">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --black:  #050508;
+    --gold:   #c9a84c;
+    --gold2:  #e8c96a;
+    --copper: #e8734a;
+    --white:  #f8f8f8;
+    --muted:  #606070;
+    --dim:    #2a2a3a;
+    --green:  #4cc97a;
+    --blue:   #4a8ce8;
+    --purple: #a04ae8;
+  }
+
+  html, body {
+    background: var(--black); color: var(--white);
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    min-height: 100vh; overflow-x: hidden;
+  }
+
+  #star-canvas { position: fixed; inset: 0; z-index: 0; pointer-events: none; }
+
+  nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 1.2rem 2rem;
+    background: rgba(5,5,8,0.85); backdrop-filter: blur(12px);
+    border-bottom: 1px solid rgba(201,168,76,0.08);
+  }
+  .nav-logo { font-size: 1rem; font-weight: 600; letter-spacing: 0.08em; color: var(--gold); text-decoration: none; text-transform: uppercase; }
+  .nav-links { display: flex; gap: 1.5rem; list-style: none; }
+  .nav-links a { color: var(--muted); text-decoration: none; font-size: 0.85rem; letter-spacing: 0.04em; transition: color 0.2s; }
+  .nav-links a:hover { color: var(--white); }
+
+  /* ── PROGRESS BAR (sticky) ── */
+  .progress-bar {
+    position: sticky; top: 64px; z-index: 50;
+    background: rgba(5,5,8,0.95); backdrop-filter: blur(8px);
+    border-bottom: 1px solid var(--dim);
+    padding: 0.85rem 2rem;
+    display: flex; align-items: center; justify-content: center; gap: 0.75rem;
+    flex-wrap: wrap;
+  }
+  .prog-step {
+    display: flex; align-items: center; gap: 0.4rem;
+    font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.08em;
+    color: var(--muted); cursor: pointer;
+    transition: color 0.2s;
+    text-decoration: none;
+  }
+  .prog-step:hover { color: var(--white); }
+  .prog-step.done { color: var(--green); }
+  .prog-step.active { color: var(--gold); }
+  .prog-dot {
+    width: 8px; height: 8px; border-radius: 50%;
+    border: 1.5px solid currentColor; background: transparent;
+  }
+  .prog-step.done .prog-dot { background: var(--green); border-color: var(--green); }
+  .prog-step.active .prog-dot { background: var(--gold); border-color: var(--gold); }
+  .prog-arrow { color: var(--dim); font-size: 0.7rem; }
+
+  /* ── HERO ── */
+  .hero {
+    padding: 10rem 2rem 5rem;
+    text-align: center;
+    position: relative; z-index: 1; max-width: 760px; margin: 0 auto;
+  }
+  .hero-eyebrow { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.15em; color: var(--gold); margin-bottom: 1rem; }
+  .hero h1 { font-size: clamp(2.2rem, 5.5vw, 4rem); font-weight: 300; letter-spacing: -0.02em; line-height: 1.15; margin-bottom: 1.25rem; }
+  .hero h1 strong { font-weight: 700; color: var(--gold); }
+  .hero-sub { font-size: 1rem; color: var(--muted); max-width: 520px; margin: 0 auto; line-height: 1.7; }
+  .hero-sub strong { color: var(--white); }
+
+  /* ── GUIDE SECTIONS ── */
+  .guide-section {
+    max-width: 860px; margin: 0 auto;
+    padding: 5rem 2rem;
+    position: relative; z-index: 1;
+  }
+  .guide-section + .guide-section {
+    border-top: 1px solid var(--dim);
+  }
+
+  .section-num {
+    font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.15em;
+    color: var(--muted); margin-bottom: 0.4rem;
+    display: flex; align-items: center; gap: 0.5rem;
+  }
+  .num-badge {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 22px; height: 22px; border-radius: 50%;
+    border: 1px solid var(--gold); color: var(--gold);
+    font-size: 0.65rem; font-weight: 700;
+  }
+  .guide-section h2 {
+    font-size: clamp(1.6rem, 3.5vw, 2.5rem);
+    font-weight: 300; letter-spacing: -0.02em; margin-bottom: 0.75rem;
+  }
+  .guide-section h2 strong { font-weight: 700; }
+  .section-intro {
+    font-size: 0.95rem; color: var(--muted); max-width: 560px;
+    line-height: 1.7; margin-bottom: 2.5rem;
+  }
+  .section-intro strong { color: var(--white); }
+
+  /* ── LOGISTIC BUILDER ── */
+  .logistic-builder {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;
+    margin-bottom: 2rem;
+  }
+  @media (max-width: 640px) { .logistic-builder { grid-template-columns: 1fr; } }
+
+  .builder-col { display: flex; flex-direction: column; gap: 1rem; }
+  .builder-card {
+    background: rgba(255,255,255,0.03); border: 1px solid var(--dim);
+    border-radius: 14px; padding: 1.5rem;
+    opacity: 0; transform: translateY(16px);
+    transition: opacity 0.45s, transform 0.45s, border-color 0.25s;
+  }
+  .builder-card.visible { opacity: 1; transform: translateY(0); }
+  .builder-card:hover { border-color: rgba(201,168,76,0.25); }
+  .bc-label {
+    font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.12em;
+    color: var(--gold); margin-bottom: 0.4rem;
+  }
+  .bc-title { font-size: 1rem; font-weight: 600; margin-bottom: 0.3rem; }
+  .bc-body { font-size: 0.83rem; color: var(--muted); line-height: 1.6; }
+  .bc-body strong { color: var(--white); }
+  .bc-example {
+    margin-top: 0.75rem; padding: 0.6rem 0.8rem;
+    background: rgba(0,0,0,0.3); border-radius: 8px;
+    font-size: 0.78rem; color: var(--muted); font-style: italic;
+  }
+  .bc-example strong { color: var(--gold2); font-style: normal; }
+
+  /* ── LOGISTIC LIVE PREVIEW ── */
+  .logistic-preview {
+    background: rgba(201,168,76,0.04); border: 1.5px solid rgba(201,168,76,0.2);
+    border-radius: 16px; padding: 1.75rem;
+    position: relative; overflow: hidden;
+  }
+  .lp-header {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 1.25rem;
+  }
+  .lp-id { font-size: 0.72rem; color: var(--muted); font-family: monospace; }
+  .lp-status {
+    font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.1em;
+    padding: 0.2rem 0.6rem; border-radius: 100px;
+    background: rgba(76,201,122,0.12); color: var(--green);
+    border: 1px solid rgba(76,201,122,0.25);
+  }
+  .lp-route {
+    display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1rem;
+  }
+  .lp-point {
+    display: flex; flex-direction: column; gap: 0.2rem; flex: 1;
+  }
+  .lp-point-label {
+    font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted);
+  }
+  .lp-point-val { font-size: 0.9rem; font-weight: 600; }
+  .lp-point-val.origin { color: var(--copper); }
+  .lp-point-val.dest { color: var(--gold); }
+  .lp-arrow { font-size: 1.2rem; color: var(--dim); flex-shrink: 0; }
+
+  /* SVG path animation */
+  .lp-path-wrap { height: 40px; margin-bottom: 1rem; }
+  #lp-svg { width: 100%; height: 40px; }
+
+  .lp-meta { display: flex; gap: 0.75rem; flex-wrap: wrap; }
+  .lp-chip {
+    font-size: 0.75rem; padding: 0.25rem 0.7rem; border-radius: 100px;
+    border: 1px solid var(--dim); color: var(--muted);
+  }
+  .lp-chip.highlighted { border-color: rgba(201,168,76,0.3); color: var(--gold2); }
+
+  /* ── SURFACE CALCULATOR ── */
+  .surface-calc {
+    background: rgba(255,255,255,0.02); border: 1px solid var(--dim);
+    border-radius: 16px; padding: 1.75rem;
+  }
+  .calc-title { font-size: 0.88rem; font-weight: 600; margin-bottom: 1.25rem; }
+  .calc-sliders { display: flex; flex-direction: column; gap: 1rem; }
+
+  .slider-row { display: flex; flex-direction: column; gap: 0.35rem; }
+  .slider-row label {
+    display: flex; justify-content: space-between; align-items: center;
+    font-size: 0.82rem;
+  }
+  .slider-row label span { color: var(--gold); font-weight: 600; font-variant-numeric: tabular-nums; }
+  input[type="range"] {
+    width: 100%; -webkit-appearance: none; appearance: none;
+    height: 4px; border-radius: 100px; outline: none; cursor: pointer;
+    background: var(--dim);
+  }
+  input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none; width: 16px; height: 16px; border-radius: 50%;
+    background: var(--gold); border: 2px solid var(--black); cursor: pointer;
+  }
+
+  .surface-result {
+    margin-top: 1.5rem; padding: 1rem;
+    background: rgba(201,168,76,0.07); border: 1px solid rgba(201,168,76,0.2);
+    border-radius: 10px; text-align: center;
+  }
+  .surface-result-val {
+    font-size: 2rem; font-weight: 700; color: var(--gold); line-height: 1;
+  }
+  .surface-result-label {
+    font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.1em;
+    color: var(--muted); margin-top: 0.3rem;
+  }
+
+  /* Bread viz */
+  .bread-wrap { position: relative; height: 80px; margin: 1.5rem 0; }
+  #bread-canvas { width: 100%; height: 80px; }
+
+  /* ── GROUP FINDER ── */
+  .group-cards { display: grid; grid-template-columns: repeat(auto-fit,minmax(220px,1fr)); gap: 1rem; }
+  .group-card {
+    background: rgba(255,255,255,0.03); border: 1px solid var(--dim); border-radius: 14px;
+    padding: 1.25rem; cursor: pointer;
+    opacity: 0; transform: translateY(14px);
+    transition: opacity 0.4s, transform 0.4s, border-color 0.25s;
+  }
+  .group-card.visible { opacity: 1; transform: translateY(0); }
+  .group-card:hover { border-color: rgba(201,168,76,0.3); }
+  .group-card.selected { border-color: var(--gold); background: rgba(201,168,76,0.07); }
+  .gc-icon { font-size: 1.8rem; margin-bottom: 0.6rem; }
+  .gc-name { font-size: 0.95rem; font-weight: 600; margin-bottom: 0.3rem; }
+  .gc-desc { font-size: 0.8rem; color: var(--muted); line-height: 1.5; }
+  .gc-members { font-size: 0.72rem; color: var(--green); margin-top: 0.5rem; }
+
+  /* ── BRIDGE PAIRING ── */
+  .pairing-layout {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; align-items: start;
+  }
+  @media (max-width: 640px) { .pairing-layout { grid-template-columns: 1fr; } }
+  .pairing-phone {
+    background: rgba(255,255,255,0.03); border: 1px solid var(--dim);
+    border-radius: 14px; padding: 1.5rem;
+  }
+  .pairing-phone h4 { font-size: 0.95rem; font-weight: 600; margin-bottom: 0.5rem; }
+  .pairing-phone p { font-size: 0.83rem; color: var(--muted); line-height: 1.6; }
+  .pairing-phone p strong { color: var(--white); }
+  .pairing-phone ol { padding-left: 1.25rem; margin-top: 0.75rem; }
+  .pairing-phone li { font-size: 0.82rem; color: var(--muted); margin-bottom: 0.4rem; line-height: 1.5; }
+  .pairing-phone li strong { color: var(--white); }
+
+  .pairing-token-box {
+    background: rgba(0,0,0,0.4); border: 1px solid rgba(201,168,76,0.2);
+    border-radius: 10px; padding: 1rem;
+    font-family: monospace; font-size: 0.82rem; color: var(--gold2);
+    letter-spacing: 0.05em; word-break: break-all;
+    margin-top: 0.75rem;
+  }
+  .token-label { font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted); margin-bottom: 0.3rem; font-family: inherit; }
+
+  /* ── COMPLETION CHECKLIST ── */
+  .checklist {
+    display: flex; flex-direction: column; gap: 0.75rem; max-width: 560px;
+  }
+  .checklist-item {
+    display: flex; align-items: center; gap: 0.85rem;
+    padding: 0.85rem 1rem;
+    background: rgba(255,255,255,0.02); border: 1px solid var(--dim);
+    border-radius: 10px; cursor: pointer;
+    transition: border-color 0.2s, background 0.2s;
+  }
+  .checklist-item:hover { border-color: rgba(201,168,76,0.2); }
+  .checklist-item.done {
+    border-color: rgba(76,201,122,0.25);
+    background: rgba(76,201,122,0.05);
+  }
+  .check-box {
+    width: 20px; height: 20px; border-radius: 5px; flex-shrink: 0;
+    border: 1.5px solid var(--dim); display: flex; align-items: center; justify-content: center;
+    font-size: 0.75rem; transition: all 0.2s;
+  }
+  .checklist-item.done .check-box {
+    background: var(--green); border-color: var(--green); color: #050508; font-weight: 700;
+  }
+  .checklist-item span { font-size: 0.88rem; }
+  .checklist-item.done span { color: var(--muted); text-decoration: line-through; }
+
+  .progress-summary {
+    margin-top: 1.5rem; padding: 1rem 1.25rem;
+    background: rgba(201,168,76,0.06); border: 1px solid rgba(201,168,76,0.2);
+    border-radius: 12px; display: flex; align-items: center; gap: 1rem;
+  }
+  .ps-bar-wrap { flex: 1; height: 6px; background: var(--dim); border-radius: 100px; overflow: hidden; }
+  .ps-bar-fill { height: 100%; width: 0%; background: linear-gradient(90deg, var(--gold), var(--green)); border-radius: 100px; transition: width 0.5s ease; }
+  .ps-label { font-size: 0.82rem; color: var(--gold); font-weight: 600; white-space: nowrap; }
+
+  /* ── BOTTOM CTA ── */
+  .bottom-cta {
+    max-width: 600px; margin: 3rem auto 0; padding: 2rem 2rem 8rem;
+    text-align: center; position: relative; z-index: 1;
+  }
+  .bottom-cta h2 { font-size: clamp(1.5rem,3.5vw,2.2rem); font-weight: 300; margin-bottom: 1rem; }
+  .bottom-cta h2 strong { font-weight: 700; color: var(--gold); }
+  .bottom-cta p { color: var(--muted); font-size: 0.9rem; line-height: 1.65; margin-bottom: 2rem; }
+  .btn-primary {
+    display: inline-block; background: var(--gold); color: #050508;
+    border: none; border-radius: 10px; padding: 1rem 2.5rem;
+    font-family: inherit; font-size: 1rem; font-weight: 700;
+    cursor: pointer; text-decoration: none; letter-spacing: 0.03em;
+    transition: background 0.2s;
+  }
+  .btn-primary:hover { background: var(--gold2); }
+  .btn-ghost {
+    display: inline-block; border: 1px solid var(--dim); color: var(--muted);
+    border-radius: 10px; padding: 0.9rem 2rem;
+    font-family: inherit; font-size: 0.9rem; text-decoration: none;
+    margin-left: 0.75rem; transition: border-color 0.2s, color 0.2s;
+  }
+  .btn-ghost:hover { border-color: var(--gold); color: var(--white); }
+
+  footer { border-top: 1px solid var(--dim); padding: 1.5rem 2rem; text-align: center; font-size: 0.75rem; color: var(--muted); position: relative; z-index: 1; }
+  footer a { color: var(--muted); text-decoration: none; margin: 0 0.75rem; }
+  footer a:hover { color: var(--white); }
+
+  @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+
+  @media (max-width: 600px) {
+    .btn-ghost { margin-left: 0; margin-top: 0.75rem; display: block; text-align: center; }
+    .nav-links { gap: 1rem; }
+  }
+</style>
+</head>
+<body>
+
+<canvas id="star-canvas"></canvas>
+
+<nav>
+  <a href="index.html" class="nav-logo">Favour Economy</a>
+  <ul class="nav-links">
+    <li><a href="waitlist.html">Waitlist</a></li>
+    <li><a href="install.html">Install</a></li>
+    <li><a href="proof.html">Proof</a></li>
+  </ul>
+</nav>
+
+<!-- STICKY PROGRESS -->
+<div class="progress-bar">
+  <a class="prog-step done" href="#s1">
+    <div class="prog-dot"></div> Install
+  </a>
+  <span class="prog-arrow">›</span>
+  <a class="prog-step active" href="#s2">
+    <div class="prog-dot"></div> First Logistic
+  </a>
+  <span class="prog-arrow">›</span>
+  <a class="prog-step" href="#s3">
+    <div class="prog-dot"></div> Your Surface
+  </a>
+  <span class="prog-arrow">›</span>
+  <a class="prog-step" href="#s4">
+    <div class="prog-dot"></div> Join a Group
+  </a>
+  <span class="prog-arrow">›</span>
+  <a class="prog-step" href="#s5">
+    <div class="prog-dot"></div> Pair Desktop
+  </a>
+</div>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-eyebrow">Getting Started Guide</div>
+  <h1>Five minutes to<br><strong>your first FavourBuck.</strong></h1>
+  <p class="hero-sub">
+    This guide walks you through your first Logistic, builds your Surface,
+    finds your Group, and optionally pairs your desktop.
+    <strong>Each step earns you more.</strong>
+  </p>
+</div>
+
+<!-- ── STEP 1: FIRST LOGISTIC ── -->
+<section class="guide-section" id="s2">
+  <div class="section-num">
+    <span class="num-badge">1</span> Step One
+  </div>
+  <h2>Post your first <strong>Logistic.</strong></h2>
+  <p class="section-intro">
+    A Logistic is the fundamental unit of the Favour Economy.
+    It's a pickup, a dropoff, and a time constraint.
+    Attach a <strong>Rider</strong> — your spec sheet — and the network finds someone to fulfil it.
+  </p>
+
+  <div class="logistic-builder">
+    <div class="builder-col">
+      <div class="builder-card" data-delay="0">
+        <div class="bc-label">Origin</div>
+        <div class="bc-title">Where is the pickup?</div>
+        <div class="bc-body">Any location — home, office, store, curb. Be as specific as you need. The network matches Ryders within range.</div>
+        <div class="bc-example"><strong>Example:</strong> "Unit 4, 121 King St W, Toronto"</div>
+      </div>
+      <div class="builder-card" data-delay="100">
+        <div class="bc-label">Destination</div>
+        <div class="bc-title">Where does it need to go?</div>
+        <div class="bc-body">Another address, a person's name, a drop zone. The Ryder delivers end-to-end. You get confirmation when it's done.</div>
+        <div class="bc-example"><strong>Example:</strong> "Sarah Chen, 88 Queen East, Suite 12"</div>
+      </div>
+    </div>
+    <div class="builder-col">
+      <div class="builder-card" data-delay="200">
+        <div class="bc-label">Time Constraint</div>
+        <div class="bc-title">When does it need to arrive?</div>
+        <div class="bc-body">Set a window. <strong>Wider window = more Ryders = faster match.</strong> The network routes optimally within your constraint.</div>
+        <div class="bc-example"><strong>Example:</strong> "Before 5pm today" or "Anytime this week"</div>
+      </div>
+      <div class="builder-card" data-delay="300">
+        <div class="bc-label">The Rider</div>
+        <div class="bc-title">What does the Ryder need?</div>
+        <div class="bc-body">The Rider is your spec sheet. Attach skills required, equipment needed, access codes, handling instructions. The network matches on fit.</div>
+        <div class="bc-example"><strong>Example:</strong> "Fragile. Needs car. Call on arrival."</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- LIVE PREVIEW -->
+  <div class="logistic-preview">
+    <div class="lp-header">
+      <span class="lp-id">LOG-2024-04-12-001</span>
+      <span class="lp-status">Matching Ryders…</span>
+    </div>
+    <div class="lp-route">
+      <div class="lp-point">
+        <div class="lp-point-label">Origin</div>
+        <div class="lp-point-val origin">King St W, Toronto</div>
+      </div>
+      <div class="lp-arrow">→</div>
+      <div class="lp-point">
+        <div class="lp-point-label">Destination</div>
+        <div class="lp-point-val dest">Queen East, Toronto</div>
+      </div>
+    </div>
+    <div class="lp-path-wrap">
+      <svg id="lp-svg" viewBox="0 0 400 40" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <linearGradient id="pathGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" stop-color="#e8734a"/>
+            <stop offset="100%" stop-color="#c9a84c"/>
+          </linearGradient>
+        </defs>
+        <path id="logistic-path" d="M10,20 C80,5 120,35 200,20 C280,5 320,35 390,20"
+              fill="none" stroke="url(#pathGrad)" stroke-width="2"
+              stroke-dasharray="450" stroke-dashoffset="450"/>
+        <!-- Ryder dot -->
+        <circle r="6" fill="#c9a84c" opacity="0">
+          <animateMotion dur="3s" repeatCount="indefinite" begin="1s">
+            <mpath href="#logistic-path"/>
+          </animateMotion>
+          <animate attributeName="opacity" values="0;1;1;0" dur="3s" repeatCount="indefinite" begin="1s"/>
+        </circle>
+        <!-- origin dot -->
+        <circle cx="10" cy="20" r="5" fill="#e8734a"/>
+        <!-- dest dot -->
+        <circle cx="390" cy="20" r="5" fill="#c9a84c"/>
+      </svg>
+    </div>
+    <div class="lp-meta">
+      <span class="lp-chip highlighted">⏱ By 5pm today</span>
+      <span class="lp-chip">🚗 Needs car</span>
+      <span class="lp-chip">📦 Fragile</span>
+      <span class="lp-chip highlighted">⚡ Fast — 3.2 km</span>
+      <span class="lp-chip">💛 Free (network has slack)</span>
+    </div>
+  </div>
+</section>
+
+<!-- ── STEP 2: YOUR SURFACE ── -->
+<section class="guide-section" id="s3">
+  <div class="section-num">
+    <span class="num-badge">2</span> Step Two
+  </div>
+  <h2>Build your <strong>Surface.</strong></h2>
+  <p class="section-intro">
+    Your Surface is the slice of yourself you contribute to the network —
+    your time, skills, capital, and location, stacked into a unit of useful work.
+    The bigger your Surface, the more Logistics you can fulfil. The more you earn.
+  </p>
+
+  <!-- BREAD VIZ -->
+  <div class="bread-wrap">
+    <canvas id="bread-canvas"></canvas>
+  </div>
+
+  <!-- SURFACE CALCULATOR -->
+  <div class="surface-calc">
+    <div class="calc-title">Surface Calculator — slide to see your earning potential</div>
+    <div class="calc-sliders">
+      <div class="slider-row">
+        <label>Free hours/week <span id="time-val">8h</span></label>
+        <input type="range" id="time-slider" min="1" max="40" value="8" oninput="calcSurface()">
+      </div>
+      <div class="slider-row">
+        <label>Skills (transport, care, tech, trades…) <span id="skill-val">2</span></label>
+        <input type="range" id="skill-slider" min="1" max="10" value="2" oninput="calcSurface()">
+      </div>
+      <div class="slider-row">
+        <label>Capital available (vehicle, tools, space) <span id="cap-val">$500</span></label>
+        <input type="range" id="cap-slider" min="0" max="10000" step="100" value="500" oninput="calcSurface()">
+      </div>
+      <div class="slider-row">
+        <label>Service radius (km) <span id="rad-val">5 km</span></label>
+        <input type="range" id="rad-slider" min="1" max="50" value="5" oninput="calcSurface()">
+      </div>
+    </div>
+    <div class="surface-result">
+      <div class="surface-result-val" id="surface-score">12</div>
+      <div class="surface-result-label">Surface Score — estimated FavourBucks/week</div>
+    </div>
+  </div>
+</section>
+
+<!-- ── STEP 3: JOIN A GROUP ── -->
+<section class="guide-section" id="s4">
+  <div class="section-num">
+    <span class="num-badge">3</span> Step Three
+  </div>
+  <h2>Join or start a <strong>Group.</strong></h2>
+  <p class="section-intro">
+    Groups share assets, split insurance, earn dividends together.
+    A vehicle you rarely use becomes a shared asset earning FavourBucks for everyone.
+    Find a group that fits your Surface.
+  </p>
+
+  <div class="group-cards">
+    <div class="group-card" data-delay="0" onclick="selectGroup(this)">
+      <div class="gc-icon">🚗</div>
+      <div class="gc-name">Transport Collective</div>
+      <div class="gc-desc">Shared vehicle pool. Members contribute cars, vans, cargo bikes. Dividends from every fulfilled Logistic.</div>
+      <div class="gc-members">↑ 312 members in your region</div>
+    </div>
+    <div class="group-card" data-delay="100" onclick="selectGroup(this)">
+      <div class="gc-icon">🏠</div>
+      <div class="gc-name">Neighbourhood Commons</div>
+      <div class="gc-desc">Local support network. Tools, storage, skills. Built around your postcode. Insurance pooled across all members.</div>
+      <div class="gc-members">↑ 87 members in your postcode</div>
+    </div>
+    <div class="group-card" data-delay="200" onclick="selectGroup(this)">
+      <div class="gc-icon">💻</div>
+      <div class="gc-name">Digital Services Guild</div>
+      <div class="gc-desc">Tech, design, writing, admin. Fulfill digital Logistics from anywhere. Shared software licences, shared earnings.</div>
+      <div class="gc-members">↑ 1,204 members globally</div>
+    </div>
+    <div class="group-card" data-delay="300" onclick="selectGroup(this)">
+      <div class="gc-icon">🌐</div>
+      <div class="gc-name">Mesh Builders</div>
+      <div class="gc-desc">Run a LoRaNet node. Map your neighbourhood. Build the internet no one owns. Earn from network infrastructure itself.</div>
+      <div class="gc-members">↑ 43 founding nodes in your city</div>
+    </div>
+    <div class="group-card" data-delay="400" onclick="selectGroup(this)">
+      <div class="gc-icon">🌱</div>
+      <div class="gc-name">Start a New Group</div>
+      <div class="gc-desc">Define your own shared purpose. Founding group members earn the highest dividend rate — same asymptotic advantage as founding members.</div>
+      <div class="gc-members">→ Be the first in your area</div>
+    </div>
+  </div>
+</section>
+
+<!-- ── STEP 4: BRIDGE (OPTIONAL) ── -->
+<section class="guide-section" id="s5">
+  <div class="section-num">
+    <span class="num-badge">4</span> Step Four — Optional
+  </div>
+  <h2>Pair your <strong>Desktop Bridge.</strong></h2>
+  <p class="section-intro">
+    The Desktop Bridge turns your Mac or PC into a fully controllable node.
+    Voice-command your computer from your phone. Run Logistics in the background while you work.
+    <strong>Optional, but powerful.</strong>
+  </p>
+
+  <div class="pairing-layout">
+    <div class="pairing-phone">
+      <h4>On your phone</h4>
+      <p>Go to Settings → Desktop Bridge → Add New Computer</p>
+      <ol>
+        <li>Tap <strong>Scan QR Code</strong></li>
+        <li>Point at your computer screen</li>
+        <li>Bridge pairs automatically over your local network</li>
+        <li>Test: say <em>"take a screenshot"</em> — your desktop responds</li>
+      </ol>
+    </div>
+    <div class="pairing-phone">
+      <h4>On your computer</h4>
+      <p>The bridge server generates a pairing token. Display it from Settings → Bridge → Show Token, or via the terminal:</p>
+      <div class="pairing-token-box">
+        <div class="token-label">Bridge Token (example)</div>
+        <div>aB3k-9mPz-Xq7r-YvN2</div>
+      </div>
+      <p style="margin-top:0.75rem;font-size:0.8rem;">Token rotates every 30 days. LAN-only by default. Never exposed to the internet unless you enable LAN mode.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ── COMPLETION CHECKLIST ── -->
+<section class="guide-section" style="border-top: 1px solid var(--dim);">
+  <div class="section-num">
+    <span class="num-badge">✓</span> Your Setup Checklist
+  </div>
+  <h2>Track your <strong>progress.</strong></h2>
+  <p class="section-intro">Tick each step as you complete it. All five = you're fully live in the network.</p>
+
+  <div class="checklist">
+    <div class="checklist-item" onclick="toggleCheck(this)">
+      <div class="check-box"></div>
+      <span>App installed and signed in with founding email</span>
+    </div>
+    <div class="checklist-item" onclick="toggleCheck(this)">
+      <div class="check-box"></div>
+      <span>First Logistic posted or fulfilled</span>
+    </div>
+    <div class="checklist-item" onclick="toggleCheck(this)">
+      <div class="check-box"></div>
+      <span>Surface configured (time, skills, radius, capital)</span>
+    </div>
+    <div class="checklist-item" onclick="toggleCheck(this)">
+      <div class="check-box"></div>
+      <span>Joined or created a Group</span>
+    </div>
+    <div class="checklist-item" onclick="toggleCheck(this)">
+      <div class="check-box"></div>
+      <span>Shared your founding referral link</span>
+    </div>
+  </div>
+
+  <div class="progress-summary">
+    <div class="ps-bar-wrap">
+      <div class="ps-bar-fill" id="checklist-bar"></div>
+    </div>
+    <div class="ps-label" id="checklist-label">0 / 5 complete</div>
+  </div>
+</section>
+
+<!-- BOTTOM CTA -->
+<div class="bottom-cta">
+  <h2>Ready to see<br><strong>who else is in?</strong></h2>
+  <p>
+    The founding network is growing city by city.
+    See live member counts, city coverage, and founding stories on the Proof page.
+  </p>
+  <a href="proof.html" class="btn-primary">See the Network →</a>
+  <a href="install.html" class="btn-ghost">Back to Install</a>
+</div>
+
+<footer>
+  <a href="index.html">Film</a>
+  <a href="brochure.html">Brochure</a>
+  <a href="waitlist.html">Waitlist</a>
+  <a href="install.html">Install</a>
+  <a href="proof.html">Proof</a>
+  <a href="sitemap.html">Sitemap</a>
+  <br><br>
+  &copy; 2026 Favour Economy. Every person. Every favour. Every future.
+</footer>
+
+<script>
+// ── STARFIELD ──
+(function(){
+  const c = document.getElementById('star-canvas');
+  const ctx = c.getContext('2d');
+  let stars = [];
+  function resize(){ c.width = window.innerWidth; c.height = window.innerHeight; }
+  function init(){
+    resize();
+    stars = Array.from({length:100}, () => ({
+      x: Math.random()*c.width, y: Math.random()*c.height,
+      r: Math.random()*1.1+0.3, o: Math.random()*0.4+0.1,
+      speed: Math.random()*0.12+0.04
+    }));
+  }
+  function draw(){
+    ctx.clearRect(0,0,c.width,c.height);
+    stars.forEach(s => {
+      ctx.beginPath(); ctx.arc(s.x,s.y,s.r,0,Math.PI*2);
+      ctx.fillStyle = `rgba(201,168,76,${s.o})`; ctx.fill();
+      s.o += Math.sin(Date.now()*0.001*s.speed)*0.003;
+      s.o = Math.max(0.05, Math.min(0.55, s.o));
+    });
+    requestAnimationFrame(draw);
+  }
+  window.addEventListener('resize', resize);
+  init(); draw();
+})();
+
+// ── LOGISTIC PATH ANIMATION ──
+window.addEventListener('load', () => {
+  const path = document.getElementById('logistic-path');
+  if(path){
+    path.style.transition = 'stroke-dashoffset 1.5s ease';
+    path.style.strokeDashoffset = '0';
+  }
+});
+
+// ── BREAD CANVAS ──
+(function(){
+  const c = document.getElementById('bread-canvas');
+  if(!c) return;
+  function resize(){ c.width = c.offsetWidth; c.height = 80; }
+  resize(); window.addEventListener('resize', resize);
+  const ctx = c.getContext('2d');
+  const slices = 7;
+  const segments = [
+    {color:'rgba(201,168,76,0.7)', label:'Time'},
+    {color:'rgba(232,115,74,0.7)', label:'Capital'},
+    {color:'rgba(74,140,232,0.7)', label:'Skills'},
+    {color:'rgba(76,201,122,0.7)', label:'Location'},
+    {color:'rgba(160,74,232,0.7)', label:'Services'},
+  ];
+  let animProg = 0;
+  function draw(){
+    if(!c.width) return;
+    ctx.clearRect(0,0,c.width,c.height);
+    const sliceW = (c.width - 20) / slices;
+    const segH = (c.height - 10) / segments.length;
+    for(let s=0; s<slices; s++){
+      const x = 10 + s * sliceW;
+      const prog = Math.min(1, animProg - s*0.08);
+      if(prog <= 0) continue;
+      for(let i=0; i<segments.length; i++){
+        const y = 5 + i * segH;
+        ctx.fillStyle = segments[i].color;
+        ctx.globalAlpha = prog * 0.9;
+        ctx.fillRect(x + 1, y, sliceW - 3, segH - 1);
+      }
+      // slice border
+      ctx.globalAlpha = prog * 0.3;
+      ctx.strokeStyle = 'rgba(255,255,255,0.15)';
+      ctx.strokeRect(x+1, 5, sliceW-3, c.height-10);
+    }
+    ctx.globalAlpha = 1;
+    if(animProg < 2) { animProg += 0.04; requestAnimationFrame(draw); }
+    else draw_labels();
+  }
+  function draw_labels(){
+    ctx.font = '9px Inter, sans-serif';
+    ctx.fillStyle = 'rgba(255,255,255,0.45)';
+    ctx.textAlign = 'left';
+    const segH = (c.height-10)/segments.length;
+    segments.forEach((s,i) => {
+      ctx.fillText(s.label, 14, 5 + i*segH + segH/2 + 3);
+    });
+  }
+  draw();
+})();
+
+// ── SURFACE CALCULATOR ──
+function calcSurface(){
+  const time = parseInt(document.getElementById('time-slider').value);
+  const skill = parseInt(document.getElementById('skill-slider').value);
+  const cap = parseInt(document.getElementById('cap-slider').value);
+  const rad = parseInt(document.getElementById('rad-slider').value);
+
+  document.getElementById('time-val').textContent = time + 'h';
+  document.getElementById('skill-val').textContent = skill;
+  document.getElementById('cap-val').textContent = '$' + cap.toLocaleString();
+  document.getElementById('rad-val').textContent = rad + ' km';
+
+  // Rough model: log-weighted combination
+  const score = Math.round(
+    (time * 1.2) +
+    (skill * 3.5) +
+    (Math.log10(cap + 1) * 8) +
+    (Math.sqrt(rad) * 4)
+  );
+  document.getElementById('surface-score').textContent = score;
+}
+window.calcSurface = calcSurface;
+calcSurface();
+
+// ── GROUP SELECT ──
+function selectGroup(el){
+  document.querySelectorAll('.group-card').forEach(c => c.classList.remove('selected'));
+  el.classList.add('selected');
+}
+window.selectGroup = selectGroup;
+
+// ── CHECKLIST ──
+function toggleCheck(el){
+  el.classList.toggle('done');
+  const done = document.querySelectorAll('.checklist-item.done').length;
+  const total = document.querySelectorAll('.checklist-item').length;
+  document.getElementById('checklist-bar').style.width = (done/total*100) + '%';
+  document.getElementById('checklist-label').textContent = `${done} / ${total} complete`;
+}
+window.toggleCheck = toggleCheck;
+
+// ── INTERSECTION OBSERVER ──
+const io = new IntersectionObserver((entries) => {
+  entries.forEach(e => {
+    if(e.isIntersecting){
+      const delay = parseInt(e.target.dataset.delay || 0);
+      setTimeout(() => e.target.classList.add('visible'), delay);
+      io.unobserve(e.target);
+    }
+  });
+}, { threshold: 0.1 });
+document.querySelectorAll('.builder-card, .group-card').forEach(el => io.observe(el));
+
+// ── PROGRESS HIGHLIGHT ON SCROLL ──
+const sections = ['s2','s3','s4','s5'];
+const progSteps = document.querySelectorAll('.prog-step');
+const scrollObserver = new IntersectionObserver((entries) => {
+  entries.forEach(e => {
+    if(e.isIntersecting){
+      const id = e.target.id;
+      const idx = sections.indexOf(id);
+      if(idx >= 0){
+        progSteps.forEach((s,i) => {
+          s.classList.remove('active');
+          if(i < idx) s.classList.add('done');
+          else if(i === idx) s.classList.add('active');
+        });
+      }
+    }
+  });
+}, { threshold: 0.4 });
+sections.forEach(id => {
+  const el = document.getElementById(id);
+  if(el) scrollObserver.observe(el);
+});
+</script>
+</body>
+</html>

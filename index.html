@@ -1,0 +1,2179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Favour Economy — The Revolution</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --black: #050508;
+    --deep: #080810;
+    --navy: #080c1a;
+    --gold: #c9a84c;
+    --gold-bright: #f0cb6a;
+    --copper: #e8734a;
+    --white: #f8f8f8;
+    --muted: #505060;
+    --dim: #303040;
+    --font: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  }
+
+  html {
+    overflow-y: scroll;
+    scroll-behavior: smooth;
+    background: var(--black);
+    color: var(--white);
+    font-family: var(--font);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  #cinematic-wrapper {
+    scroll-snap-type: y mandatory;
+    overflow-y: scroll;
+    height: 100vh;
+    scroll-behavior: smooth;
+    position: relative;
+  }
+
+  /* Remove snap from individual shots when outside wrapper */
+  body > .shot { scroll-snap-align: none; }
+
+  body { background: var(--black); }
+
+  /* ── SECTIONS ── */
+  .shot {
+    position: relative;
+    width: 100%;
+    height: 100vh;
+    min-height: 600px;
+    scroll-snap-align: start;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    background: var(--black);
+  }
+
+  .shot-inner {
+    position: relative;
+    z-index: 10;
+    text-align: center;
+    padding: 2rem;
+    max-width: 900px;
+    width: 100%;
+  }
+
+  /* ── AUDIO TOGGLE ── */
+  #audio-toggle {
+    position: fixed;
+    top: 1.5rem;
+    right: 1.5rem;
+    z-index: 9999;
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.12);
+    color: var(--muted);
+    font-family: var(--font);
+    font-size: 0.7rem;
+    letter-spacing: 0.15em;
+    padding: 0.5rem 0.9rem;
+    cursor: pointer;
+    border-radius: 2px;
+    transition: color 0.3s, border-color 0.3s;
+    text-transform: uppercase;
+  }
+  #audio-toggle:hover { color: var(--gold); border-color: rgba(201,168,76,0.4); }
+  #audio-toggle.on { color: var(--gold); border-color: rgba(201,168,76,0.5); }
+
+  /* ── DOT NAV ── */
+  #dot-nav {
+    position: fixed;
+    right: 1.5rem;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 9999;
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+  }
+  .dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--dim);
+    cursor: pointer;
+    transition: background 0.3s, transform 0.3s;
+  }
+  .dot.active { background: var(--gold); transform: scale(1.5); }
+
+  /* ── TYPOGRAPHY ── */
+  .t-massive {
+    font-size: clamp(3rem, 9vw, 8rem);
+    font-weight: 300;
+    letter-spacing: -0.02em;
+    line-height: 1.05;
+  }
+  .t-huge {
+    font-size: clamp(2.2rem, 6vw, 5.5rem);
+    font-weight: 300;
+    letter-spacing: -0.02em;
+    line-height: 1.1;
+  }
+  .t-large {
+    font-size: clamp(1.4rem, 3.5vw, 2.8rem);
+    font-weight: 300;
+    line-height: 1.3;
+  }
+  .t-med {
+    font-size: clamp(1rem, 2vw, 1.5rem);
+    font-weight: 300;
+    line-height: 1.6;
+    color: var(--muted);
+  }
+  .t-label {
+    font-size: 0.7rem;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+  .t-gold { color: var(--gold); }
+  .t-copper { color: var(--copper); }
+  .t-white { color: var(--white); }
+
+  /* ── ANIMATION CLASSES ── */
+  .reveal { opacity: 0; transform: translateY(24px); transition: opacity 0.9s ease, transform 0.9s ease; }
+  .reveal.visible { opacity: 1; transform: translateY(0); }
+  .reveal-fast { opacity: 0; transition: opacity 0.5s ease; }
+  .reveal-fast.visible { opacity: 1; }
+  .delay-1 { transition-delay: 0.2s; }
+  .delay-2 { transition-delay: 0.5s; }
+  .delay-3 { transition-delay: 0.8s; }
+  .delay-4 { transition-delay: 1.2s; }
+  .delay-5 { transition-delay: 1.6s; }
+
+  @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+  @keyframes fadeInUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+  @keyframes pulse { 0%, 100% { opacity: 0.4; transform: scale(1); } 50% { opacity: 1; transform: scale(1.08); } }
+  @keyframes subtlePulse { 0%, 100% { opacity: 0.6; } 50% { opacity: 1; } }
+  @keyframes glow { 0%, 100% { text-shadow: 0 0 20px rgba(201,168,76,0); } 50% { text-shadow: 0 0 60px rgba(201,168,76,0.5), 0 0 120px rgba(201,168,76,0.2); } }
+  @keyframes drift { 0% { transform: translateY(0) translateX(0); } 25% { transform: translateY(-6px) translateX(3px); } 50% { transform: translateY(-3px) translateX(-2px); } 75% { transform: translateY(-8px) translateX(1px); } 100% { transform: translateY(0) translateX(0); } }
+  @keyframes spin-slow { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+  @keyframes draw-line { from { stroke-dashoffset: 600; } to { stroke-dashoffset: 0; } }
+  @keyframes node-appear { 0% { opacity: 0; transform: scale(0); } 60% { transform: scale(1.3); } 100% { opacity: 1; transform: scale(1); } }
+  @keyframes flash-white { 0% { opacity: 0; } 20% { opacity: 1; } 100% { opacity: 0; } }
+  @keyframes count-up { from { opacity: 0; transform: scale(0.8); } to { opacity: 1; transform: scale(1); } }
+  @keyframes particle-move { 0% { transform: translate(0,0); opacity: 1; } 100% { transform: translate(var(--dx), var(--dy)); opacity: 0; } }
+  @keyframes mesh-pulse { 0%, 100% { opacity: 0.15; } 50% { opacity: 0.45; } }
+  @keyframes expand-ring { 0% { transform: scale(0.3); opacity: 0.8; } 100% { transform: scale(3); opacity: 0; } }
+  @keyframes type-blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
+  @keyframes slide-in-left { from { opacity: 0; transform: translateX(-40px); } to { opacity: 1; transform: translateX(0); } }
+  @keyframes slide-in-right { from { opacity: 0; transform: translateX(40px); } to { opacity: 1; transform: translateX(0); } }
+  @keyframes heartbeat { 0%, 100% { transform: scale(1); opacity: 0.3; } 10% { transform: scale(1.4); opacity: 1; } 20% { transform: scale(1); opacity: 0.3; } 30% { transform: scale(1.2); opacity: 0.8; } 40% { transform: scale(1); opacity: 0.3; } }
+
+  /* ═══════════════════════════════════════════════════════
+     SHOT 1 — THE VOID
+  ═══════════════════════════════════════════════════════ */
+  #s1 { cursor: pointer; }
+  #s1 .sub-bass {
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse at center, rgba(201,168,76,0.03) 0%, transparent 70%);
+    animation: pulse 4s ease-in-out infinite;
+  }
+  #s1 .void-text {
+    opacity: 0;
+    animation: fadeIn 2s ease 1.5s forwards;
+    font-size: 0.65rem;
+    letter-spacing: 0.4em;
+    text-transform: uppercase;
+    color: var(--dim);
+  }
+  #s1 .click-hint {
+    margin-top: 3rem;
+    opacity: 0;
+    animation: fadeIn 1s ease 3s forwards;
+    font-size: 0.6rem;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--dim);
+  }
+  .cursor-ring {
+    position: absolute;
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    border: 1px solid rgba(201,168,76,0.15);
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    animation: expand-ring 3s ease-out infinite;
+  }
+  .cursor-ring:nth-child(2) { animation-delay: 1s; }
+  .cursor-ring:nth-child(3) { animation-delay: 2s; }
+
+  /* ═══════════════════════════════════════════════════════
+     SHOT 2 — THE NEED (Starfield)
+  ═══════════════════════════════════════════════════════ */
+  #s2 { background: var(--deep); }
+  #stars-canvas {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+  }
+
+  /* ═══════════════════════════════════════════════════════
+     SHOT 3 — THE SCALE (8 billion)
+  ═══════════════════════════════════════════════════════ */
+  #s3 { background: var(--deep); }
+  #s3 .globe-bg {
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse 80% 60% at 50% 50%, rgba(8,12,26,1) 0%, var(--deep) 100%);
+  }
+  .grid-dots {
+    position: absolute;
+    inset: 0;
+    background-image:
+      radial-gradient(circle, rgba(201,168,76,0.12) 1px, transparent 1px);
+    background-size: 28px 28px;
+    animation: mesh-pulse 5s ease-in-out infinite;
+  }
+  .stat-number {
+    font-size: clamp(5rem, 14vw, 12rem);
+    font-weight: 200;
+    letter-spacing: -0.04em;
+    color: var(--gold);
+    line-height: 1;
+    animation: glow 4s ease-in-out infinite;
+  }
+
+  /* ═══════════════════════════════════════════════════════
+     SHOT 4 — THE MIRROR
+  ═══════════════════════════════════════════════════════ */
+  #s4 { background: var(--deep); }
+  #s4 .grid-dots { opacity: 0.6; }
+
+  /* ═══════════════════════════════════════════════════════
+     SHOT 5 — THE GAP
+  ═══════════════════════════════════════════════════════ */
+  #s5 { background: var(--black); }
+  .gap-container {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .gap-grid {
+    position: absolute;
+    top: 0;
+    width: 48%;
+    height: 100%;
+    background-image: radial-gradient(circle, rgba(201,168,76,0.08) 1px, transparent 1px);
+    background-size: 22px 22px;
+  }
+  .gap-grid.left { left: 0; animation: slide-in-left 1.5s ease forwards; }
+  .gap-grid.right { right: 0; animation: slide-in-right 1.5s ease forwards; }
+  .gap-line {
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 2px;
+    height: 100%;
+    background: linear-gradient(to bottom, transparent, var(--copper), transparent);
+    opacity: 0.4;
+  }
+
+  /* ═══════════════════════════════════════════════════════
+     SHOT 6 — THE LOGISTIC
+  ═══════════════════════════════════════════════════════ */
+  #s6 { background: var(--black); }
+  #logistic-svg {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: min(600px, 90vw);
+    height: 200px;
+  }
+  .logistic-path {
+    stroke: var(--gold);
+    stroke-width: 1.5;
+    fill: none;
+    stroke-dasharray: 600;
+    stroke-dashoffset: 600;
+  }
+  .logistic-path.animate { animation: draw-line 2s ease 0.5s forwards; }
+  .origin-dot { fill: var(--copper); opacity: 0; }
+  .dest-dot { fill: var(--gold-bright); opacity: 0; }
+  .origin-dot.show { animation: node-appear 0.5s ease 0.3s forwards; }
+  .dest-dot.show { animation: node-appear 0.5s ease 2.2s forwards; }
+
+  /* ═══════════════════════════════════════════════════════
+     SHOT 7 — LOGISTIC ANATOMY
+  ═══════════════════════════════════════════════════════ */
+  #s7 { background: var(--black); }
+  .anatomy-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.5rem;
+    max-width: 700px;
+    margin: 2rem auto 0;
+  }
+  @media (max-width: 600px) { .anatomy-grid { grid-template-columns: 1fr; } }
+  .anatomy-item {
+    border: 1px solid var(--dim);
+    padding: 1.5rem;
+    text-align: left;
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity 0.6s ease, transform 0.6s ease, border-color 0.3s;
+  }
+  .anatomy-item.visible { opacity: 1; transform: translateY(0); }
+  .anatomy-item:hover { border-color: var(--gold); }
+  .anatomy-key {
+    font-size: 0.65rem;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 0.5rem;
+  }
+  .anatomy-val {
+    font-size: 1.3rem;
+    font-weight: 300;
+    color: var(--white);
+  }
+  .anatomy-desc {
+    font-size: 0.8rem;
+    color: var(--muted);
+    margin-top: 0.4rem;
+    line-height: 1.5;
+  }
+
+  /* ═══════════════════════════════════════════════════════
+     SHOT 8 — THE RYDER
+  ═══════════════════════════════════════════════════════ */
+  #s8 { background: var(--deep); }
+  .ryder-panels {
+    display: flex;
+    gap: 1.5rem;
+    margin-top: 2rem;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+  .ryder-panel {
+    width: 180px;
+    height: 240px;
+    border: 1px solid var(--dim);
+    position: relative;
+    overflow: hidden;
+    opacity: 0;
+    transition: opacity 0.8s ease, border-color 0.3s;
+    background: var(--navy);
+  }
+  .ryder-panel.visible { opacity: 1; }
+  .ryder-panel:hover { border-color: var(--gold); }
+  .ryder-icon {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -60%);
+    font-size: 3rem;
+    opacity: 0.7;
+  }
+  .ryder-label {
+    position: absolute;
+    bottom: 1rem;
+    left: 0;
+    right: 0;
+    text-align: center;
+    font-size: 0.65rem;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+  .ryder-notify {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: var(--gold);
+    animation: pulse 1.5s ease-in-out infinite;
+  }
+  .ryder-shimmer {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, transparent 40%, rgba(201,168,76,0.06) 50%, transparent 60%);
+    background-size: 300% 300%;
+    animation: shimmer 3s ease infinite;
+  }
+  @keyframes shimmer { 0% { background-position: 0% 50%; } 100% { background-position: 200% 50%; } }
+
+  /* ═══════════════════════════════════════════════════════
+     SHOT 9 — FAST OR FREE
+  ═══════════════════════════════════════════════════════ */
+  #s9 { background: var(--black); }
+  .fast-free-split {
+    position: absolute;
+    inset: 0;
+    display: flex;
+  }
+  .ff-half {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: flex 1s ease;
+  }
+  .ff-fast { background: radial-gradient(ellipse at center, rgba(232,115,74,0.06) 0%, transparent 70%); }
+  .ff-free { background: radial-gradient(ellipse at center, rgba(201,168,76,0.06) 0%, transparent 70%); }
+  .ff-divider {
+    position: absolute;
+    top: 0;
+    left: 50%;
+    width: 1px;
+    height: 100%;
+    background: linear-gradient(to bottom, transparent, rgba(255,255,255,0.1), transparent);
+  }
+  .ff-word {
+    font-size: clamp(4rem, 12vw, 10rem);
+    font-weight: 200;
+    letter-spacing: -0.03em;
+  }
+  .ff-fast .ff-word { color: var(--copper); }
+  .ff-free .ff-word { color: var(--gold); }
+  #s9 .shot-inner { z-index: 20; pointer-events: none; }
+
+  /* ═══════════════════════════════════════════════════════
+     SHOT 10 — NETWORK OPTIMIZING
+  ═══════════════════════════════════════════════════════ */
+  #s10 { background: var(--black); }
+  #network-canvas {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0.7;
+  }
+
+  /* ═══════════════════════════════════════════════════════
+     SHOT 11 — FAVOURBUCKS
+  ═══════════════════════════════════════════════════════ */
+  #s11 { background: var(--black); }
+  .origami-container {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    pointer-events: none;
+  }
+  .origami-shape {
+    position: absolute;
+    width: 120px;
+    height: 120px;
+    border: 1px solid rgba(201,168,76,0.15);
+    transform-origin: center;
+  }
+  .origami-shape:nth-child(1) { animation: spin-slow 20s linear infinite; }
+  .origami-shape:nth-child(2) { width: 200px; height: 200px; border-color: rgba(201,168,76,0.08); animation: spin-slow 30s linear infinite reverse; transform: rotate(45deg); }
+  .origami-shape:nth-child(3) { width: 300px; height: 300px; border-color: rgba(201,168,76,0.04); animation: spin-slow 45s linear infinite; transform: rotate(22.5deg); }
+  .origami-shape:nth-child(4) { width: 440px; height: 440px; border-color: rgba(201,168,76,0.02); animation: spin-slow 60s linear infinite reverse; }
+
+  /* ═══════════════════════════════════════════════════════
+     SHOT 12 — THE MESH
+  ═══════════════════════════════════════════════════════ */
+  #s12 { background: var(--black); }
+  #mesh-canvas {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+  }
+  .mesh-overlay {
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse at center, transparent 30%, var(--black) 80%);
+    pointer-events: none;
+  }
+
+  /* ═══════════════════════════════════════════════════════
+     SHOT 13 — PAY TO MAP
+  ═══════════════════════════════════════════════════════ */
+  #s13 { background: var(--deep); }
+  .map-bg {
+    position: absolute;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(201,168,76,0.04) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(201,168,76,0.04) 1px, transparent 1px);
+    background-size: 40px 40px;
+    perspective: 600px;
+    transform: perspective(600px) rotateX(25deg) scale(1.4);
+    transform-origin: bottom center;
+    opacity: 0.6;
+  }
+  .location-pins {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+  }
+  .pin {
+    position: absolute;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--gold);
+    transform: translate(-50%, -50%);
+  }
+  .pin::after {
+    content: '';
+    position: absolute;
+    inset: -6px;
+    border-radius: 50%;
+    border: 1px solid rgba(201,168,76,0.3);
+    animation: expand-ring 2.5s ease-out infinite;
+  }
+  .pin:nth-child(odd)::after { animation-delay: 0.8s; }
+  .map-earnings {
+    display: flex;
+    gap: 2rem;
+    justify-content: center;
+    margin-top: 2rem;
+    flex-wrap: wrap;
+  }
+  .earn-stat {
+    text-align: center;
+    padding: 1.2rem 2rem;
+    border: 1px solid var(--dim);
+    min-width: 140px;
+  }
+  .earn-num {
+    font-size: 2.5rem;
+    font-weight: 200;
+    color: var(--gold);
+  }
+  .earn-label {
+    font-size: 0.65rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-top: 0.3rem;
+  }
+
+  /* ═══════════════════════════════════════════════════════
+     SHOT 14 — INSURANCE
+  ═══════════════════════════════════════════════════════ */
+  #s14 { background: var(--deep); }
+  .insurance-panels {
+    display: flex;
+    gap: 1.5rem;
+    margin-top: 2.5rem;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+  .ins-panel {
+    flex: 1;
+    min-width: 180px;
+    max-width: 240px;
+    padding: 2rem 1.5rem;
+    border: 1px solid var(--dim);
+    text-align: center;
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity 0.7s ease, transform 0.7s ease, border-color 0.3s;
+    background: rgba(255,255,255,0.02);
+  }
+  .ins-panel.visible { opacity: 1; transform: translateY(0); }
+  .ins-panel:hover { border-color: rgba(201,168,76,0.4); }
+  .ins-icon { font-size: 2.5rem; margin-bottom: 1rem; }
+  .ins-title { font-size: 0.75rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--gold); margin-bottom: 0.5rem; }
+  .ins-desc { font-size: 0.85rem; color: var(--muted); line-height: 1.5; }
+
+  /* ═══════════════════════════════════════════════════════
+     SHOT 15 — THE TURN (BLACK)
+  ═══════════════════════════════════════════════════════ */
+  #s15 { background: #000; }
+  .heartbeat-ring {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    border: 1px solid rgba(201,168,76,0.2);
+    animation: heartbeat 2s ease-in-out infinite;
+  }
+
+  /* ═══════════════════════════════════════════════════════
+     SHOT 16 — NOT AN EVOLUTION
+  ═══════════════════════════════════════════════════════ */
+  #s16 { background: var(--black); }
+  #s16 .not-evo {
+    font-size: clamp(1.5rem, 4vw, 3rem);
+    font-weight: 300;
+    color: var(--muted);
+    letter-spacing: -0.01em;
+    line-height: 1.3;
+  }
+  #s16 .evo-word {
+    display: inline-block;
+    opacity: 0;
+    transform: translateY(15px);
+    transition: opacity 0.4s ease, transform 0.4s ease;
+  }
+  #s16 .evo-word.show { opacity: 1; transform: translateY(0); }
+
+  /* ═══════════════════════════════════════════════════════
+     SHOT 17 — REVOLUTION
+  ═══════════════════════════════════════════════════════ */
+  #s17 { background: var(--black); overflow: hidden; }
+  .white-flash {
+    position: absolute;
+    inset: 0;
+    background: white;
+    opacity: 0;
+    pointer-events: none;
+  }
+  .white-flash.flash { animation: flash-white 1.2s ease forwards; }
+  .revolution-bg {
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse at center, rgba(201,168,76,0.12) 0%, transparent 65%);
+    animation: pulse 3s ease-in-out infinite;
+  }
+  #s17 .revolution-text {
+    font-size: clamp(3.5rem, 10vw, 9rem);
+    font-weight: 700;
+    color: var(--gold);
+    letter-spacing: -0.03em;
+    line-height: 1;
+    text-shadow: 0 0 80px rgba(201,168,76,0.4), 0 0 160px rgba(201,168,76,0.15);
+    animation: glow 3s ease-in-out infinite;
+  }
+
+  /* ═══════════════════════════════════════════════════════
+     SHOT 18 — LOGO
+  ═══════════════════════════════════════════════════════ */
+  #s18 { background: #000; }
+  .logo-mark {
+    width: 80px;
+    height: 80px;
+    margin: 0 auto 2rem;
+    position: relative;
+  }
+  .logo-outer {
+    width: 80px;
+    height: 80px;
+    border: 1.5px solid var(--gold);
+    transform: rotate(45deg);
+    position: absolute;
+    animation: spin-slow 20s linear infinite;
+  }
+  .logo-inner {
+    width: 50px;
+    height: 50px;
+    border: 1px solid rgba(201,168,76,0.5);
+    transform: rotate(0deg);
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    margin-top: -25px;
+    margin-left: -25px;
+    animation: spin-slow 15s linear infinite reverse;
+  }
+  .logo-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--gold);
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    animation: pulse 2s ease-in-out infinite;
+  }
+  .logo-name {
+    font-size: clamp(2rem, 5vw, 4rem);
+    font-weight: 200;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--white);
+  }
+  .logo-tagline {
+    margin-top: 1rem;
+    font-size: 0.8rem;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  /* ═══════════════════════════════════════════════════════
+     SHOT 19 — CTA
+  ═══════════════════════════════════════════════════════ */
+  #s19 { background: #000; }
+  .cta-domain {
+    font-size: clamp(1rem, 3vw, 2rem);
+    font-weight: 200;
+    letter-spacing: 0.2em;
+    color: var(--muted);
+    margin-bottom: 1.5rem;
+  }
+  .cta-buttons {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    flex-wrap: wrap;
+    margin-top: 2rem;
+  }
+  .cta-btn {
+    padding: 0.9rem 2.5rem;
+    font-family: var(--font);
+    font-size: 0.75rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-decoration: none;
+    display: inline-block;
+  }
+  .cta-btn-primary {
+    background: var(--gold);
+    color: #000;
+    border: 1px solid var(--gold);
+    font-weight: 600;
+  }
+  .cta-btn-primary:hover { background: var(--gold-bright); border-color: var(--gold-bright); transform: translateY(-2px); }
+  .cta-btn-secondary {
+    background: transparent;
+    color: var(--muted);
+    border: 1px solid var(--dim);
+  }
+  .cta-btn-secondary:hover { color: var(--white); border-color: var(--muted); transform: translateY(-2px); }
+  .email-form {
+    margin-top: 2.5rem;
+    display: flex;
+    gap: 0;
+    justify-content: center;
+    max-width: 440px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  .email-input {
+    flex: 1;
+    padding: 0.9rem 1.2rem;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid var(--dim);
+    border-right: none;
+    color: var(--white);
+    font-family: var(--font);
+    font-size: 0.85rem;
+    outline: none;
+    transition: border-color 0.3s;
+  }
+  .email-input:focus { border-color: var(--gold); }
+  .email-input::placeholder { color: var(--muted); }
+  .email-submit {
+    padding: 0.9rem 1.5rem;
+    background: var(--gold);
+    border: 1px solid var(--gold);
+    color: #000;
+    font-family: var(--font);
+    font-size: 0.75rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.3s;
+  }
+  .email-submit:hover { background: var(--gold-bright); }
+
+  /* ── SCRIPT SECTION ── */
+  #script-section {
+    background: var(--deep);
+    padding: 6rem 2rem;
+    border-top: 1px solid var(--dim);
+  }
+  .script-inner {
+    max-width: 800px;
+    margin: 0 auto;
+  }
+  .script-header {
+    text-align: center;
+    margin-bottom: 4rem;
+  }
+  .shot-card {
+    border-left: 2px solid var(--dim);
+    padding: 2rem 2rem 2rem 2.5rem;
+    margin-bottom: 2.5rem;
+    position: relative;
+    transition: border-color 0.3s;
+  }
+  .shot-card:hover { border-color: var(--gold); }
+  .shot-number {
+    position: absolute;
+    left: -0.5rem;
+    top: 2rem;
+    width: 1rem;
+    height: 1rem;
+    border-radius: 50%;
+    background: var(--dim);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.5rem;
+    color: var(--black);
+    font-weight: 700;
+  }
+  .shot-card:hover .shot-number { background: var(--gold); }
+  .shot-title { font-size: 0.65rem; letter-spacing: 0.3em; text-transform: uppercase; color: var(--gold); margin-bottom: 0.7rem; }
+  .shot-visual { font-size: 0.9rem; color: var(--white); line-height: 1.6; margin-bottom: 0.8rem; }
+  .shot-sound { font-size: 0.8rem; color: var(--muted); font-style: italic; margin-bottom: 0.6rem; }
+  .shot-copy { font-size: 1rem; color: rgba(248,248,248,0.8); font-style: italic; margin-top: 0.5rem; padding: 0.8rem 1rem; border-left: 1px solid var(--dim); }
+  .shot-duration { font-size: 0.65rem; letter-spacing: 0.2em; color: var(--dim); margin-top: 0.8rem; }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 600px) {
+    .ryder-panels { gap: 0.8rem; }
+    .ryder-panel { width: 120px; height: 180px; }
+    .insurance-panels { flex-direction: column; align-items: center; }
+    .ins-panel { max-width: 100%; width: 100%; }
+    .email-form { flex-direction: column; }
+    .email-input { border-right: 1px solid var(--dim); border-bottom: none; }
+    .cta-buttons { flex-direction: column; align-items: center; }
+  }
+
+  /* ── SCROLL PROGRESS ── */
+  #progress-bar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 2px;
+    background: linear-gradient(to right, var(--copper), var(--gold));
+    transition: width 0.2s ease;
+    z-index: 10000;
+    width: 0%;
+  }
+</style>
+</head>
+<body>
+
+<div id="progress-bar"></div>
+<button id="audio-toggle" aria-label="Toggle audio">♪ SOUND OFF</button>
+<nav id="dot-nav" aria-label="Section navigation"></nav>
+
+<!-- AUDIO -->
+
+<audio id="ambient" loop>
+  <!-- Replace src with your ambient audio file path -->
+  <!-- <source src="ambient.mp3" type="audio/mpeg"> -->
+</audio>
+
+<div id="cinematic-wrapper">
+
+<!-- ═══════════════════════════════════════════════════════
+     SHOT 1 — THE VOID
+═══════════════════════════════════════════════════════ -->
+<section class="shot" id="s1" data-shot="1" aria-label="Opening">
+  <div class="sub-bass"></div>
+  <div class="cursor-ring"></div>
+  <div class="cursor-ring"></div>
+  <div class="cursor-ring"></div>
+  <div class="shot-inner">
+    <p class="void-text">Favour Economy</p>
+    <p class="click-hint">Scroll to begin</p>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════
+     SHOT 2 — THE NEED
+═══════════════════════════════════════════════════════ -->
+<section class="shot" id="s2" data-shot="2" aria-label="The Need">
+  <canvas id="stars-canvas"></canvas>
+  <div class="shot-inner">
+    <p class="t-label reveal delay-1">Every day</p>
+    <br>
+    <h2 class="t-huge reveal delay-2" style="color:var(--white)">
+      8 billion people<br>need something.
+    </h2>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════
+     SHOT 3 — THE SCALE
+═══════════════════════════════════════════════════════ -->
+<section class="shot" id="s3" data-shot="3" aria-label="The Scale">
+  <div class="globe-bg"></div>
+  <div class="grid-dots"></div>
+  <div class="shot-inner">
+    <div class="stat-number reveal" id="counter-8b">8B</div>
+    <p class="t-large reveal delay-2" style="color:var(--muted);margin-top:1rem">
+      people have something to offer.
+    </p>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════
+     SHOT 4 — THE MIRROR (The Gap)
+═══════════════════════════════════════════════════════ -->
+<section class="shot" id="s4" data-shot="4" aria-label="The Gap">
+  <div class="gap-container">
+    <div class="gap-grid left"></div>
+    <div class="gap-line"></div>
+    <div class="gap-grid right"></div>
+  </div>
+  <div class="shot-inner">
+    <h2 class="t-huge reveal" style="color:var(--white)">
+      The gap between them
+    </h2>
+    <p class="t-large reveal delay-2" style="color:var(--muted);margin-top:1rem">
+      has always been the system.
+    </p>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════
+     SHOT 5 — THE LOGISTIC
+═══════════════════════════════════════════════════════ -->
+<section class="shot" id="s5" data-shot="5" aria-label="The Logistic">
+  <svg id="logistic-svg" viewBox="0 0 600 200" xmlns="http://www.w3.org/2000/svg">
+    <!-- Origin dot -->
+    <circle class="origin-dot show" cx="80" cy="100" r="8"/>
+    <circle cx="80" cy="100" r="18" fill="none" stroke="#e8734a" stroke-width="1" opacity="0.3"/>
+    <!-- Path -->
+    <path class="logistic-path animate" d="M88,100 C200,40 400,160 512,100"/>
+    <!-- Destination dot -->
+    <circle class="dest-dot show" cx="520" cy="100" r="8"/>
+    <circle cx="520" cy="100" r="18" fill="none" stroke="#c9a84c" stroke-width="1" opacity="0.3"/>
+    <!-- Labels -->
+    <text x="80" y="140" fill="#e8734a" font-size="10" text-anchor="middle" letter-spacing="2" font-family="Inter,sans-serif">ORIGIN</text>
+    <text x="520" y="140" fill="#c9a84c" font-size="10" text-anchor="middle" letter-spacing="2" font-family="Inter,sans-serif">DESTINATION</text>
+    <!-- Time arc -->
+    <path d="M200,80 Q300,30 400,80" fill="none" stroke="rgba(248,248,248,0.1)" stroke-width="1" stroke-dasharray="4 4"/>
+    <text x="300" y="50" fill="rgba(248,248,248,0.3)" font-size="9" text-anchor="middle" letter-spacing="2" font-family="Inter,sans-serif">TIME CONSTRAINT</text>
+  </svg>
+  <div class="shot-inner" style="position:relative;z-index:20;margin-top:140px">
+    <h1 class="t-massive t-gold reveal delay-2" style="letter-spacing:0.1em">THE LOGISTIC</h1>
+    <p class="t-med reveal delay-3" style="margin-top:1rem">
+      The fundamental unit of a new economy.
+    </p>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════
+     SHOT 6 — LOGISTIC ANATOMY
+═══════════════════════════════════════════════════════ -->
+<section class="shot" id="s6" data-shot="6" aria-label="Logistic Anatomy">
+  <div class="shot-inner">
+    <p class="t-label reveal">How it works</p>
+    <h2 class="t-huge reveal delay-1" style="margin-top:0.5rem">
+      Four elements.<br><span class="t-gold">One connection.</span>
+    </h2>
+    <div class="anatomy-grid" id="anatomy-grid">
+      <div class="anatomy-item delay-1">
+        <div class="anatomy-key">[ Origin ]</div>
+        <div class="anatomy-val">A location.</div>
+        <div class="anatomy-desc">Where something needs to be picked up. Anywhere on Earth.</div>
+      </div>
+      <div class="anatomy-item delay-2">
+        <div class="anatomy-key">[ Destination ]</div>
+        <div class="anatomy-val">Another location.</div>
+        <div class="anatomy-desc">Where it needs to arrive. The network finds the path.</div>
+      </div>
+      <div class="anatomy-item delay-3">
+        <div class="anatomy-key">[ Time ]</div>
+        <div class="anatomy-val">A constraint.</div>
+        <div class="anatomy-desc">When it needs to happen. The network optimizes around it.</div>
+      </div>
+      <div class="anatomy-item delay-4">
+        <div class="anatomy-key t-copper">[ The Rider ]</div>
+        <div class="anatomy-val" style="color:var(--copper)">The requirements.</div>
+        <div class="anatomy-desc">The Rider is the spec sheet attached to every Logistic — what skills, equipment, time window, and capital are needed to fulfil it.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════
+     SHOT 7 — THE SURFACE (Sliced Bread)
+═══════════════════════════════════════════════════════ -->
+<section class="shot" id="s7" data-shot="7" aria-label="The Surface">
+  <div class="shot-inner">
+    <p class="t-label reveal">The Surface Layer</p>
+    <h2 class="t-huge reveal delay-1" style="margin-top:0.5rem">
+      The thinnest slice<br><span class="t-gold">of useful work.</span>
+    </h2>
+    <div id="bread-visual" style="margin:2rem auto 0;max-width:640px;position:relative">
+      <!-- Bread slices stack — built by JS -->
+      <div id="bread-stack"></div>
+      <div id="bread-legend" style="display:flex;gap:1.5rem;justify-content:center;margin-top:1.5rem;flex-wrap:wrap;opacity:0;transition:opacity 0.8s ease 1.5s">
+        <span style="font-size:0.65rem;letter-spacing:0.18em;text-transform:uppercase;color:var(--muted)"><span style="color:var(--gold)">●</span> Willingness</span>
+        <span style="font-size:0.65rem;letter-spacing:0.18em;text-transform:uppercase;color:var(--muted)"><span style="color:var(--copper)">●</span> Time</span>
+        <span style="font-size:0.65rem;letter-spacing:0.18em;text-transform:uppercase;color:var(--muted)"><span style="color:#7ec8e3">●</span> Skills</span>
+        <span style="font-size:0.65rem;letter-spacing:0.18em;text-transform:uppercase;color:var(--muted)"><span style="color:#b5e48c">●</span> Capital</span>
+        <span style="font-size:0.65rem;letter-spacing:0.18em;text-transform:uppercase;color:var(--muted)"><span style="color:#d4a5f5">●</span> Location</span>
+      </div>
+    </div>
+    <p class="t-med reveal delay-4" style="margin-top:1.5rem">
+      Every intersection of a willing person, their time, skills, capital, and location<br>
+      is a <em style="color:var(--gold);font-style:normal">Surface</em> — one thin slice of useful work.
+    </p>
+    <p class="t-med reveal delay-5" style="margin-top:0.6rem;color:var(--muted)">
+      Stack enough surfaces and you can move the world.
+    </p>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════
+     SHOT 8 — THE NETWORK PARTICIPANTS
+═══════════════════════════════════════════════════════ -->
+<section class="shot" id="s8" data-shot="8" aria-label="Network Participants">
+  <div class="shot-inner">
+    <h2 class="t-huge reveal">
+      Ordinary people.<br><span class="t-gold">Extraordinary reach.</span>
+    </h2>
+    <div class="ryder-panels">
+      <div class="ryder-panel delay-1" id="rp1">
+        <div class="ryder-shimmer"></div>
+        <div class="ryder-notify"></div>
+        <div class="ryder-icon">🚲</div>
+        <div class="ryder-label">Urban Courier</div>
+      </div>
+      <div class="ryder-panel delay-2" id="rp2">
+        <div class="ryder-shimmer"></div>
+        <div class="ryder-notify" style="animation-delay:0.5s"></div>
+        <div class="ryder-icon">🚗</div>
+        <div class="ryder-label">City Driver</div>
+      </div>
+      <div class="ryder-panel delay-3" id="rp3">
+        <div class="ryder-shimmer"></div>
+        <div class="ryder-notify" style="animation-delay:1s"></div>
+        <div class="ryder-icon">📦</div>
+        <div class="ryder-label">Local Handler</div>
+      </div>
+      <div class="ryder-panel delay-4" id="rp4">
+        <div class="ryder-shimmer"></div>
+        <div class="ryder-notify" style="animation-delay:1.5s"></div>
+        <div class="ryder-icon">🛵</div>
+        <div class="ryder-label">Last Mile</div>
+      </div>
+    </div>
+    <p class="t-med reveal delay-5" style="margin-top:2rem">
+      Every willing person is a Surface. Every Surface is a node. Every node grows the network.
+    </p>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════
+     SHOT 8 — FAST OR FREE
+═══════════════════════════════════════════════════════ -->
+<section class="shot" id="s8b" data-shot="9" aria-label="Fast or Free">
+  <div class="fast-free-split">
+    <div class="ff-half ff-fast">
+      <span class="ff-word">FAST</span>
+    </div>
+    <div class="ff-divider"></div>
+    <div class="ff-half ff-free">
+      <span class="ff-word">FREE</span>
+    </div>
+  </div>
+  <div class="shot-inner">
+    <p class="t-large reveal" style="color:var(--white)">The network decides.</p>
+    <p class="t-med reveal delay-2" style="margin-top:0.5rem">
+      When it has slack — your Logistic rides free.<br>
+      When you need it now — you pay for the priority.
+    </p>
+    <p class="t-med reveal delay-3" style="margin-top:1.5rem;color:var(--gold)">
+      You always choose.
+    </p>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════
+     SHOT 9 — NETWORK OPTIMIZING
+═══════════════════════════════════════════════════════ -->
+<section class="shot" id="s9" data-shot="10" aria-label="Network Optimization">
+  <canvas id="network-canvas"></canvas>
+  <div class="shot-inner">
+    <h2 class="t-huge reveal" style="color:var(--white)">
+      The network sees<br><span class="t-gold">what you cannot.</span>
+    </h2>
+    <p class="t-med reveal delay-2" style="margin-top:1.5rem">
+      Free time. Capital. Equipment. Labour. Services.<br>
+      Optimized in real time. Across every city on Earth.
+    </p>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════
+     SHOT 10 — FAVOURBUCKS + ESCROW MODEL
+═══════════════════════════════════════════════════════ -->
+<section class="shot" id="s10" data-shot="11" aria-label="FavourBucks">
+  <div class="origami-container">
+    <div class="origami-shape"></div>
+    <div class="origami-shape"></div>
+    <div class="origami-shape"></div>
+    <div class="origami-shape"></div>
+  </div>
+  <div class="shot-inner">
+    <p class="t-label reveal">The currency</p>
+    <h2 class="t-huge reveal delay-1" style="margin-top:0.5rem">
+      <span class="t-gold">FavourBucks.</span>
+    </h2>
+    <p class="t-large reveal delay-2" style="margin-top:1rem;color:var(--muted)">
+      Every favour earned is a favour remembered.
+    </p>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin-top:2rem;max-width:680px;margin-left:auto;margin-right:auto">
+      <div class="reveal delay-2" style="border:1px solid var(--dim);padding:1.2rem 1rem;text-align:center">
+        <div style="font-size:2.2rem;font-weight:200;color:var(--gold)">0%</div>
+        <div style="font-size:0.6rem;letter-spacing:0.18em;text-transform:uppercase;color:var(--muted);margin-top:0.3rem;line-height:1.4">Compound<br>Interest</div>
+      </div>
+      <div class="reveal delay-3" style="border:1px solid rgba(201,168,76,0.3);padding:1.2rem 1rem;text-align:center;background:rgba(201,168,76,0.03)">
+        <div style="font-size:2.2rem;font-weight:200;color:var(--gold)">1% + 1%</div>
+        <div style="font-size:0.6rem;letter-spacing:0.18em;text-transform:uppercase;color:var(--muted);margin-top:0.3rem;line-height:1.4">On-chain<br>System + Group</div>
+      </div>
+      <div class="reveal delay-4" style="border:1px solid var(--dim);padding:1.2rem 1rem;text-align:center">
+        <div style="font-size:2.2rem;font-weight:200;color:var(--copper)">15%</div>
+        <div style="font-size:0.6rem;letter-spacing:0.18em;text-transform:uppercase;color:var(--muted);margin-top:0.3rem;line-height:1.4">Off-chain<br>Infrastructure</div>
+      </div>
+    </div>
+    <p class="t-med reveal delay-5" style="margin-top:1.5rem;color:var(--muted)">
+      No compound interest. No debt traps. Frictionless — and value returned to the people who power it.
+    </p>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════
+     SHOT 10b — THE ESCROW BANK
+═══════════════════════════════════════════════════════ -->
+<section class="shot" id="s10b" data-shot="12" aria-label="The Escrow Bank">
+  <div class="shot-inner">
+    <p class="t-label reveal">The money model</p>
+    <h2 class="t-huge reveal delay-1" style="margin-top:0.5rem">
+      Not a bank.<br><span class="t-gold">An escrow.</span>
+    </h2>
+    <p class="t-med reveal delay-2" style="margin-top:1rem">
+      Every payment enters the system, is held for an instant, and released to the recipient.<br>
+      The network takes only what it needs — and returns the rest as value.
+    </p>
+    <div id="escrow-flow" style="margin:2rem auto 0;max-width:640px;position:relative;height:120px">
+      <!-- Animated escrow flow — built by CSS -->
+      <div class="escrow-node reveal delay-2" style="position:absolute;left:0;top:50%;transform:translateY(-50%);text-align:center;width:110px">
+        <div style="width:44px;height:44px;border:1px solid var(--dim);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1.3rem;margin:0 auto">💸</div>
+        <div style="font-size:0.6rem;letter-spacing:0.15em;text-transform:uppercase;color:var(--muted);margin-top:0.4rem">Payment in</div>
+      </div>
+      <svg style="position:absolute;top:50%;left:110px;width:calc(100% - 220px);transform:translateY(-50%)" viewBox="0 0 300 40" preserveAspectRatio="none">
+        <!-- Main flow line -->
+        <line x1="0" y1="20" x2="300" y2="20" stroke="rgba(201,168,76,0.2)" stroke-width="1"/>
+        <!-- Animated dot -->
+        <circle r="4" fill="#c9a84c" opacity="0.8">
+          <animateMotion dur="2s" repeatCount="indefinite" path="M0,20 L300,20"/>
+        </circle>
+        <!-- 1% system tap -->
+        <line x1="80" y1="20" x2="80" y2="5" stroke="rgba(201,168,76,0.5)" stroke-width="1" stroke-dasharray="3,3"/>
+        <text x="80" y="3" fill="rgba(201,168,76,0.6)" font-size="8" text-anchor="middle" font-family="Inter,sans-serif">1% sys</text>
+        <!-- 1% group tap -->
+        <line x1="150" y1="20" x2="150" y2="5" stroke="rgba(201,168,76,0.5)" stroke-width="1" stroke-dasharray="3,3"/>
+        <text x="150" y="3" fill="rgba(201,168,76,0.6)" font-size="8" text-anchor="middle" font-family="Inter,sans-serif">1% group</text>
+        <!-- remainder label -->
+        <text x="150" y="36" fill="rgba(248,248,248,0.2)" font-size="7" text-anchor="middle" font-family="Inter,sans-serif">98% → recipient instantly</text>
+      </svg>
+      <div class="escrow-node reveal delay-4" style="position:absolute;right:0;top:50%;transform:translateY(-50%);text-align:center;width:110px">
+        <div style="width:44px;height:44px;border:1px solid rgba(201,168,76,0.4);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1.3rem;margin:0 auto;background:rgba(201,168,76,0.05)">✓</div>
+        <div style="font-size:0.6rem;letter-spacing:0.15em;text-transform:uppercase;color:var(--gold);margin-top:0.4rem">Received</div>
+      </div>
+    </div>
+    <p class="t-med reveal delay-5" style="margin-top:1.5rem;color:var(--muted)">
+      On-chain: 1% to system infrastructure + 1% to your group fund.<br>
+      Off-chain: 15% — funds infrastructure futures available to all members.
+    </p>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════
+     SHOT 10c — THE GROUP / COMMONS
+═══════════════════════════════════════════════════════ -->
+<section class="shot" id="s10c" data-shot="13" aria-label="The Group">
+  <div class="shot-inner">
+    <p class="t-label reveal">The Group</p>
+    <h2 class="t-huge reveal delay-1" style="margin-top:0.5rem">
+      Own things<br><span class="t-gold">together.</span>
+    </h2>
+    <p class="t-med reveal delay-2" style="margin-top:1rem">
+      A Group is any set of people — friends, a neighbourhood, an interest collective —<br>
+      who pool their 1% Group cashback into shared assets, insurance, and dividends.
+    </p>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin-top:2rem;max-width:680px;margin-left:auto;margin-right:auto">
+      <div class="reveal delay-2" style="border:1px solid var(--dim);padding:1.4rem 1rem;text-align:center">
+        <div style="font-size:2rem;margin-bottom:0.6rem">🏠</div>
+        <div style="font-size:0.65rem;letter-spacing:0.2em;text-transform:uppercase;color:var(--gold);margin-bottom:0.4rem">Shared Assets</div>
+        <div style="font-size:0.8rem;color:var(--muted);line-height:1.5">Spread ownership costs of cars, tools, equipment, spaces across the group.</div>
+      </div>
+      <div class="reveal delay-3" style="border:1px solid rgba(201,168,76,0.25);padding:1.4rem 1rem;text-align:center;background:rgba(201,168,76,0.03)">
+        <div style="font-size:2rem;margin-bottom:0.6rem">🛡️</div>
+        <div style="font-size:0.65rem;letter-spacing:0.2em;text-transform:uppercase;color:var(--gold);margin-bottom:0.4rem">Group Insurance</div>
+        <div style="font-size:0.8rem;color:var(--muted);line-height:1.5">Local life, child, and elderly insurance — underwritten by your group's own reserve.</div>
+      </div>
+      <div class="reveal delay-4" style="border:1px solid var(--dim);padding:1.4rem 1rem;text-align:center">
+        <div style="font-size:2rem;margin-bottom:0.6rem">📈</div>
+        <div style="font-size:0.65rem;letter-spacing:0.2em;text-transform:uppercase;color:var(--gold);margin-bottom:0.4rem">Dividends</div>
+        <div style="font-size:0.8rem;color:var(--muted);line-height:1.5">When the group fund earns — members earn. Every favour compounds into collective wealth.</div>
+      </div>
+    </div>
+    <p class="t-med reveal delay-5" style="margin-top:1.5rem;color:var(--muted)">
+      A group of friends. A city block. A trade collective.<br>
+      <span style="color:var(--white)">Any size. Any focus. Permanently owned by its members.</span>
+    </p>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════
+     SHOT 10d — INFRASTRUCTURE FUTURES
+═══════════════════════════════════════════════════════ -->
+<section class="shot" id="s10d" data-shot="14" aria-label="Infrastructure Futures">
+  <div class="shot-inner">
+    <p class="t-label reveal">Every user an investor</p>
+    <h2 class="t-huge reveal delay-1" style="margin-top:0.5rem">
+      Build it.<br><span class="t-gold">Get paid forever.</span>
+    </h2>
+    <p class="t-med reveal delay-2" style="margin-top:1rem">
+      Members don't buy infrastructure — they <em style="color:var(--gold);font-style:normal">get paid to build it.</em><br>
+      Every asset you contribute earns recurring revenue for as long as it delivers value.
+    </p>
+    <!-- Asymptotic reward curve visual -->
+    <div style="margin:1.8rem auto 0;max-width:520px">
+      <svg viewBox="0 0 520 100" style="width:100%;display:block" xmlns="http://www.w3.org/2000/svg">
+        <!-- Axes -->
+        <line x1="40" y1="90" x2="500" y2="90" stroke="rgba(255,255,255,0.08)" stroke-width="1"/>
+        <line x1="40" y1="10" x2="40" y2="90" stroke="rgba(255,255,255,0.08)" stroke-width="1"/>
+        <!-- Asymptotic curve: reward starts high, approaches zero as redundancy → ∞ -->
+        <path d="M40,15 C80,16 120,22 180,38 C240,54 320,72 500,87"
+              fill="none" stroke="url(#asym-grad)" stroke-width="2"/>
+        <!-- Early adopter zone highlight -->
+        <rect x="40" y="10" width="100" height="80" fill="rgba(201,168,76,0.04)"/>
+        <text x="90" y="8" fill="rgba(201,168,76,0.5)" font-size="7" text-anchor="middle" font-family="Inter,sans-serif" letter-spacing="1">EARLY</text>
+        <!-- Labels -->
+        <text x="40" y="98" fill="rgba(248,248,248,0.2)" font-size="7" font-family="Inter,sans-serif">sparse</text>
+        <text x="430" y="98" fill="rgba(248,248,248,0.2)" font-size="7" font-family="Inter,sans-serif">saturated</text>
+        <text x="20" y="20" fill="rgba(248,248,248,0.25)" font-size="7" font-family="Inter,sans-serif" transform="rotate(-90,20,55)" text-anchor="middle">reward</text>
+        <!-- Redundancy label -->
+        <text x="270" y="98" fill="rgba(248,248,248,0.15)" font-size="7" font-family="Inter,sans-serif" text-anchor="middle">network redundancy →</text>
+        <defs>
+          <linearGradient id="asym-grad" x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0%" stop-color="#c9a84c"/>
+            <stop offset="40%" stop-color="#e8734a"/>
+            <stop offset="100%" stop-color="rgba(232,115,74,0.2)"/>
+          </linearGradient>
+        </defs>
+      </svg>
+      <p style="font-size:0.65rem;letter-spacing:0.15em;text-transform:uppercase;color:var(--muted);text-align:center;margin-top:0.4rem">Rewards are highest when the network needs you most — and approach zero as full redundancy is achieved.</p>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:0.7rem;margin-top:1.5rem;max-width:560px;margin-left:auto;margin-right:auto">
+      <div class="reveal delay-2" style="display:flex;align-items:center;gap:1rem;border:1px solid rgba(201,168,76,0.25);padding:0.9rem 1.2rem;background:rgba(201,168,76,0.03)">
+        <div style="font-size:1.3rem;flex-shrink:0">📡</div>
+        <div>
+          <div style="font-size:0.65rem;letter-spacing:0.18em;text-transform:uppercase;color:var(--gold);margin-bottom:0.25rem">Run a Reticulum Node</div>
+          <div style="font-size:0.78rem;color:var(--muted);line-height:1.5">Provide mesh coverage → earn FavourBucks per packet routed. Fully redundant coverage is the goal; early nodes earn the most.</div>
+        </div>
+      </div>
+      <div class="reveal delay-3" style="display:flex;align-items:center;gap:1rem;border:1px solid var(--dim);padding:0.9rem 1.2rem">
+        <div style="font-size:1.3rem;flex-shrink:0">🗺️</div>
+        <div>
+          <div style="font-size:0.65rem;letter-spacing:0.18em;text-transform:uppercase;color:var(--gold);margin-bottom:0.25rem">Contribute 3D Map Data</div>
+          <div style="font-size:0.78rem;color:var(--muted);line-height:1.5">Map unmapped territory → earn per square metre. As coverage saturates, rewards taper — but your prior work keeps generating.</div>
+        </div>
+      </div>
+      <div class="reveal delay-4" style="display:flex;align-items:center;gap:1rem;border:1px solid var(--dim);padding:0.9rem 1.2rem">
+        <div style="font-size:1.3rem;flex-shrink:0">🏗️</div>
+        <div>
+          <div style="font-size:0.65rem;letter-spacing:0.18em;text-transform:uppercase;color:var(--gold);margin-bottom:0.25rem">Create Any Recurring Asset</div>
+          <div style="font-size:0.78rem;color:var(--muted);line-height:1.5">A tool, a space, a skill, a route — any asset with recurring value earns recurring revenue. You become the system's investor.</div>
+        </div>
+      </div>
+    </div>
+    <p class="t-med reveal delay-5" style="margin-top:1.5rem">
+      Every user is an investor. Every asset is a wage.<br>
+      <span style="color:var(--gold)">Build once. Earn as long as the network needs you.</span>
+    </p>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════
+     SHOT 11 — THE MESH
+═══════════════════════════════════════════════════════ -->
+<section class="shot" id="s11" data-shot="15" aria-label="The Mesh Network">
+  <canvas id="mesh-canvas"></canvas>
+  <div class="mesh-overlay"></div>
+  <div class="shot-inner">
+    <p class="t-label reveal">1% of every favour</p>
+    <h2 class="t-huge reveal delay-2" style="margin-top:1rem;color:var(--white)">
+      Builds the internet<br><span class="t-gold">that no one owns.</span>
+    </h2>
+    <p class="t-med reveal delay-3" style="margin-top:1.5rem">
+      A global LoRaNet / Reticulum mesh — free, encrypted,<br>
+      built and owned by the people who run it.
+    </p>
+    <p class="t-med reveal delay-4" style="margin-top:1rem;color:var(--muted)">
+      Every node operator earns recurring FavourBucks. Early coverage earns the most.<br>
+      As redundancy grows, rewards approach zero — but the world is fully covered.
+    </p>
+    <p class="t-med reveal delay-5" style="margin-top:0.8rem;color:var(--copper)">
+      Works offline. Censorship-resistant. Owned by no corporation. Ever.
+    </p>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════
+     SHOT 12 — PAY TO MAP
+═══════════════════════════════════════════════════════ -->
+<section class="shot" id="s12" data-shot="16" aria-label="Pay to Map">
+  <div class="map-bg"></div>
+  <div class="location-pins" id="pins-container"></div>
+  <div class="shot-inner">
+    <h2 class="t-huge reveal" style="color:var(--white)">
+      Pay people to<br><span class="t-gold">map the world.</span>
+    </h2>
+    <p class="t-med reveal delay-2" style="margin-top:1rem">
+      Every phone a sensor. Every route a contribution.<br>
+      Citizens build — and own — the most valuable geographic<br>dataset in human history.
+    </p>
+    <div class="map-earnings">
+      <div class="earn-stat reveal delay-2">
+        <div class="earn-num">FB/m²</div>
+        <div class="earn-label">Earned per mapping</div>
+      </div>
+      <div class="earn-stat reveal delay-3">
+        <div class="earn-num">3D</div>
+        <div class="earn-label">Full world coverage</div>
+      </div>
+      <div class="earn-stat reveal delay-4">
+        <div class="earn-num">∞</div>
+        <div class="earn-label">Updates forever</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════
+     SHOT 13 — INSURANCE / WELFARE
+═══════════════════════════════════════════════════════ -->
+<section class="shot" id="s13" data-shot="17" aria-label="Insurance and Welfare">
+  <div class="shot-inner">
+    <p class="t-label reveal" style="color:var(--muted)">Not a charity</p>
+    <h2 class="t-huge reveal delay-1" style="margin-top:0.5rem;color:var(--white)">
+      The natural output<br>of a <span class="t-gold">system that works.</span>
+    </h2>
+    <div class="insurance-panels">
+      <div class="ins-panel delay-2" id="ip1">
+        <div class="ins-icon">👶</div>
+        <div class="ins-title">Child Insurance</div>
+        <div class="ins-desc">Every child born into the network is born into the system's protection.</div>
+      </div>
+      <div class="ins-panel delay-3" id="ip2">
+        <div class="ins-icon">💛</div>
+        <div class="ins-title">Life Insurance</div>
+        <div class="ins-desc">Favour history is proof of value. The network remembers what you gave.</div>
+      </div>
+      <div class="ins-panel delay-4" id="ip3">
+        <div class="ins-icon">🌿</div>
+        <div class="ins-title">Elderly Care</div>
+        <div class="ins-desc">A lifetime of favours earns dignity. No one left behind when the network is rich.</div>
+      </div>
+      <div class="ins-panel delay-5" id="ip4">
+        <div class="ins-icon">⚖️</div>
+        <div class="ins-title">Minimum FavourWage</div>
+        <div class="ins-desc">A baseline that guarantees food, shelter, and connectivity for every participant.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════
+     SHOT 14 — THE TURN (BLACK)
+═══════════════════════════════════════════════════════ -->
+<section class="shot" id="s14" data-shot="18" aria-label="The Turn" style="background:#000">
+  <div class="shot-inner">
+    <div class="heartbeat-ring"></div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════
+     SHOT 15 — NOT AN EVOLUTION
+═══════════════════════════════════════════════════════ -->
+<section class="shot" id="s15" data-shot="19" aria-label="Not an Evolution">
+  <div class="shot-inner">
+    <p class="not-evo" id="evo-text">
+      <span class="evo-word">This</span>
+      <span class="evo-word"> isn't</span>
+      <span class="evo-word"> an</span>
+      <span class="evo-word"> evolution.</span>
+    </p>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════
+     SHOT 16 — REVOLUTION
+═══════════════════════════════════════════════════════ -->
+<section class="shot" id="s16" data-shot="20" aria-label="The Revolution">
+  <div class="white-flash" id="white-flash"></div>
+  <div class="revolution-bg"></div>
+  <div class="shot-inner">
+    <h1 class="revolution-text reveal">IT'S A<br>REVOLUTION.</h1>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════
+     SHOT 17 — LOGO
+═══════════════════════════════════════════════════════ -->
+<section class="shot" id="s17" data-shot="21" aria-label="Favour Economy" style="background:#000">
+  <div class="shot-inner">
+    <div class="logo-mark reveal">
+      <div class="logo-outer"></div>
+      <div class="logo-inner"></div>
+      <div class="logo-dot"></div>
+    </div>
+    <div class="logo-name reveal delay-2">Favour Economy</div>
+    <div class="logo-tagline reveal delay-3">Every person. Every favour. Every future.</div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════
+     SHOT 18 — CTA
+═══════════════════════════════════════════════════════ -->
+<section class="shot" id="s18" data-shot="22" aria-label="Join the Network" style="background:#000">
+  <div class="shot-inner">
+    <div class="cta-domain reveal">favoureconomy.com</div>
+    <h2 class="t-huge reveal delay-1" style="color:var(--white)">
+      Join the Revolution.
+    </h2>
+    <div class="cta-buttons reveal delay-2">
+      <a href="mailto:hello@favoureconomy.com?subject=I want to Build" class="cta-btn cta-btn-primary">Build</a>
+      <a href="mailto:hello@favoureconomy.com?subject=I want to Invest" class="cta-btn cta-btn-secondary">Invest</a>
+      <a href="mailto:hello@favoureconomy.com?subject=I want to Earn Favours" class="cta-btn cta-btn-secondary">Earn Favours</a>
+    </div>
+    <div class="email-form reveal delay-3">
+      <input type="email" class="email-input" placeholder="your@email.com" id="email-input" autocomplete="off">
+      <button class="email-submit" onclick="submitEmail()">JOIN →</button>
+    </div>
+    <p class="t-label reveal delay-4" style="margin-top:2rem;color:var(--dim)">
+      The future belongs to those useful to it.
+    </p>
+    <button onclick="openScript()" class="reveal delay-5" style="margin-top:2.5rem;background:transparent;border:1px solid var(--dim);color:var(--muted);font-family:var(--font);font-size:0.65rem;letter-spacing:0.25em;text-transform:uppercase;padding:0.7rem 1.5rem;cursor:pointer;transition:color 0.3s,border-color 0.3s" onmouseover="this.style.color='var(--gold)';this.style.borderColor='rgba(201,168,76,0.4)'" onmouseout="this.style.color='var(--muted)';this.style.borderColor='var(--dim)'">Read Full Trailer Script ↓</button>
+  </div>
+</section>
+
+</div><!-- /cinematic-wrapper -->
+
+<!-- ═══════════════════════════════════════════════════════
+     TRAILER SCRIPT — Full Document
+═══════════════════════════════════════════════════════ -->
+<div id="script-section">
+  <div class="script-inner">
+    <div class="script-header">
+      <p style="font-size:0.65rem;letter-spacing:0.3em;text-transform:uppercase;color:var(--gold);margin-bottom:1rem">Cinematic Trailer</p>
+      <h2 style="font-size:clamp(2rem,5vw,4rem);font-weight:200;color:var(--white)">FAVOUR ECONOMY</h2>
+      <p style="font-size:1.2rem;color:var(--muted);margin-top:0.5rem;font-style:italic">The Revolution — Full Shot Script</p>
+      <p style="font-size:0.75rem;color:var(--dim);margin-top:1rem">Duration: ~2:28 &nbsp;·&nbsp; Tone: Apple × Inception × Black Mirror Optimism &nbsp;·&nbsp; Colour: Black → Gold → White</p>
+    </div>
+
+    <div class="shot-card">
+      <div class="shot-number">1</div>
+      <div class="shot-title">The Void — 4s</div>
+      <div class="shot-visual">Pure black screen. Complete silence. Four full seconds.</div>
+      <div class="shot-sound">Sound: Absolute silence — then one low sub-bass note, felt more than heard. A single piano key.</div>
+      <div class="shot-copy">Nothing. The audience leans in.</div>
+    </div>
+
+    <div class="shot-card">
+      <div class="shot-number">2</div>
+      <div class="shot-title">The Need — 3s</div>
+      <div class="shot-visual">Extreme close-up. A hand reaching for a phone, screen glow reflected on skin. Night. Somewhere urban. Anywhere on Earth. The hand could be anyone's.</div>
+      <div class="shot-sound">Sound: Sub-bass sustains. One piano key. No reverb. Intimate.</div>
+      <div class="shot-copy">"Every day..."</div>
+    </div>
+
+    <div class="shot-card">
+      <div class="shot-number">3</div>
+      <div class="shot-title">The Scale — 4s</div>
+      <div class="shot-visual">Pull back — not just one hand — we see a continent from satellite altitude. Millions of light-points, human activity at 2am. It breathes.</div>
+      <div class="shot-sound">Sound: Strings enter, low. The scale of the sound matches the scale of the image.</div>
+      <div class="shot-copy">"8 billion people need something."</div>
+    </div>
+
+    <div class="shot-card">
+      <div class="shot-number">4</div>
+      <div class="shot-title">The Mirror — 4s</div>
+      <div class="shot-visual">CUT TO BLACK. Hard cut. One beat. Then: the same continent, same lights — but the lights pulse slightly differently. These are the givers, not the takers. Identical. Separated by nothing but the system.</div>
+      <div class="shot-sound">Sound: Same strings. A breath. The gap between two notes.</div>
+      <div class="shot-copy">"8 billion people have something to offer."</div>
+    </div>
+
+    <div class="shot-card">
+      <div class="shot-number">5</div>
+      <div class="shot-title">The Gap — 5s</div>
+      <div class="shot-visual">Two identical city grids — slide in from left and right — separated by a thin dark line. The line slowly widens into an abyss. The grids strain toward each other.</div>
+      <div class="shot-sound">Sound: Tension. A second low drone enters beneath the strings.</div>
+      <div class="shot-copy">"The gap between them... has always been the system."</div>
+    </div>
+
+    <div class="shot-card">
+      <div class="shot-number">6</div>
+      <div class="shot-title">The Logistic — 5s</div>
+      <div class="shot-visual">CUT TO BLACK. Hard silence, one full second. Then — a single white dot appears on pure black. It moves. A second dot appears. A golden line draws itself between them, slowly, with intention.</div>
+      <div class="shot-sound">Sound: The moment the line appears — a clean, high piano tone. Sustain. The sound of connection.</div>
+      <div class="shot-copy">THE LOGISTIC</div>
+      <div class="shot-duration">Gold text. Full screen. Nothing else.</div>
+    </div>
+
+    <div class="shot-card">
+      <div class="shot-number">7</div>
+      <div class="shot-title">Logistic Anatomy — 6s</div>
+      <div class="shot-visual">Minimalist animation — city grid from above, pure dark. Copper dot (pickup) appears first. Gold dot (destination) second. A time arc — like a countdown — forms above the connecting path.</div>
+      <div class="shot-sound">Sound: Music builds. Percussion enters. Each element's appearance gets its own soft click.</div>
+      <div class="shot-copy">[ ORIGIN ] — a location. / [ DESTINATION ] — another. / [ TIME ] — a constraint. / [ THE RYDER ] — a human who connects them.</div>
+    </div>
+
+    <div class="shot-card">
+      <div class="shot-number">8</div>
+      <div class="shot-title">The Ryder — 5s</div>
+      <div class="shot-visual">Close-up montage — each 1.5 seconds: a cyclist weaving morning traffic; a woman loading a car efficiently; a man on subway reading who looks up at a notification; a teenager on a scooter taking a corner. They all say yes.</div>
+      <div class="shot-sound">Sound: Warm percussion. The cuts have rhythm. Human scale.</div>
+      <div class="shot-copy">"Ordinary people. Extraordinary reach."</div>
+    </div>
+
+    <div class="shot-card">
+      <div class="shot-number">9</div>
+      <div class="shot-title">Fast or Free — 6s</div>
+      <div class="shot-visual">Split screen — left half bleeds copper, city at speed; right half glows gold, city at ease. FAST on the left. FREE on the right. A divider line that shimmers between them.</div>
+      <div class="shot-sound">Sound: The music drops to near-silence. The space between FAST and FREE is a beat of silence. Then returns doubled in intensity.</div>
+      <div class="shot-copy">"The network decides. You choose."</div>
+    </div>
+
+    <div class="shot-card">
+      <div class="shot-number">10</div>
+      <div class="shot-title">Network Optimizing — 6s</div>
+      <div class="shot-visual">God's-eye view of a city at night. Ryders appear as moving gold points. Logistics pop up as copper lines — match — resolve — pulse green. The network is alive, routing, breathing, solving.</div>
+      <div class="shot-sound">Sound: Full crescendo. This is the emotional peak of act two. Fast, hopeful, vast.</div>
+      <div class="shot-copy">"Free time. Capital. Equipment. Labour. Services. The network sees what you cannot."</div>
+    </div>
+
+    <div class="shot-card">
+      <div class="shot-number">11</div>
+      <div class="shot-title">FavourBucks — 5s</div>
+      <div class="shot-visual">Abstract. Geometrical fragments of light — not coins, but something richer. Origami folds in slow motion. Encryption spiraling like DNA. Value that doesn't decay.</div>
+      <div class="shot-sound">Sound: Lighter, musical. Almost playful. But still vast.</div>
+      <div class="shot-copy">"Every favour earned is a favour remembered. Every favour remembered grows the system."</div>
+    </div>
+
+    <div class="shot-card">
+      <div class="shot-number">12</div>
+      <div class="shot-title">The Mesh — 7s</div>
+      <div class="shot-visual">The most cinematic shot. A globe — dark, turning slowly. It's covered in tiny lights, like neural tissue. The lights pulse in waves. The mesh breathes. It expands, reaches deserts, mountains, islands, oceans.</div>
+      <div class="shot-sound">Sound: Quiet. Almost sacred. A choir note, held.</div>
+      <div class="shot-copy">"1% of every favour... builds the internet that no one owns."</div>
+    </div>
+
+    <div class="shot-card">
+      <div class="shot-number">13</div>
+      <div class="shot-title">Pay to Map — 6s</div>
+      <div class="shot-visual">First-person: a person moving through a Lagos market — their phone captures and maps. Cut: a village in Peru, same motion. Cut: flood zone in Bangladesh. The 3D mesh builds behind each of them in real time. They are building the world's most valuable map.</div>
+      <div class="shot-sound">Sound: Warmer now. Human scale. The music has become something you could hum.</div>
+      <div class="shot-copy">"Pay people to map the world. Let the world own the map."</div>
+    </div>
+
+    <div class="shot-card">
+      <div class="shot-number">14</div>
+      <div class="shot-title">Insurance / Welfare — 7s</div>
+      <div class="shot-visual">Three images, warm light, 2.5s each: a newborn's hand curled around an adult finger; an elderly woman laughing in a circle of people; a child running toward the camera, free.</div>
+      <div class="shot-sound">Sound: Full. Warm. The emotional resolution of everything built before.</div>
+      <div class="shot-copy">"Life insurance. Child insurance. Elderly care. Not a charity. The natural output of a system that works."</div>
+    </div>
+
+    <div class="shot-card">
+      <div class="shot-number">15</div>
+      <div class="shot-title">The Turn — 2s</div>
+      <div class="shot-visual">CUT TO BLACK. Hard. Complete. Two full seconds.</div>
+      <div class="shot-sound">Sound: SILENCE. Then one deep bass thud — felt in the chest. Nothing else.</div>
+      <div class="shot-copy">Nothing.</div>
+      <div class="shot-duration">The audience is quiet. They wait.</div>
+    </div>
+
+    <div class="shot-card">
+      <div class="shot-number">16</div>
+      <div class="shot-title">Not an Evolution — 4s</div>
+      <div class="shot-visual">Slow zoom out from a single human face — looking up. Calm. Certain. The world behind them lit gold.</div>
+      <div class="shot-sound">Sound: The full orchestra enters. Strings + brass + electronic bass. This is the crescendo. One word at a time.</div>
+      <div class="shot-copy">"This isn't an evolution."</div>
+    </div>
+
+    <div class="shot-card" style="border-left-color:var(--gold)">
+      <div class="shot-number" style="background:var(--gold)">17</div>
+      <div class="shot-title" style="color:var(--gold-bright)">The Revolution — 4s</div>
+      <div class="shot-visual">WHITE FLASH — 0.3 seconds, pure white, full bleed. Then: the globe, fully illuminated. The mesh covers it completely. Every Logistic flowing. Every favour completing. Every person fed.</div>
+      <div class="shot-sound">Sound: FULL. Every instrument. The moment the audience has been waiting for.</div>
+      <div class="shot-copy" style="font-size:1.4rem;font-weight:700;color:var(--gold)">IT'S A REVOLUTION.</div>
+    </div>
+
+    <div class="shot-card">
+      <div class="shot-number">18</div>
+      <div class="shot-title">Logo Reveal — 5s</div>
+      <div class="shot-visual">Fade to deep black. The logo appears — slowly, piece by piece. Minimal. Geometric. A rotating diamond form, gold on black. The mark of a new world.</div>
+      <div class="shot-sound">Sound: Fades back to the single sub-bass note from shot 1. Full circle. The beginning is the end.</div>
+      <div class="shot-copy">FAVOUR ECONOMY · "Every person. Every favour. Every future."</div>
+    </div>
+
+    <div class="shot-card">
+      <div class="shot-number">19</div>
+      <div class="shot-title">CTA — 4s</div>
+      <div class="shot-visual">Same black. Minimal. No fanfare. Just the domain. An invitation.</div>
+      <div class="shot-sound">Sound: Near silence. The sub-bass note fades to nothing.</div>
+      <div class="shot-copy">favoureconomy.com — Join the network. →</div>
+      <div class="shot-duration">Total runtime: ~2:28</div>
+    </div>
+
+    <div style="text-align:center;padding:4rem 0 2rem;border-top:1px solid var(--dim);margin-top:3rem">
+      <p style="font-size:0.65rem;letter-spacing:0.3em;text-transform:uppercase;color:var(--dim)">
+        Production Notes
+      </p>
+      <p style="font-size:0.85rem;color:var(--muted);margin-top:1rem;line-height:1.7;max-width:600px;margin-left:auto;margin-right:auto">
+        Score direction: Hans Zimmer × Brian Eno. Starts sub-20Hz sub-bass. Builds through strings, then brass, then full electronic synthesis. The silence at shot 15 must be absolute. The white flash at shot 17 must be bright enough to feel physical. Colour grade: deep teal-black shadows, gold highlights, copper mid-tones. No cool-blue grading.
+      </p>
+      <p style="font-size:0.75rem;color:var(--dim);margin-top:2rem">
+        Favour Economy &copy; 2026 &nbsp;·&nbsp; All rights reserved
+      </p>
+      <button onclick="backToTop()" style="margin-top:2rem;background:transparent;border:1px solid var(--dim);color:var(--muted);font-family:var(--font);font-size:0.65rem;letter-spacing:0.25em;text-transform:uppercase;padding:0.7rem 1.5rem;cursor:pointer;transition:color 0.3s,border-color 0.3s" onmouseover="this.style.color='var(--gold)';this.style.borderColor='rgba(201,168,76,0.4)'" onmouseout="this.style.color='var(--muted)';this.style.borderColor='var(--dim)'">↑ Back to Experience</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ─────────────────────────────────────────────────────────
+// SECTION INDEX & DOT NAV
+// ─────────────────────────────────────────────────────────
+const wrapper = document.getElementById('cinematic-wrapper');
+const shots = document.querySelectorAll('.shot');
+const nav = document.getElementById('dot-nav');
+const progressBar = document.getElementById('progress-bar');
+
+shots.forEach((s, i) => {
+  const dot = document.createElement('div');
+  dot.className = 'dot';
+  dot.setAttribute('aria-label', `Section ${i+1}`);
+  dot.addEventListener('click', () => {
+    wrapper.scrollTo({ top: s.offsetTop, behavior: 'smooth' });
+  });
+  nav.appendChild(dot);
+});
+
+const dots = nav.querySelectorAll('.dot');
+
+// ─────────────────────────────────────────────────────────
+// SCRIPT ESCAPE / RETURN
+// ─────────────────────────────────────────────────────────
+function openScript() {
+  wrapper.style.overflowY = 'hidden';
+  document.getElementById('script-section').scrollIntoView({ behavior: 'smooth' });
+  setTimeout(() => { wrapper.style.overflowY = ''; }, 1200);
+}
+function backToTop() {
+  shots[0].scrollIntoView({ behavior: 'smooth' });
+  setTimeout(() => window.scrollTo({ top: 0, behavior: 'smooth' }), 100);
+}
+
+// ─────────────────────────────────────────────────────────
+// INTERSECTION OBSERVER — activate animations on scroll
+// ─────────────────────────────────────────────────────────
+const io = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (!entry.isIntersecting) return;
+    const el = entry.target;
+    el.querySelectorAll('.reveal, .reveal-fast').forEach(r => r.classList.add('visible'));
+    el.querySelectorAll('.anatomy-item').forEach(r => r.classList.add('visible'));
+    el.querySelectorAll('.ins-panel').forEach(r => r.classList.add('visible'));
+    el.querySelectorAll('.ryder-panel').forEach(r => r.classList.add('visible'));
+    const id = el.id;
+    if (id === 's7') initBread();
+    if (id === 's15') triggerEvoWords();
+    if (id === 's16') triggerWhiteFlash();
+    if (id === 's9') initNetwork();
+    if (id === 's11') initMesh();
+  });
+}, { threshold: 0.35, root: wrapper });
+
+shots.forEach(s => io.observe(s));
+
+// ─────────────────────────────────────────────────────────
+// ACTIVE DOT TRACKING
+// ─────────────────────────────────────────────────────────
+const scrollIO = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (!entry.isIntersecting) return;
+    const idx = parseInt(entry.target.dataset.shot) - 1;
+    dots.forEach(d => d.classList.remove('active'));
+    if (dots[idx]) dots[idx].classList.add('active');
+    const total = shots.length;
+    progressBar.style.width = `${((idx + 1) / total) * 100}%`;
+  });
+}, { threshold: 0.5, root: wrapper });
+
+shots.forEach(s => scrollIO.observe(s));
+
+// ─────────────────────────────────────────────────────────
+// KEYBOARD NAVIGATION
+// ─────────────────────────────────────────────────────────
+let currentShot = 0;
+document.addEventListener('keydown', e => {
+  if (e.key === 'ArrowDown' || e.key === ' ' || e.key === 'ArrowRight') {
+    e.preventDefault();
+    currentShot = Math.min(currentShot + 1, shots.length - 1);
+    wrapper.scrollTo({ top: shots[currentShot].offsetTop, behavior: 'smooth' });
+  }
+  if (e.key === 'ArrowUp' || e.key === 'ArrowLeft') {
+    e.preventDefault();
+    currentShot = Math.max(currentShot - 1, 0);
+    wrapper.scrollTo({ top: shots[currentShot].offsetTop, behavior: 'smooth' });
+  }
+});
+
+// ─────────────────────────────────────────────────────────
+// AUDIO TOGGLE
+// ─────────────────────────────────────────────────────────
+const audio = document.getElementById('ambient');
+const audioBtn = document.getElementById('audio-toggle');
+let audioOn = false;
+
+audioBtn.addEventListener('click', () => {
+  audioOn = !audioOn;
+  if (audioOn) {
+    audio.volume = 0.3;
+    audio.play().catch(() => {});
+    audioBtn.textContent = '♪ SOUND ON';
+    audioBtn.classList.add('on');
+  } else {
+    audio.pause();
+    audioBtn.textContent = '♪ SOUND OFF';
+    audioBtn.classList.remove('on');
+  }
+});
+
+// ─────────────────────────────────────────────────────────
+// STARS CANVAS (Shot 2)
+// ─────────────────────────────────────────────────────────
+(function initStars() {
+  const canvas = document.getElementById('stars-canvas');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  let stars = [];
+
+  function resize() {
+    canvas.width = canvas.offsetWidth;
+    canvas.height = canvas.offsetHeight;
+    stars = [];
+    for (let i = 0; i < 300; i++) {
+      stars.push({
+        x: Math.random() * canvas.width,
+        y: Math.random() * canvas.height,
+        r: Math.random() * 1.5 + 0.3,
+        a: Math.random(),
+        speed: Math.random() * 0.003 + 0.001,
+        phase: Math.random() * Math.PI * 2,
+        gold: Math.random() > 0.85
+      });
+    }
+  }
+
+  function draw(t) {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    stars.forEach(s => {
+      const alpha = s.a * (0.5 + 0.5 * Math.sin(t * s.speed * 1000 + s.phase));
+      ctx.beginPath();
+      ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+      ctx.fillStyle = s.gold ? `rgba(201,168,76,${alpha})` : `rgba(248,248,248,${alpha})`;
+      ctx.fill();
+    });
+    requestAnimationFrame(draw);
+  }
+
+  resize();
+  window.addEventListener('resize', resize);
+  requestAnimationFrame(draw);
+})();
+
+// ─────────────────────────────────────────────────────────
+// NETWORK CANVAS (Shot 9)
+// ─────────────────────────────────────────────────────────
+let networkInit = false;
+function initNetwork() {
+  if (networkInit) return;
+  networkInit = true;
+  const canvas = document.getElementById('network-canvas');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  let nodes = [], logistics = [];
+
+  function resize() {
+    canvas.width = canvas.offsetWidth;
+    canvas.height = canvas.offsetHeight;
+    nodes = [];
+    for (let i = 0; i < 60; i++) {
+      nodes.push({
+        x: Math.random() * canvas.width,
+        y: Math.random() * canvas.height,
+        vx: (Math.random() - 0.5) * 0.4,
+        vy: (Math.random() - 0.5) * 0.4,
+        gold: Math.random() > 0.7
+      });
+    }
+  }
+
+  function spawnLogistic() {
+    const a = nodes[Math.floor(Math.random() * nodes.length)];
+    const b = nodes[Math.floor(Math.random() * nodes.length)];
+    if (a === b) return;
+    logistics.push({ from: a, to: b, progress: 0, speed: 0.008 + Math.random() * 0.012, done: false });
+  }
+
+  setInterval(spawnLogistic, 600);
+
+  function draw() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    // Update nodes
+    nodes.forEach(n => {
+      n.x += n.vx; n.y += n.vy;
+      if (n.x < 0 || n.x > canvas.width) n.vx *= -1;
+      if (n.y < 0 || n.y > canvas.height) n.vy *= -1;
+    });
+
+    // Draw connections
+    nodes.forEach((a, i) => {
+      nodes.slice(i + 1).forEach(b => {
+        const d = Math.hypot(a.x - b.x, a.y - b.y);
+        if (d < 120) {
+          ctx.beginPath();
+          ctx.moveTo(a.x, a.y);
+          ctx.lineTo(b.x, b.y);
+          ctx.strokeStyle = `rgba(201,168,76,${0.06 * (1 - d/120)})`;
+          ctx.lineWidth = 0.5;
+          ctx.stroke();
+        }
+      });
+    });
+
+    // Draw logistics
+    logistics = logistics.filter(l => !l.done);
+    logistics.forEach(l => {
+      l.progress += l.speed;
+      if (l.progress >= 1) { l.done = true; return; }
+      const x = l.from.x + (l.to.x - l.from.x) * l.progress;
+      const y = l.from.y + (l.to.y - l.from.y) * l.progress;
+      ctx.beginPath();
+      ctx.arc(x, y, 3, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(232,115,74,${0.9 - l.progress * 0.5})`;
+      ctx.fill();
+      // Trail
+      ctx.beginPath();
+      const tx = l.from.x + (l.to.x - l.from.x) * Math.max(0, l.progress - 0.15);
+      const ty = l.from.y + (l.to.y - l.from.y) * Math.max(0, l.progress - 0.15);
+      ctx.moveTo(tx, ty);
+      ctx.lineTo(x, y);
+      ctx.strokeStyle = `rgba(232,115,74,0.3)`;
+      ctx.lineWidth = 1;
+      ctx.stroke();
+      // Completion flash
+      if (l.progress > 0.95) {
+        ctx.beginPath();
+        ctx.arc(l.to.x, l.to.y, 8 * (l.progress - 0.95) * 20, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(201,168,76,${(1 - l.progress) * 2})`;
+        ctx.fill();
+      }
+    });
+
+    // Draw nodes
+    nodes.forEach(n => {
+      ctx.beginPath();
+      ctx.arc(n.x, n.y, n.gold ? 3 : 2, 0, Math.PI * 2);
+      ctx.fillStyle = n.gold ? 'rgba(201,168,76,0.7)' : 'rgba(248,248,248,0.2)';
+      ctx.fill();
+    });
+
+    requestAnimationFrame(draw);
+  }
+
+  resize();
+  window.addEventListener('resize', resize);
+  draw();
+}
+
+// ─────────────────────────────────────────────────────────
+// MESH CANVAS (Shot 11)
+// ─────────────────────────────────────────────────────────
+let meshInit = false;
+function initMesh() {
+  if (meshInit) return;
+  meshInit = true;
+  const canvas = document.getElementById('mesh-canvas');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+
+  function resize() {
+    canvas.width = canvas.offsetWidth;
+    canvas.height = canvas.offsetHeight;
+  }
+
+  const nodes = [];
+  function generateMesh() {
+    const cx = canvas.width / 2, cy = canvas.height / 2;
+    const maxR = Math.min(canvas.width, canvas.height) * 0.42;
+    for (let i = 0; i < 200; i++) {
+      // Spherical distribution approximation
+      const lat = (Math.random() - 0.5) * Math.PI;
+      const lon = Math.random() * Math.PI * 2;
+      const r = maxR * (0.85 + Math.random() * 0.15);
+      nodes.push({
+        x: cx + r * Math.cos(lat) * Math.cos(lon),
+        y: cy + r * 0.55 * Math.sin(lat),
+        brightness: Math.random(),
+        speed: Math.random() * 0.002 + 0.001,
+        phase: Math.random() * Math.PI * 2,
+        size: Math.random() * 1.5 + 0.5
+      });
+    }
+  }
+
+  let t = 0;
+  function draw() {
+    t += 0.01;
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    const cx = canvas.width / 2, cy = canvas.height / 2;
+    const maxR = Math.min(canvas.width, canvas.height) * 0.42;
+
+    // Globe circle
+    ctx.beginPath();
+    ctx.arc(cx, cy, maxR, 0, Math.PI * 2);
+    ctx.strokeStyle = 'rgba(201,168,76,0.06)';
+    ctx.lineWidth = 1;
+    ctx.stroke();
+
+    // Latitude lines
+    for (let i = -3; i <= 3; i++) {
+      const y = cy + (maxR * 0.55) * (i / 3);
+      const hw = Math.sqrt(Math.max(0, maxR * maxR - (y - cy) * (y - cy) / 0.3025));
+      if (hw < 5) continue;
+      ctx.beginPath();
+      ctx.ellipse(cx, y, hw, hw * 0.2, 0, 0, Math.PI * 2);
+      ctx.strokeStyle = 'rgba(201,168,76,0.04)';
+      ctx.lineWidth = 0.5;
+      ctx.stroke();
+    }
+
+    // Connections between nearby nodes
+    nodes.forEach((a, i) => {
+      nodes.slice(i + 1, i + 8).forEach(b => {
+        const d = Math.hypot(a.x - b.x, a.y - b.y);
+        if (d < 60) {
+          const alpha = 0.12 * (1 - d / 60);
+          const pulse = 0.5 + 0.5 * Math.sin(t + a.phase);
+          ctx.beginPath();
+          ctx.moveTo(a.x, a.y);
+          ctx.lineTo(b.x, b.y);
+          ctx.strokeStyle = `rgba(201,168,76,${alpha * pulse})`;
+          ctx.lineWidth = 0.5;
+          ctx.stroke();
+        }
+      });
+    });
+
+    // Nodes
+    nodes.forEach(n => {
+      const pulse = 0.5 + 0.5 * Math.sin(t * n.speed * 100 + n.phase);
+      const alpha = 0.3 + n.brightness * 0.5 * pulse;
+      ctx.beginPath();
+      ctx.arc(n.x, n.y, n.size, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(201,168,76,${alpha})`;
+      ctx.fill();
+    });
+
+    requestAnimationFrame(draw);
+  }
+
+  resize();
+  generateMesh();
+  window.addEventListener('resize', () => { resize(); nodes.length = 0; generateMesh(); });
+  draw();
+}
+
+// ─────────────────────────────────────────────────────────
+// SLICED BREAD / SURFACE VISUAL (Shot 7)
+// ─────────────────────────────────────────────────────────
+let breadDone = false;
+function initBread() {
+  if (breadDone) return;
+  breadDone = true;
+  const stack = document.getElementById('bread-stack');
+  const legend = document.getElementById('bread-legend');
+  if (!stack) return;
+
+  const layers = [
+    { label: 'Willingness', color: '#c9a84c', icon: '🙋' },
+    { label: 'Time',        color: '#e8734a', icon: '⏰' },
+    { label: 'Skills',      color: '#7ec8e3', icon: '🔨' },
+    { label: 'Capital',     color: '#b5e48c', icon: '💰' },
+    { label: 'Location',    color: '#d4a5f5', icon: '📍' },
+  ];
+
+  // Build single slice first, then stack multiples
+  stack.innerHTML = '';
+  stack.style.cssText = 'position:relative;width:100%;max-width:500px;margin:0 auto;';
+
+  // We'll build 7 stacked slices (showing accumulation)
+  const SLICES = 7;
+  const sliceH = 18;
+  const gap = 3;
+  const totalH = (sliceH + gap) * SLICES + 60;
+  stack.style.height = totalH + 'px';
+
+  for (let s = 0; s < SLICES; s++) {
+    const yBase = totalH - (s + 1) * (sliceH + gap);
+    const slice = document.createElement('div');
+    slice.style.cssText = `
+      position:absolute;
+      left:10%;
+      width:80%;
+      top:${yBase}px;
+      height:${sliceH}px;
+      opacity:0;
+      transform:translateY(10px);
+      transition: opacity 0.5s ease ${s * 0.15}s, transform 0.5s ease ${s * 0.15}s;
+      display:flex;
+      border-radius:2px;
+      overflow:hidden;
+    `;
+
+    layers.forEach(layer => {
+      const seg = document.createElement('div');
+      seg.style.cssText = `
+        flex:1;
+        background:${layer.color};
+        opacity:${0.12 + s * 0.1};
+        border-right:1px solid rgba(5,5,8,0.4);
+        display:flex;
+        align-items:center;
+        justify-content:center;
+        font-size:${s === SLICES - 1 ? '9px' : '0'};
+        transition:opacity 0.3s;
+      `;
+      if (s === SLICES - 1) seg.textContent = layer.icon;
+      slice.appendChild(seg);
+    });
+
+    // Label on last (top) slice
+    if (s === SLICES - 1) {
+      const lbl = document.createElement('div');
+      lbl.style.cssText = `
+        position:absolute;
+        right:-4rem;
+        top:50%;
+        transform:translateY(-50%);
+        font-size:0.6rem;
+        letter-spacing:0.2em;
+        text-transform:uppercase;
+        color:rgba(201,168,76,0.7);
+        white-space:nowrap;
+      `;
+      lbl.textContent = '1 surface';
+      slice.appendChild(lbl);
+    }
+
+    stack.appendChild(slice);
+
+    setTimeout(() => {
+      slice.style.opacity = '1';
+      slice.style.transform = 'translateY(0)';
+    }, s * 150 + 300);
+  }
+
+  // "Stack = power" callout
+  const callout = document.createElement('div');
+  callout.style.cssText = `
+    text-align:center;
+    margin-top:1rem;
+    font-size:0.75rem;
+    color:rgba(201,168,76,0.6);
+    letter-spacing:0.15em;
+    text-transform:uppercase;
+    opacity:0;
+    transition:opacity 0.8s ease 1.4s;
+  `;
+  callout.textContent = `${SLICES} surfaces stacked → real capability`;
+  stack.parentElement.insertBefore(callout, stack.nextSibling);
+  setTimeout(() => { callout.style.opacity = '1'; }, 1400);
+
+  if (legend) setTimeout(() => { legend.style.opacity = '1'; }, 1600);
+}
+
+// ─────────────────────────────────────────────────────────
+// EVOLUTION WORDS (Shot 15)
+// ─────────────────────────────────────────────────────────
+function triggerEvoWords() {
+  const words = document.querySelectorAll('#s15 .evo-word');
+  words.forEach((w, i) => {
+    setTimeout(() => w.classList.add('show'), i * 300);
+  });
+}
+
+// ─────────────────────────────────────────────────────────
+// WHITE FLASH (Shot 16)
+// ─────────────────────────────────────────────────────────
+function triggerWhiteFlash() {
+  const f = document.getElementById('white-flash');
+  if (f) {
+    setTimeout(() => f.classList.add('flash'), 300);
+  }
+}
+
+// ─────────────────────────────────────────────────────────
+// LOCATION PINS (Shot 12)
+// ─────────────────────────────────────────────────────────
+(function initPins() {
+  const container = document.getElementById('pins-container');
+  if (!container) return;
+  const positions = [
+    [15,25],[30,60],[55,40],[70,70],[85,30],[45,80],[20,75],[65,20],[40,50],[80,55]
+  ];
+  positions.forEach(([x, y]) => {
+    const pin = document.createElement('div');
+    pin.className = 'pin';
+    pin.style.left = x + '%';
+    pin.style.top = y + '%';
+    pin.style.animationDelay = (Math.random() * 2) + 's';
+    container.appendChild(pin);
+  });
+})();
+
+// ─────────────────────────────────────────────────────────
+// EMAIL CTA
+// ─────────────────────────────────────────────────────────
+function submitEmail() {
+  const input = document.getElementById('email-input');
+  const email = input ? input.value.trim() : '';
+  if (!email || !email.includes('@')) {
+    input.style.borderColor = 'var(--copper)';
+    setTimeout(() => input.style.borderColor = '', 1500);
+    return;
+  }
+  window.location.href = `mailto:hello@favoureconomy.com?subject=Early Access Request&body=Please add me to the early access list.%0A%0AEmail: ${encodeURIComponent(email)}`;
+  input.value = '';
+  input.placeholder = 'You\'re in. →';
+}
+
+document.getElementById('email-input')?.addEventListener('keydown', e => {
+  if (e.key === 'Enter') submitEmail();
+});
+</script>
+</body>
+</html>
