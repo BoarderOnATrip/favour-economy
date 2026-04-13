@@ -705,9 +705,15 @@
 
     <!-- FORM -->
     <div class="form-wrap">
-      <form id="waitlist-form" onsubmit="handleSubmit(event)">
+      <!-- Hidden form for Netlify bot detection -->
+      <form name="waitlist" netlify netlify-honeypot="bot-field" hidden>
+        <input type="email" name="email">
+      </form>
+
+      <form id="waitlist-form" onsubmit="handleSubmit(event)" name="waitlist">
+        <input name="bot-field" style="display:none" aria-hidden="true">
         <div class="form-row">
-          <input type="email" id="email-input" placeholder="your@email.com" required autocomplete="email">
+          <input type="email" id="email-input" name="email" placeholder="your@email.com" required autocomplete="email">
           <button type="submit">Claim My Spot →</button>
         </div>
       </form>
@@ -989,8 +995,7 @@ function generateMemberNumber(){
 // ── FORM SUBMIT ──
 function handleSubmit(e){
   e.preventDefault();
-  const emailIn = document.getElementById('email-input') || document.getElementById('email-input-2');
-  const email = (document.getElementById('email-input').value || document.getElementById('email-input-2').value).trim();
+  const email = (document.getElementById('email-input').value || document.getElementById('email-input-2').value || '').trim();
   if(!email) return;
 
   const num = generateMemberNumber();
@@ -999,6 +1004,13 @@ function handleSubmit(e){
   // Store in sessionStorage for thankyou page
   sessionStorage.setItem('fe_member_num', num);
   sessionStorage.setItem('fe_email', email);
+
+  // Submit to Netlify Forms silently
+  fetch('/', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body: new URLSearchParams({ 'form-name': 'waitlist', email, member_number: num }).toString()
+  }).catch(() => {}); // non-blocking — redirect regardless
 
   // Show success inline
   document.getElementById('success-num').textContent = numStr;
