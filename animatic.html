@@ -1,0 +1,2016 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Unfolding — Animatic Spec · Editor's Bible</title>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --black:   #050508;
+  --deep:    #08080f;
+  --gold:    #c9a84c;
+  --gold-b:  #f0cb6a;
+  --copper:  #e8734a;
+  --red:     #c0392b;
+  --green:   #4caf7a;
+  --blue:    #4a7ec0;
+  --white:   #f4f4f4;
+  --muted:   #6a6a7e;
+  --dim:     #1e1e2a;
+  --font:    'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  --mono:    'JetBrains Mono', 'SF Mono', Consolas, monospace;
+}
+html { background: var(--black); color: var(--white); font-family: var(--font); -webkit-font-smoothing: antialiased; }
+body { background: var(--black); }
+.page { max-width: 1280px; margin: 0 auto; padding: 0 2rem 6rem; }
+
+/* ── COVER ── */
+.cover {
+  min-height: 100vh;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  text-align: center; padding: 4rem 2rem; position: relative; overflow: hidden;
+}
+.cover::before {
+  content: ''; position: absolute; inset: 0;
+  background:
+    radial-gradient(ellipse 60% 40% at 50% 50%, rgba(201,168,76,0.06), transparent 70%),
+    repeating-linear-gradient(0deg, transparent 0, transparent 23px, rgba(201,168,76,0.03) 24px),
+    repeating-linear-gradient(90deg, transparent 0, transparent 23px, rgba(201,168,76,0.03) 24px);
+  pointer-events: none;
+}
+.cover-eyebrow {
+  font-family: var(--mono);
+  font-size: 0.7rem; letter-spacing: 0.4em; text-transform: uppercase;
+  color: var(--gold); margin-bottom: 2rem; position: relative;
+}
+.cover-title {
+  font-size: clamp(3rem, 10vw, 8rem); font-weight: 200;
+  letter-spacing: -0.04em; line-height: 0.95; color: var(--white);
+  position: relative;
+}
+.cover-title em { font-style: normal; color: var(--gold); }
+.cover-sub {
+  font-size: clamp(1rem, 1.8vw, 1.3rem); font-weight: 300; color: var(--muted);
+  margin-top: 2rem; max-width: 680px; line-height: 1.5; position: relative;
+}
+.cover-meta {
+  margin-top: 4rem; display: grid; grid-template-columns: repeat(5, 1fr);
+  gap: 0; max-width: 900px; width: 100%; position: relative;
+  border-top: 1px solid var(--dim); border-bottom: 1px solid var(--dim);
+}
+.cover-meta div {
+  padding: 1.2rem 0.8rem; border-right: 1px solid var(--dim);
+  font-family: var(--mono);
+}
+.cover-meta div:last-child { border-right: none; }
+.cover-meta .label {
+  font-size: 0.5rem; letter-spacing: 0.25em; text-transform: uppercase;
+  color: var(--muted); margin-bottom: 0.4rem;
+}
+.cover-meta .value { font-size: 0.78rem; color: var(--white); }
+@media (max-width:760px){ .cover-meta{ grid-template-columns:repeat(2,1fr);} }
+
+/* ── SECTION ── */
+.section { padding: 5rem 0 1rem; }
+.section-tag {
+  font-family: var(--mono);
+  font-size: 0.62rem; letter-spacing: 0.3em; text-transform: uppercase;
+  color: var(--gold); margin-bottom: 0.6rem;
+}
+.section-num {
+  font-family: var(--mono); color: var(--muted); margin-right: 1rem;
+}
+.section-title {
+  font-size: clamp(1.8rem, 3.6vw, 2.8rem); font-weight: 200;
+  letter-spacing: -0.02em; line-height: 1.1; margin-bottom: 0.8rem;
+}
+.section-body {
+  font-size: 0.95rem; color: var(--muted); max-width: 760px; line-height: 1.7;
+}
+
+/* ── MASTER TIMELINE STRIP ── */
+.timeline-wrap {
+  margin: 2.5rem 0; padding: 1.8rem 1.5rem;
+  border: 1px solid var(--dim); background: var(--deep);
+  overflow-x: auto;
+}
+.timeline {
+  display: grid;
+  grid-template-columns: 90px 1fr;
+  gap: 0;
+  min-width: 1100px;
+}
+.tl-label {
+  font-family: var(--mono); font-size: 0.58rem;
+  letter-spacing: 0.18em; text-transform: uppercase;
+  color: var(--muted); padding: 0.5rem 0.6rem 0.5rem 0;
+  border-right: 1px solid var(--dim);
+  display: flex; align-items: center;
+}
+.tl-track {
+  position: relative; height: 32px;
+  border-bottom: 1px solid rgba(255,255,255,0.04);
+}
+.tl-block {
+  position: absolute; height: 22px; top: 5px;
+  border-radius: 1px;
+  font-family: var(--mono); font-size: 0.55rem;
+  letter-spacing: 0.05em; padding: 0 0.4rem;
+  display: flex; align-items: center; overflow: hidden; white-space: nowrap;
+}
+.tl-block.act-1 { background: rgba(192,57,43,0.6); color: #fff; border-left: 2px solid var(--red); }
+.tl-block.act-2 { background: rgba(201,168,76,0.7); color: #000; border-left: 2px solid var(--gold-b); }
+.tl-block.act-3 { background: rgba(76,175,122,0.6); color: #fff; border-left: 2px solid var(--green); }
+.tl-block.silence { background: rgba(255,255,255,0.04); color: rgba(244,244,244,0.5); border: 1px dashed rgba(244,244,244,0.3); }
+.tl-block.cello { background: rgba(192,57,43,0.4); color: #fff; }
+.tl-block.choir { background: rgba(201,168,76,0.5); color: #000; }
+.tl-block.vo { background: rgba(244,244,244,0.7); color: #000; }
+.tl-block.sfx { background: rgba(74,126,192,0.5); color: #fff; }
+.tl-block.text { background: rgba(232,115,74,0.6); color: #000; }
+
+.tl-ruler {
+  display: grid;
+  grid-template-columns: 90px 1fr;
+  margin-bottom: 0.5rem;
+}
+.tl-ticks {
+  position: relative; height: 24px;
+  border-bottom: 1px solid rgba(201,168,76,0.2);
+}
+.tl-tick {
+  position: absolute; top: 12px; bottom: 0; width: 1px;
+  background: rgba(255,255,255,0.15);
+}
+.tl-tick.major { background: rgba(201,168,76,0.6); top: 4px; }
+.tl-tick-label {
+  position: absolute; top: -2px; transform: translateX(-50%);
+  font-family: var(--mono); font-size: 0.55rem;
+  color: var(--gold); letter-spacing: 0.1em;
+}
+
+/* ── ANIMATIC FRAMES ── */
+.shot-card {
+  border: 1px solid var(--dim); background: var(--deep);
+  margin: 2rem 0;
+}
+.shot-head {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 0.8rem 1.2rem; border-bottom: 1px solid var(--dim);
+  background: rgba(0,0,0,0.4); font-family: var(--mono);
+  font-size: 0.62rem; letter-spacing: 0.18em; text-transform: uppercase;
+}
+.sh-num { color: var(--gold); }
+.sh-tc { color: var(--white); }
+.sh-dur { color: var(--copper); }
+.sh-act { color: var(--muted); }
+
+.frames {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1px;
+  background: var(--dim);
+}
+.frame {
+  background: #000; aspect-ratio: 16/9;
+  position: relative; overflow: hidden;
+}
+.frame svg { width: 100%; height: 100%; display: block; }
+.frame-label {
+  position: absolute; bottom: 6px; left: 8px;
+  font-family: var(--mono); font-size: 0.55rem;
+  letter-spacing: 0.15em; text-transform: uppercase;
+  color: rgba(201,168,76,0.85);
+  background: rgba(0,0,0,0.6);
+  padding: 2px 6px;
+}
+.frame-tc {
+  position: absolute; top: 6px; right: 8px;
+  font-family: var(--mono); font-size: 0.55rem;
+  color: rgba(244,244,244,0.7);
+  background: rgba(0,0,0,0.6);
+  padding: 2px 6px; letter-spacing: 0.1em;
+}
+
+.shot-detail {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 1px;
+  background: var(--dim); border-top: 1px solid var(--dim);
+}
+.shot-detail > div { background: var(--deep); padding: 1rem 1.2rem; }
+.sd-label {
+  font-family: var(--mono); font-size: 0.55rem;
+  letter-spacing: 0.22em; text-transform: uppercase;
+  color: var(--gold); margin-bottom: 0.5rem;
+}
+.sd-list {
+  display: grid; grid-template-columns: 70px 1fr; gap: 0.3rem 0.7rem;
+  font-size: 0.72rem;
+}
+.sd-list dt {
+  font-family: var(--mono); font-size: 0.6rem;
+  color: var(--muted); letter-spacing: 0.12em; text-transform: uppercase;
+  padding-top: 2px;
+}
+.sd-list dd { color: rgba(244,244,244,0.85); line-height: 1.5; }
+.sd-trans {
+  margin-top: 0.6rem; padding: 0.6rem 0.8rem;
+  background: rgba(232,115,74,0.06); border-left: 2px solid var(--copper);
+  font-size: 0.7rem; color: rgba(244,244,244,0.85); line-height: 1.5;
+}
+.sd-trans .speaker {
+  display: block; font-family: var(--mono); font-size: 0.55rem;
+  letter-spacing: 0.22em; text-transform: uppercase;
+  color: var(--copper); margin-bottom: 0.3rem;
+}
+@media (max-width: 760px) {
+  .frames { grid-template-columns: 1fr; }
+  .shot-detail { grid-template-columns: 1fr; }
+}
+
+/* ── EDL TABLE ── */
+.edl {
+  width: 100%; border-collapse: collapse; margin: 2rem 0;
+  font-size: 0.72rem; font-family: var(--mono);
+}
+.edl th {
+  padding: 0.7rem 0.6rem; font-size: 0.55rem;
+  letter-spacing: 0.2em; text-transform: uppercase;
+  font-weight: 400; text-align: left; color: var(--gold);
+  border-bottom: 1px solid var(--dim); background: rgba(201,168,76,0.03);
+  position: sticky; top: 0;
+}
+.edl td {
+  padding: 0.55rem 0.6rem;
+  border-bottom: 1px solid rgba(255,255,255,0.04);
+  vertical-align: top; line-height: 1.45; color: rgba(244,244,244,0.85);
+}
+.edl td.tc { color: var(--gold); white-space: nowrap; }
+.edl td.dur { color: var(--copper); }
+.edl td.trans { color: var(--green); font-size: 0.65rem; letter-spacing: 0.1em; text-transform: uppercase; }
+.edl tr:hover td { background: rgba(255,255,255,0.015); }
+.edl-wrap { overflow-x: auto; }
+
+/* ── HERO MOMENT BREAKDOWN ── */
+.hero-moment {
+  margin: 2.5rem 0; border: 1px solid rgba(201,168,76,0.3);
+  background: linear-gradient(180deg, rgba(201,168,76,0.05), transparent 30%);
+}
+.hm-head {
+  padding: 1.2rem 1.6rem; border-bottom: 1px solid rgba(201,168,76,0.2);
+  display: flex; justify-content: space-between; align-items: baseline;
+}
+.hm-num {
+  font-family: var(--mono); font-size: 0.6rem; letter-spacing: 0.3em;
+  color: var(--gold); text-transform: uppercase;
+}
+.hm-title {
+  font-size: 1.4rem; font-weight: 200; letter-spacing: -0.01em;
+  margin-top: 0.3rem;
+}
+.hm-tc {
+  font-family: var(--mono); font-size: 0.85rem; color: var(--copper);
+  letter-spacing: 0.1em;
+}
+.hm-frames {
+  display: grid; grid-template-columns: repeat(8, 1fr); gap: 1px;
+  background: var(--dim);
+}
+.hm-frame {
+  background: #000; aspect-ratio: 16/9; position: relative; overflow: hidden;
+}
+.hm-frame svg { width: 100%; height: 100%; display: block; }
+.hm-frame-tc {
+  position: absolute; bottom: 2px; left: 4px;
+  font-family: var(--mono); font-size: 0.45rem;
+  color: rgba(201,168,76,0.7); letter-spacing: 0.1em;
+  background: rgba(0,0,0,0.7); padding: 1px 4px;
+}
+.hm-body { padding: 1.4rem 1.6rem; }
+.hm-body p {
+  font-size: 0.85rem; color: rgba(244,244,244,0.85);
+  line-height: 1.65; margin-bottom: 0.8rem;
+}
+.hm-body p strong { color: var(--gold); font-weight: 500; }
+@media (max-width: 760px) {
+  .hm-frames { grid-template-columns: repeat(4, 1fr); }
+}
+
+/* ── TEXT TIMING ── */
+.text-grid {
+  display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem;
+  margin: 2rem 0;
+}
+@media (max-width: 760px) { .text-grid { grid-template-columns: 1fr; } }
+.text-card {
+  padding: 1.5rem; border: 1px solid var(--dim); background: var(--deep);
+}
+.text-display {
+  background: #000; padding: 1.5rem; text-align: center;
+  margin: 0.8rem 0; min-height: 80px;
+  display: flex; align-items: center; justify-content: center;
+  border: 1px solid rgba(201,168,76,0.15);
+}
+.text-display .word {
+  font-family: var(--font); font-size: 1.4rem; font-weight: 200;
+  letter-spacing: 0.3em; color: var(--white);
+}
+.text-card dl {
+  display: grid; grid-template-columns: 90px 1fr; gap: 0.4rem 0.8rem;
+  font-size: 0.72rem; padding-top: 0.8rem;
+  border-top: 1px solid var(--dim);
+}
+.text-card dt {
+  font-family: var(--mono); font-size: 0.58rem;
+  letter-spacing: 0.15em; text-transform: uppercase; color: var(--muted);
+}
+.text-card dd { color: rgba(244,244,244,0.85); font-family: var(--mono); }
+
+/* ── DELIVERABLES CHECKLIST ── */
+.deliv-grid {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem;
+  margin: 2rem 0;
+}
+@media (max-width: 760px) { .deliv-grid { grid-template-columns: 1fr; } }
+.deliv-card {
+  padding: 1.5rem; border: 1px solid var(--dim); background: var(--deep);
+}
+.deliv-card h4 {
+  font-size: 0.85rem; font-weight: 400; margin-bottom: 0.8rem;
+  color: var(--gold); letter-spacing: 0.05em;
+}
+.deliv-card ul { list-style: none; }
+.deliv-card li {
+  padding: 0.5rem 0; font-size: 0.75rem; color: rgba(244,244,244,0.85);
+  border-bottom: 1px solid rgba(255,255,255,0.04); line-height: 1.5;
+  display: grid; grid-template-columns: 16px 1fr auto; gap: 0.6rem;
+  align-items: baseline;
+}
+.deliv-card .check {
+  width: 12px; height: 12px; border: 1px solid var(--gold);
+  border-radius: 1px; display: inline-block;
+}
+.deliv-card .spec {
+  font-family: var(--mono); font-size: 0.6rem;
+  color: var(--muted); letter-spacing: 0.1em;
+}
+
+/* ── PULL QUOTE ── */
+.pq {
+  border-left: 2px solid var(--gold);
+  padding: 1rem 1.6rem; margin: 2.5rem 0;
+  font-size: clamp(1.1rem, 2.4vw, 1.6rem);
+  font-weight: 200; line-height: 1.4; color: var(--white);
+}
+.pq em { font-style: normal; color: var(--gold); }
+
+.clap {
+  display: inline-block; font-family: var(--mono); font-size: 0.6rem;
+  letter-spacing: 0.2em; text-transform: uppercase; padding: 0.25rem 0.6rem;
+  background: var(--gold); color: #000; margin-right: 0.5rem;
+}
+.clap.copper { background: var(--copper); color: #000; }
+.clap.dark { background: var(--dim); color: var(--muted); }
+
+.footer {
+  border-top: 1px solid var(--dim); padding: 3rem 2rem 2rem;
+  text-align: center; margin-top: 6rem;
+}
+.footer-logo { font-size: 1.2rem; font-weight: 200; letter-spacing: 0.2em; text-transform: uppercase; }
+.footer-tag {
+  font-family: var(--mono); font-size: 0.6rem; letter-spacing: 0.25em;
+  color: var(--muted); margin-top: 0.6rem; text-transform: uppercase;
+}
+.footer-links { display: flex; gap: 2rem; justify-content: center; margin-top: 1.5rem; flex-wrap: wrap; }
+.footer-links a {
+  font-size: 0.7rem; letter-spacing: 0.15em; text-transform: uppercase;
+  color: var(--muted); text-decoration: none;
+}
+.footer-links a:hover { color: var(--gold); }
+
+/* Camera move arrow */
+.move-diagram {
+  margin-top: 0.8rem; padding: 0.8rem;
+  background: rgba(0,0,0,0.4); border: 1px solid var(--dim);
+}
+.move-diagram svg { width: 100%; height: 50px; }
+</style>
+</head>
+<body>
+
+<!-- ════════════════════════════════════════════
+     COVER
+═══════════════════════════════════════════════ -->
+<div class="cover">
+  <p class="cover-eyebrow">Animatic Spec · Editor's Bible · v1.0</p>
+  <h1 class="cover-title">The<br><em>Cut.</em></h1>
+  <p class="cover-sub">Frame-accurate timecodes, in/mid/out frames per shot, every transition specified, every audio cue synced. Hand this to your editor and they can cut the film without a phone call.</p>
+  <div class="cover-meta">
+    <div><div class="label">Total Length</div><div class="value">01:00:00</div></div>
+    <div><div class="label">Frame Rate</div><div class="value">24 fps</div></div>
+    <div><div class="label">Total Frames</div><div class="value">1,440</div></div>
+    <div><div class="label">Cuts</div><div class="value">11 hard · 1 morph</div></div>
+    <div><div class="label">Aspect</div><div class="value">2.39 : 1</div></div>
+  </div>
+</div>
+
+<div class="page">
+
+<!-- ════════════════════════════════════════════
+     PHILOSOPHY
+═══════════════════════════════════════════════ -->
+<div class="section">
+  <p class="section-tag"><span class="section-num">00 ·</span> The Cutting Principle</p>
+  <h2 class="section-title">The edit is the breath.</h2>
+  <p class="section-body">An animatic is the film with the courage held in. Every cut here was decided before the shoot — not because we don't trust the editor, but because the rhythm IS the message. The film breathes in for 18 seconds, holds for 2, exhales for 40. Anything that breaks that breath gets cut.</p>
+</div>
+
+<div class="pq">
+  Eleven hard cuts. One morph. <em>Two seconds of silence</em> that decide whether the film works at all.
+</div>
+
+<!-- ════════════════════════════════════════════
+     MASTER TIMELINE
+═══════════════════════════════════════════════ -->
+<div class="section">
+  <p class="section-tag"><span class="section-num">01 ·</span> Master Timeline</p>
+  <h2 class="section-title">The whole film, one strip.</h2>
+  <p class="section-body">Read top to bottom: shot stack, cello, choir, voiceover, sound effects, on-screen text. Read left to right: time. The 0:18–0:20 silence column is intentionally empty — that gap is the whole film.</p>
+</div>
+
+<div class="timeline-wrap">
+  <!-- Time ruler -->
+  <div class="tl-ruler">
+    <div></div>
+    <div class="tl-ticks">
+      <!-- Major ticks every 10s -->
+      <div class="tl-tick major" style="left:0%"><span class="tl-tick-label">0:00</span></div>
+      <div class="tl-tick major" style="left:16.66%"><span class="tl-tick-label">0:10</span></div>
+      <div class="tl-tick major" style="left:33.33%"><span class="tl-tick-label">0:20</span></div>
+      <div class="tl-tick major" style="left:50%"><span class="tl-tick-label">0:30</span></div>
+      <div class="tl-tick major" style="left:66.66%"><span class="tl-tick-label">0:40</span></div>
+      <div class="tl-tick major" style="left:83.33%"><span class="tl-tick-label">0:50</span></div>
+      <div class="tl-tick major" style="left:99.5%"><span class="tl-tick-label">1:00</span></div>
+      <!-- Minor ticks every 1s -->
+      <div class="tl-tick" style="left:1.66%"></div><div class="tl-tick" style="left:3.33%"></div>
+      <div class="tl-tick" style="left:5%"></div><div class="tl-tick" style="left:6.66%"></div>
+      <div class="tl-tick" style="left:8.33%"></div><div class="tl-tick" style="left:10%"></div>
+      <div class="tl-tick" style="left:11.66%"></div><div class="tl-tick" style="left:13.33%"></div>
+      <div class="tl-tick" style="left:15%"></div>
+      <div class="tl-tick" style="left:18.33%"></div><div class="tl-tick" style="left:20%"></div>
+      <div class="tl-tick" style="left:21.66%"></div><div class="tl-tick" style="left:23.33%"></div>
+      <div class="tl-tick" style="left:25%"></div><div class="tl-tick" style="left:26.66%"></div>
+      <div class="tl-tick" style="left:28.33%"></div><div class="tl-tick" style="left:30%"></div>
+      <div class="tl-tick" style="left:31.66%"></div>
+      <div class="tl-tick" style="left:35%"></div><div class="tl-tick" style="left:36.66%"></div>
+      <div class="tl-tick" style="left:38.33%"></div><div class="tl-tick" style="left:40%"></div>
+      <div class="tl-tick" style="left:41.66%"></div><div class="tl-tick" style="left:43.33%"></div>
+      <div class="tl-tick" style="left:45%"></div><div class="tl-tick" style="left:46.66%"></div>
+      <div class="tl-tick" style="left:48.33%"></div>
+      <div class="tl-tick" style="left:51.66%"></div><div class="tl-tick" style="left:53.33%"></div>
+      <div class="tl-tick" style="left:55%"></div><div class="tl-tick" style="left:56.66%"></div>
+      <div class="tl-tick" style="left:58.33%"></div><div class="tl-tick" style="left:60%"></div>
+      <div class="tl-tick" style="left:61.66%"></div><div class="tl-tick" style="left:63.33%"></div>
+      <div class="tl-tick" style="left:65%"></div>
+      <div class="tl-tick" style="left:68.33%"></div><div class="tl-tick" style="left:70%"></div>
+      <div class="tl-tick" style="left:71.66%"></div><div class="tl-tick" style="left:73.33%"></div>
+      <div class="tl-tick" style="left:75%"></div><div class="tl-tick" style="left:76.66%"></div>
+      <div class="tl-tick" style="left:78.33%"></div><div class="tl-tick" style="left:80%"></div>
+      <div class="tl-tick" style="left:81.66%"></div>
+      <div class="tl-tick" style="left:85%"></div><div class="tl-tick" style="left:86.66%"></div>
+      <div class="tl-tick" style="left:88.33%"></div><div class="tl-tick" style="left:90%"></div>
+      <div class="tl-tick" style="left:91.66%"></div><div class="tl-tick" style="left:93.33%"></div>
+      <div class="tl-tick" style="left:95%"></div><div class="tl-tick" style="left:96.66%"></div>
+      <div class="tl-tick" style="left:98.33%"></div>
+    </div>
+  </div>
+
+  <!-- Picture track -->
+  <div class="timeline">
+    <div class="tl-label">Picture</div>
+    <div class="tl-track">
+      <div class="tl-block act-1" style="left:0%; width:6.5%">01 IRIS</div>
+      <div class="tl-block act-1" style="left:6.66%; width:3%">02 BED</div>
+      <div class="tl-block act-1" style="left:10%; width:3%">03 ARG</div>
+      <div class="tl-block act-1" style="left:13.33%; width:6.5%">04 SLEEP</div>
+      <div class="tl-block act-1" style="left:20%; width:9.8%">05 SERVERS</div>
+      <div class="tl-block act-2" style="left:30%; width:9.8%">06 PAPER</div>
+      <div class="tl-block act-2" style="left:40%; width:9.8%">07 UNFOLD</div>
+      <div class="tl-block act-2" style="left:50%; width:6.5%">08 GROCERIES</div>
+      <div class="tl-block act-2" style="left:56.66%; width:6.5%">09 LORA</div>
+      <div class="tl-block act-2" style="left:63.33%; width:16.5%">10 THREAD CITY</div>
+      <div class="tl-block act-3" style="left:80%; width:13.2%">11 IRIS LOST</div>
+      <div class="tl-block act-3" style="left:93.33%; width:6.5%">12 MARK</div>
+    </div>
+
+    <div class="tl-label">Cello</div>
+    <div class="tl-track">
+      <div class="tl-block cello" style="left:0%; width:30%">SUSTAIN — DREAD CRESCENDO</div>
+      <div class="tl-block silence" style="left:30%; width:3.3%">SILENCE</div>
+      <div class="tl-block cello" style="left:33.33%; width:60%; background:rgba(201,168,76,0.4)">RESOLVE → TONIC</div>
+    </div>
+
+    <div class="tl-label">Choir</div>
+    <div class="tl-track">
+      <div class="tl-block choir" style="left:33.33%; width:6.6%; opacity:0.5">1 voice</div>
+      <div class="tl-block choir" style="left:40%; width:13.3%; opacity:0.7">3 → 7 voices</div>
+      <div class="tl-block choir" style="left:53.33%; width:26.6%">12 voices · FULL</div>
+      <div class="tl-block choir" style="left:80%; width:20%; opacity:0.6">resolve · fade</div>
+    </div>
+
+    <div class="tl-label">VO</div>
+    <div class="tl-track">
+      <div class="tl-block vo" style="left:6.66%; width:8.3%">told you it was free</div>
+      <div class="tl-block vo" style="left:16.66%; width:11.6%">paid with location · contacts · sleep</div>
+      <div class="tl-block vo" style="left:33.33%; width:5%">producer.</div>
+      <div class="tl-block vo" style="left:43.33%; width:11.6%">oldest currency · ledger</div>
+      <div class="tl-block vo" style="left:60%; width:11.6%">98% to recipient</div>
+      <div class="tl-block vo" style="left:80%; width:13.3%">designed something else</div>
+    </div>
+
+    <div class="tl-label">SFX</div>
+    <div class="tl-track">
+      <div class="tl-block sfx" style="left:6.66%; width:1.5%">click</div>
+      <div class="tl-block sfx" style="left:9%; width:1.5%">chime</div>
+      <div class="tl-block sfx" style="left:13.33%; width:6.6%; opacity:0.5">snore · screen hum</div>
+      <div class="tl-block sfx" style="left:23.33%; width:5%; opacity:0.6">server hum</div>
+      <div class="tl-block sfx" style="left:33%; width:1%; background:rgba(201,168,76,0.7)"></div>
+      <div class="tl-block sfx" style="left:50%; width:5%; opacity:0.5">door · "thank you"</div>
+      <div class="tl-block sfx" style="left:56%; width:6.6%; opacity:0.5">wind · bell</div>
+      <div class="tl-block sfx" style="left:80%; width:2%; background:rgba(192,57,43,0.5)">lost</div>
+    </div>
+
+    <div class="tl-label">On-Screen</div>
+    <div class="tl-track">
+      <div class="tl-block text" style="left:1.66%; width:5%">"SOMEONE IS WATCHING"</div>
+      <div class="tl-block text" style="left:23.33%; width:6.6%">YOU — ARE NOT — THE PRODUCT</div>
+      <div class="tl-block text" style="left:93.33%; width:6.5%">FAVOUR ECONOMY</div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════
+     SHOT-BY-SHOT ANIMATIC
+═══════════════════════════════════════════════ -->
+<div class="section">
+  <p class="section-tag"><span class="section-num">02 ·</span> Shot-by-Shot Animatic</p>
+  <h2 class="section-title">Twelve shots.<br>Three frames each.</h2>
+  <p class="section-body">For every shot: the FIRST frame the editor cuts to, the MIDDLE frame at the apex of motion, and the LAST frame before the cut. Each card includes the camera-move diagram, audio sync points, and the transition spec into the next shot.</p>
+</div>
+
+<!-- ═══ SHOT 01 ═══ -->
+<div class="shot-card">
+  <div class="shot-head">
+    <span class="sh-num">SHOT 01 · IRIS BLOOM</span>
+    <span class="sh-tc">00:00:00:00 → 00:00:04:00</span>
+    <span class="sh-dur">96 FRAMES</span>
+    <span class="sh-act">ACT I · DREAD</span>
+  </div>
+  <div class="frames">
+    <div class="frame">
+      <svg viewBox="0 0 320 180" preserveAspectRatio="xMidYMid slice">
+        <rect width="320" height="180" fill="#000"/>
+        <circle cx="160" cy="90" r="1" fill="#3a0808"/>
+      </svg>
+      <span class="frame-label">IN — pinprick</span>
+      <span class="frame-tc">00:00:00:00</span>
+    </div>
+    <div class="frame">
+      <svg viewBox="0 0 320 180" preserveAspectRatio="xMidYMid slice">
+        <rect width="320" height="180" fill="#000"/>
+        <circle cx="160" cy="90" r="14" fill="#7b1414"/>
+        <circle cx="160" cy="90" r="14" fill="none" stroke="rgba(192,57,43,0.4)" stroke-width="0.4" stroke-dasharray="2,3"/>
+      </svg>
+      <span class="frame-label">MID — bloom</span>
+      <span class="frame-tc">00:00:02:00</span>
+    </div>
+    <div class="frame">
+      <svg viewBox="0 0 320 180" preserveAspectRatio="xMidYMid slice">
+        <rect width="320" height="180" fill="#000"/>
+        <circle cx="160" cy="90" r="28" fill="#c0392b"/>
+        <circle cx="160" cy="90" r="28" fill="none" stroke="rgba(192,57,43,0.5)" stroke-width="0.5"/>
+        <circle cx="160" cy="90" r="14" fill="#000"/>
+        <circle cx="166" cy="84" r="3" fill="rgba(255,255,255,0.15)"/>
+        <text x="160" y="170" fill="rgba(192,57,43,0.7)" font-size="6" font-family="Inter,sans-serif" text-anchor="middle" letter-spacing="3">SOMEONE IS WATCHING</text>
+      </svg>
+      <span class="frame-label">OUT — full iris + text</span>
+      <span class="frame-tc">00:00:03:23</span>
+    </div>
+  </div>
+  <div class="shot-detail">
+    <div>
+      <div class="sd-label">Camera + Motion</div>
+      <dl class="sd-list">
+        <dt>Move</dt><dd>Static. Zero camera motion. Subject grows.</dd>
+        <dt>Curve</dt><dd>Ease-out exponential — 90% of growth in last 30 frames</dd>
+        <dt>Text</dt><dd>Fade in at 00:00:02:12, hold to 00:00:03:23</dd>
+      </dl>
+      <div class="move-diagram">
+        <svg viewBox="0 0 300 50">
+          <circle cx="20" cy="25" r="2" fill="#7b1414"/>
+          <line x1="30" y1="25" x2="270" y2="25" stroke="#c0392b" stroke-width="0.5" stroke-dasharray="2,3"/>
+          <circle cx="280" cy="25" r="14" fill="none" stroke="#c0392b" stroke-width="1"/>
+          <text x="150" y="15" fill="#c9a84c" font-size="7" font-family="JetBrains Mono,monospace" text-anchor="middle" letter-spacing="2">SCALE 1px → 28px · 96 frames</text>
+        </svg>
+      </div>
+    </div>
+    <div>
+      <div class="sd-label">Audio Sync</div>
+      <dl class="sd-list">
+        <dt>F+0</dt><dd>Cello low-C strikes — root note, sustained</dd>
+        <dt>F+24</dt><dd>(1.0s) — first audible breath in</dd>
+        <dt>F+72</dt><dd>(3.0s) — text fade aligns with cello vibrato peak</dd>
+        <dt>F+95</dt><dd>(3.96s) — cello holds for cut</dd>
+      </dl>
+      <div class="sd-trans">
+        <span class="speaker">→ TRANSITION TO SHOT 02</span>
+        Hard cut on cello vibrato peak. NO crossfade. The cut should land on a downbeat — if the editor feels the urge to soften it, resist.
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ SHOT 02 ═══ -->
+<div class="shot-card">
+  <div class="shot-head">
+    <span class="sh-num">SHOT 02 · CHILD'S BEDROOM</span>
+    <span class="sh-tc">00:00:04:00 → 00:00:06:00</span>
+    <span class="sh-dur">48 FRAMES</span>
+    <span class="sh-act">ACT I · DREAD</span>
+  </div>
+  <div class="frames">
+    <div class="frame">
+      <svg viewBox="0 0 320 180" preserveAspectRatio="xMidYMid slice">
+        <rect width="320" height="180" fill="#0a0a14"/>
+        <rect x="60" y="20" width="200" height="140" fill="none" stroke="rgba(192,57,43,0.4)" stroke-width="0.6" stroke-dasharray="3,3"/>
+        <circle cx="72" cy="32" r="3" fill="#c0392b"/>
+        <text x="80" y="35" fill="rgba(192,57,43,0.9)" font-size="6" font-family="JetBrains Mono,monospace">REC 00:04:21</text>
+      </svg>
+      <span class="frame-label">IN — frame appears</span>
+      <span class="frame-tc">00:00:04:00</span>
+    </div>
+    <div class="frame">
+      <svg viewBox="0 0 320 180" preserveAspectRatio="xMidYMid slice">
+        <rect width="320" height="180" fill="#0a0a14"/>
+        <rect x="60" y="20" width="200" height="140" fill="none" stroke="rgba(192,57,43,0.4)" stroke-width="0.6" stroke-dasharray="3,3"/>
+        <circle cx="72" cy="32" r="3" fill="#c0392b"/>
+        <rect x="100" y="100" width="120" height="40" fill="#1a1828"/>
+        <ellipse cx="135" cy="105" rx="14" ry="8" fill="#0a0a14"/>
+      </svg>
+      <span class="frame-label">MID — bed visible</span>
+      <span class="frame-tc">00:00:05:00</span>
+    </div>
+    <div class="frame">
+      <svg viewBox="0 0 320 180" preserveAspectRatio="xMidYMid slice">
+        <rect width="320" height="180" fill="#0a0a14"/>
+        <rect x="60" y="20" width="200" height="140" fill="none" stroke="rgba(192,57,43,0.4)" stroke-width="0.6" stroke-dasharray="3,3"/>
+        <circle cx="72" cy="32" r="3" fill="#c0392b"/>
+        <text x="80" y="35" fill="rgba(192,57,43,0.9)" font-size="6" font-family="JetBrains Mono,monospace">REC 00:04:23</text>
+        <rect x="100" y="100" width="120" height="40" fill="#1a1828"/>
+        <ellipse cx="135" cy="105" rx="14" ry="8" fill="#0a0a14"/>
+        <line x1="160" y1="50" x2="160" y2="130" stroke="rgba(192,57,43,0.3)" stroke-width="0.4"/>
+        <line x1="80" y1="90" x2="240" y2="90" stroke="rgba(192,57,43,0.3)" stroke-width="0.4"/>
+        <text x="245" y="153" fill="rgba(192,57,43,0.4)" font-size="5" font-family="JetBrains Mono,monospace">GPS · 51.5074°N</text>
+      </svg>
+      <span class="frame-label">OUT — crosshair locks</span>
+      <span class="frame-tc">00:00:05:23</span>
+    </div>
+  </div>
+  <div class="shot-detail">
+    <div>
+      <div class="sd-label">Camera + Motion</div>
+      <dl class="sd-list">
+        <dt>Move</dt><dd>Subtle handheld — 2px wobble at 4Hz, mimics phone hold</dd>
+        <dt>UI</dt><dd>REC counter increments live. GPS appears at F+30.</dd>
+        <dt>Crosshair</dt><dd>Snaps in at F+38, locks at F+44 — that snap is the violation</dd>
+      </dl>
+      <div class="move-diagram">
+        <svg viewBox="0 0 300 50">
+          <rect x="20" y="10" width="260" height="30" fill="none" stroke="#c0392b" stroke-width="0.5" stroke-dasharray="3,3"/>
+          <line x1="20" y1="25" x2="280" y2="25" stroke="rgba(192,57,43,0.4)" stroke-width="0.3"/>
+          <text x="150" y="48" fill="#c9a84c" font-size="7" font-family="JetBrains Mono,monospace" text-anchor="middle" letter-spacing="2">HANDHELD 2px @ 4Hz · POV LOCKED</text>
+        </svg>
+      </div>
+    </div>
+    <div>
+      <div class="sd-label">Audio Sync</div>
+      <dl class="sd-list">
+        <dt>F+0</dt><dd>Cello continues. UI shutter click — sharp, dry.</dd>
+        <dt>F+12</dt><dd>VO IN — "They told you it was free."</dd>
+        <dt>F+38</dt><dd>Crosshair snap aligns with cello bow change</dd>
+      </dl>
+      <div class="sd-trans">
+        <span class="speaker">→ TRANSITION TO SHOT 03</span>
+        Hard cut. The VO sentence ends across the cut — words finish in shot 03's first three frames. This pulls the audience through the edit.
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ SHOT 03 ═══ -->
+<div class="shot-card">
+  <div class="shot-head">
+    <span class="sh-num">SHOT 03 · ARGUMENT + MIC</span>
+    <span class="sh-tc">00:00:06:00 → 00:00:08:00</span>
+    <span class="sh-dur">48 FRAMES</span>
+    <span class="sh-act">ACT I · DREAD</span>
+  </div>
+  <div class="frames">
+    <div class="frame">
+      <svg viewBox="0 0 320 180" preserveAspectRatio="xMidYMid slice">
+        <rect width="320" height="180" fill="#080814"/>
+        <path d="M60,170 L60,90 Q70,70 80,90 L80,170 Z" fill="#1a1828"/>
+        <ellipse cx="70" cy="78" rx="11" ry="13" fill="#1a1828"/>
+        <path d="M240,170 L240,90 Q250,70 260,90 L260,170 Z" fill="#1a1828"/>
+        <ellipse cx="250" cy="78" rx="11" ry="13" fill="#1a1828"/>
+      </svg>
+      <span class="frame-label">IN — silhouettes only</span>
+      <span class="frame-tc">00:00:06:00</span>
+    </div>
+    <div class="frame">
+      <svg viewBox="0 0 320 180" preserveAspectRatio="xMidYMid slice">
+        <rect width="320" height="180" fill="#080814"/>
+        <path d="M60,170 L60,90 Q70,70 80,90 L80,170 Z" fill="#1a1828"/>
+        <ellipse cx="70" cy="78" rx="11" ry="13" fill="#1a1828"/>
+        <path d="M240,170 L240,90 Q250,70 260,90 L260,170 Z" fill="#1a1828"/>
+        <ellipse cx="250" cy="78" rx="11" ry="13" fill="#1a1828"/>
+        <g transform="translate(160,40)" opacity="0.6">
+          <rect x="-6" y="-10" width="12" height="20" rx="6" fill="none" stroke="#c0392b" stroke-width="1"/>
+        </g>
+      </svg>
+      <span class="frame-label">MID — mic appears</span>
+      <span class="frame-tc">00:00:07:00</span>
+    </div>
+    <div class="frame">
+      <svg viewBox="0 0 320 180" preserveAspectRatio="xMidYMid slice">
+        <rect width="320" height="180" fill="#080814"/>
+        <path d="M60,170 L60,90 Q70,70 80,90 L80,170 Z" fill="#1a1828"/>
+        <ellipse cx="70" cy="78" rx="11" ry="13" fill="#1a1828"/>
+        <path d="M240,170 L240,90 Q250,70 260,90 L260,170 Z" fill="#1a1828"/>
+        <ellipse cx="250" cy="78" rx="11" ry="13" fill="#1a1828"/>
+        <path d="M85,90 Q160,140 235,90" fill="none" stroke="rgba(192,57,43,0.3)" stroke-width="0.5" stroke-dasharray="2,2"/>
+        <g transform="translate(160,40)">
+          <rect x="-6" y="-10" width="12" height="20" rx="6" fill="none" stroke="#c0392b" stroke-width="1.2"/>
+          <circle cx="0" cy="0" r="22" fill="none" stroke="rgba(192,57,43,0.3)" stroke-width="0.4"/>
+          <circle cx="0" cy="0" r="32" fill="none" stroke="rgba(192,57,43,0.15)" stroke-width="0.4"/>
+        </g>
+      </svg>
+      <span class="frame-label">OUT — mic full glow</span>
+      <span class="frame-tc">00:00:07:23</span>
+    </div>
+  </div>
+  <div class="shot-detail">
+    <div>
+      <div class="sd-label">Camera + Motion</div>
+      <dl class="sd-list">
+        <dt>Move</dt><dd>Locked off — perfect symmetry. Camera does NOT move.</dd>
+        <dt>Mic</dt><dd>Fades in F+18, glow ramps F+24 → F+44</dd>
+        <dt>Tension</dt><dd>Dotted line between figures appears F+36</dd>
+      </dl>
+    </div>
+    <div>
+      <div class="sd-label">Audio Sync</div>
+      <dl class="sd-list">
+        <dt>F+0</dt><dd>Muffled raised voices behind glass — duck under VO</dd>
+        <dt>F+0</dt><dd>VO continues — "You paid with your location."</dd>
+        <dt>F+24</dt><dd>"Your contacts." — aligns with mic glow peak</dd>
+        <dt>F+40</dt><dd>"Your sleep." — last beat before cut</dd>
+      </dl>
+      <div class="sd-trans">
+        <span class="speaker">→ TRANSITION TO SHOT 04</span>
+        J-cut. Shot 04's audio (snore, screen hum) pre-laps under the last 6 frames of shot 03. The audience hears the bedroom before they see it — already inside the violation.
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ SHOT 04 ═══ -->
+<div class="shot-card">
+  <div class="shot-head">
+    <span class="sh-num">SHOT 04 · SLEEPING FACE</span>
+    <span class="sh-tc">00:00:08:00 → 00:00:12:00</span>
+    <span class="sh-dur">96 FRAMES</span>
+    <span class="sh-act">ACT I · DREAD</span>
+  </div>
+  <div class="frames">
+    <div class="frame">
+      <svg viewBox="0 0 320 180" preserveAspectRatio="xMidYMid slice">
+        <rect width="320" height="180" fill="#02020a"/>
+        <path d="M60,140 Q80,90 130,80 Q170,75 200,90 Q230,100 240,140 L320,140 L320,180 L0,180 L0,140 Z" fill="#0a0a14"/>
+        <rect x="260" y="60" width="40" height="70" rx="4" fill="rgba(192,57,43,0.4)"/>
+      </svg>
+      <span class="frame-label">IN — wide push begins</span>
+      <span class="frame-tc">00:00:08:00</span>
+    </div>
+    <div class="frame">
+      <svg viewBox="0 0 320 180" preserveAspectRatio="xMidYMid slice">
+        <rect width="320" height="180" fill="#02020a"/>
+        <path d="M40,140 Q60,90 110,80 Q150,75 180,90 Q210,100 220,140 L320,140 L320,180 L0,180 L0,140 Z" fill="#0a0a14"/>
+        <ellipse cx="135" cy="100" rx="6" ry="2" fill="#1a1a22"/>
+        <rect x="240" y="60" width="40" height="70" rx="4" fill="rgba(192,57,43,0.7)"/>
+        <ellipse cx="200" cy="100" rx="80" ry="40" fill="rgba(192,57,43,0.08)"/>
+      </svg>
+      <span class="frame-label">MID — push 2cm closer</span>
+      <span class="frame-tc">00:00:10:00</span>
+    </div>
+    <div class="frame">
+      <svg viewBox="0 0 320 180" preserveAspectRatio="xMidYMid slice">
+        <rect width="320" height="180" fill="#02020a"/>
+        <path d="M30,140 Q50,90 100,80 Q140,75 170,90 Q200,100 210,140 L320,140 L320,180 L0,180 L0,140 Z" fill="#0a0a14"/>
+        <ellipse cx="125" cy="100" rx="7" ry="2.5" fill="#1a1a22"/>
+        <path d="M150,108 Q155,114 160,108" fill="none" stroke="#1a1a22" stroke-width="1"/>
+        <rect x="230" y="55" width="44" height="78" rx="4" fill="rgba(192,57,43,0.85)"/>
+        <rect x="234" y="59" width="36" height="70" fill="#0a0a14"/>
+        <text x="252" y="98" fill="rgba(192,57,43,0.9)" font-size="6" font-family="JetBrains Mono,monospace" text-anchor="middle">TRACKING</text>
+        <ellipse cx="190" cy="100" rx="100" ry="50" fill="rgba(192,57,43,0.15)"/>
+        <text x="160" y="170" fill="rgba(192,57,43,0.4)" font-size="5" font-family="JetBrains Mono,monospace" text-anchor="middle" letter-spacing="2">YOU SLEEP · IT DOESN'T</text>
+      </svg>
+      <span class="frame-label">OUT — text overlay holds</span>
+      <span class="frame-tc">00:00:11:23</span>
+    </div>
+  </div>
+  <div class="shot-detail">
+    <div>
+      <div class="sd-label">Camera + Motion</div>
+      <dl class="sd-list">
+        <dt>Move</dt><dd>Slow push-in 4cm/s on dolly — ~6cm total over 96 frames</dd>
+        <dt>Curve</dt><dd>Linear. The intrusion should feel mechanical.</dd>
+        <dt>Text</dt><dd>Fade in F+72, hold through cut</dd>
+      </dl>
+      <div class="move-diagram">
+        <svg viewBox="0 0 300 50">
+          <rect x="20" y="15" width="40" height="20" fill="none" stroke="#c9a84c" stroke-width="0.5"/>
+          <line x1="60" y1="25" x2="240" y2="25" stroke="#c9a84c" stroke-width="0.5"/>
+          <polygon points="240,20 250,25 240,30" fill="#c9a84c"/>
+          <rect x="250" y="10" width="50" height="30" fill="none" stroke="#c9a84c" stroke-width="0.5"/>
+          <text x="150" y="48" fill="#c9a84c" font-size="7" font-family="JetBrains Mono,monospace" text-anchor="middle" letter-spacing="2">DOLLY IN · 4cm/s · LINEAR</text>
+        </svg>
+      </div>
+    </div>
+    <div>
+      <div class="sd-label">Audio Sync</div>
+      <dl class="sd-list">
+        <dt>F+0</dt><dd>Soft snore loops. Phone screen hum (60Hz buzz, low).</dd>
+        <dt>F+24</dt><dd>Notification chime — quiet, untouched</dd>
+        <dt>F+48</dt><dd>VO — "The sound of your own voice"</dd>
+        <dt>F+72</dt><dd>"in your own kitchen." — text appears together</dd>
+        <dt>F+90</dt><dd>Cello swells — peak before silence</dd>
+      </dl>
+      <div class="sd-trans">
+        <span class="speaker">→ TRANSITION TO SHOT 05</span>
+        Hard cut on cello swell peak. The wider frame after this intimate one is intentional whiplash — the audience is yanked from one body to a thousand machines.
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ SHOT 05 ═══ -->
+<div class="shot-card">
+  <div class="shot-head">
+    <span class="sh-num">SHOT 05 · SERVER WALL</span>
+    <span class="sh-tc">00:00:12:00 → 00:00:18:00</span>
+    <span class="sh-dur">144 FRAMES</span>
+    <span class="sh-act">ACT I · NAMING</span>
+  </div>
+  <div class="frames">
+    <div class="frame">
+      <svg viewBox="0 0 320 180" preserveAspectRatio="xMidYMid slice">
+        <rect width="320" height="180" fill="#000"/>
+        <rect x="120" y="60" width="80" height="60" fill="#0a0a14" stroke="rgba(192,57,43,0.2)"/>
+        <g fill="#c0392b">
+          <circle cx="135" cy="75" r="2"/><circle cx="155" cy="75" r="2"/><circle cx="175" cy="75" r="2"/>
+          <circle cx="135" cy="95" r="2"/><circle cx="155" cy="95" r="2"/><circle cx="175" cy="95" r="2"/>
+        </g>
+      </svg>
+      <span class="frame-label">IN — tight on one rack</span>
+      <span class="frame-tc">00:00:12:00</span>
+    </div>
+    <div class="frame">
+      <svg viewBox="0 0 320 180" preserveAspectRatio="xMidYMid slice">
+        <rect width="320" height="180" fill="#000"/>
+        <rect x="80" y="40" width="60" height="100" fill="#0a0a14" stroke="rgba(192,57,43,0.2)"/>
+        <rect x="180" y="40" width="60" height="100" fill="#0a0a14" stroke="rgba(192,57,43,0.2)"/>
+        <g fill="#c0392b">
+          <circle cx="95" cy="55" r="2"/><circle cx="115" cy="55" r="2"/><circle cx="135" cy="55" r="2"/>
+          <circle cx="195" cy="55" r="2"/><circle cx="215" cy="55" r="2"/><circle cx="235" cy="55" r="2"/>
+          <circle cx="95" cy="95" r="2"/><circle cx="115" cy="95" r="2"/><circle cx="135" cy="95" r="2"/>
+          <circle cx="195" cy="95" r="2"/><circle cx="215" cy="95" r="2"/><circle cx="235" cy="95" r="2"/>
+        </g>
+      </svg>
+      <span class="frame-label">MID — pullback reveals more</span>
+      <span class="frame-tc">00:00:15:00</span>
+    </div>
+    <div class="frame">
+      <svg viewBox="0 0 320 180" preserveAspectRatio="xMidYMid slice">
+        <rect width="320" height="180" fill="#000"/>
+        <g>
+          <rect x="20" y="30" width="56" height="120" fill="#0a0a14" stroke="rgba(192,57,43,0.2)"/>
+          <rect x="86" y="30" width="56" height="120" fill="#0a0a14" stroke="rgba(192,57,43,0.2)"/>
+          <rect x="152" y="30" width="56" height="120" fill="#0a0a14" stroke="rgba(192,57,43,0.2)"/>
+          <rect x="218" y="30" width="56" height="120" fill="#0a0a14" stroke="rgba(192,57,43,0.2)"/>
+        </g>
+        <g fill="#c0392b">
+          <circle cx="34" cy="50" r="2"/><circle cx="48" cy="50" r="2"/><circle cx="62" cy="50" r="2"/>
+          <circle cx="100" cy="50" r="2"/><circle cx="114" cy="50" r="2"/><circle cx="128" cy="50" r="2"/>
+          <circle cx="166" cy="50" r="2"/><circle cx="180" cy="50" r="2"/><circle cx="194" cy="50" r="2"/>
+          <circle cx="232" cy="50" r="2"/><circle cx="246" cy="50" r="2"/><circle cx="260" cy="50" r="2"/>
+          <circle cx="34" cy="90" r="2"/><circle cx="48" cy="90" r="2"/><circle cx="62" cy="90" r="2"/>
+          <circle cx="100" cy="90" r="2"/><circle cx="114" cy="90" r="2"/><circle cx="128" cy="90" r="2"/>
+          <circle cx="166" cy="90" r="2"/><circle cx="180" cy="90" r="2"/><circle cx="194" cy="90" r="2"/>
+          <circle cx="232" cy="90" r="2"/><circle cx="246" cy="90" r="2"/><circle cx="260" cy="90" r="2"/>
+          <circle cx="34" cy="130" r="2"/><circle cx="48" cy="130" r="2"/><circle cx="62" cy="130" r="2"/>
+          <circle cx="100" cy="130" r="2"/><circle cx="114" cy="130" r="2"/><circle cx="128" cy="130" r="2"/>
+          <circle cx="166" cy="130" r="2"/><circle cx="180" cy="130" r="2"/><circle cx="194" cy="130" r="2"/>
+          <circle cx="232" cy="130" r="2"/><circle cx="246" cy="130" r="2"/><circle cx="260" cy="130" r="2"/>
+        </g>
+        <text x="160" y="170" fill="#c0392b" font-size="9" font-family="Inter,sans-serif" font-weight="200" text-anchor="middle" letter-spacing="6">YOU — ARE NOT — THE PRODUCT</text>
+      </svg>
+      <span class="frame-label">OUT — full wall + thesis</span>
+      <span class="frame-tc">00:00:17:23</span>
+    </div>
+  </div>
+  <div class="shot-detail">
+    <div>
+      <div class="sd-label">Camera + Motion</div>
+      <dl class="sd-list">
+        <dt>Move</dt><dd>Dolly OUT — 6m over 144 frames</dd>
+        <dt>Curve</dt><dd>Ease-out cubic — slow start, accelerates, eases at the end</dd>
+        <dt>Text</dt><dd>Three words, one per beat: F+96 / F+108 / F+120</dd>
+      </dl>
+      <div class="move-diagram">
+        <svg viewBox="0 0 300 50">
+          <rect x="240" y="10" width="40" height="30" fill="none" stroke="#c9a84c" stroke-width="0.5"/>
+          <line x1="240" y1="25" x2="60" y2="25" stroke="#c9a84c" stroke-width="0.5"/>
+          <polygon points="60,20 50,25 60,30" fill="#c9a84c"/>
+          <rect x="20" y="5" width="30" height="40" fill="none" stroke="#c9a84c" stroke-width="0.5"/>
+          <text x="150" y="48" fill="#c9a84c" font-size="7" font-family="JetBrains Mono,monospace" text-anchor="middle" letter-spacing="2">DOLLY OUT 6m · EASE-OUT CUBIC</text>
+        </svg>
+      </div>
+    </div>
+    <div>
+      <div class="sd-label">Audio Sync</div>
+      <dl class="sd-list">
+        <dt>F+0</dt><dd>Server hum enters — deep 50Hz drone</dd>
+        <dt>F+96</dt><dd>"YOU" — cello bow stops</dd>
+        <dt>F+108</dt><dd>"ARE NOT" — silence between words</dd>
+        <dt>F+120</dt><dd>"THE PRODUCT" — last word</dd>
+        <dt>F+132</dt><dd>FULL SILENCE — server hum kills out</dd>
+      </dl>
+      <div class="sd-trans">
+        <span class="speaker">→ TRANSITION TO SHOT 06 (THE SILENCE)</span>
+        The most important cut in the film. Hold black for 12 frames (0.5s) AFTER shot 05 ends. Then shot 06 begins. See <strong>HERO MOMENT 01</strong> below for frame-by-frame breakdown.
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ SHOT 06 ═══ -->
+<div class="shot-card">
+  <div class="shot-head">
+    <span class="sh-num">SHOT 06 · GOLD PAPER FALLS</span>
+    <span class="sh-tc">00:00:18:12 → 00:00:24:00</span>
+    <span class="sh-dur">132 FRAMES</span>
+    <span class="sh-act">ACT II · TURN</span>
+  </div>
+  <div class="frames">
+    <div class="frame">
+      <svg viewBox="0 0 320 180" preserveAspectRatio="xMidYMid slice">
+        <rect width="320" height="180" fill="#0a0a14"/>
+        <g transform="translate(160,30) rotate(-8)">
+          <rect x="-22" y="-22" width="44" height="44" fill="#c9a84c"/>
+        </g>
+      </svg>
+      <span class="frame-label">IN — paper enters frame top</span>
+      <span class="frame-tc">00:00:18:12</span>
+    </div>
+    <div class="frame">
+      <svg viewBox="0 0 320 180" preserveAspectRatio="xMidYMid slice">
+        <rect width="320" height="180" fill="#08081a"/>
+        <g transform="translate(160,90) rotate(-15)">
+          <rect x="-22" y="-22" width="44" height="44" fill="#c9a84c"/>
+          <line x1="-22" y1="0" x2="22" y2="0" stroke="rgba(0,0,0,0.2)" stroke-width="0.4"/>
+        </g>
+        <line x1="160" y1="20" x2="160" y2="80" stroke="rgba(201,168,76,0.15)" stroke-width="0.4" stroke-dasharray="1,3"/>
+      </svg>
+      <span class="frame-label">MID — falling, mid-frame</span>
+      <span class="frame-tc">00:00:21:00</span>
+    </div>
+    <div class="frame">
+      <svg viewBox="0 0 320 180" preserveAspectRatio="xMidYMid slice">
+        <rect width="320" height="180" fill="#02020a"/>
+        <g transform="translate(160,140) rotate(-8)">
+          <rect x="-22" y="-22" width="44" height="44" fill="#c9a84c"/>
+          <rect x="-22" y="-22" width="44" height="44" fill="rgba(0,0,0,0.15)"/>
+        </g>
+        <ellipse cx="160" cy="150" rx="40" ry="3" fill="none" stroke="rgba(201,168,76,0.4)" stroke-width="0.4"/>
+        <ellipse cx="160" cy="150" rx="60" ry="4.5" fill="none" stroke="rgba(201,168,76,0.2)" stroke-width="0.4"/>
+        <ellipse cx="160" cy="100" rx="80" ry="60" fill="rgba(201,168,76,0.05)"/>
+        <text x="160" y="170" fill="rgba(201,168,76,0.5)" font-size="5" font-family="JetBrains Mono,monospace" text-anchor="middle" letter-spacing="3">YOU ARE THE PRODUCER</text>
+      </svg>
+      <span class="frame-label">OUT — meets water, ripple</span>
+      <span class="frame-tc">00:00:23:23</span>
+    </div>
+  </div>
+  <div class="shot-detail">
+    <div>
+      <div class="sd-label">Camera + Motion</div>
+      <dl class="sd-list">
+        <dt>Move</dt><dd>Vertical track, follows paper at constant speed</dd>
+        <dt>Speed</dt><dd>Captured at 240fps, conformed to 24fps = 10× slow-mo</dd>
+        <dt>Rotation</dt><dd>Paper rotates -8° → -22° → -8° (gentle pendulum)</dd>
+      </dl>
+      <div class="move-diagram">
+        <svg viewBox="0 0 300 50">
+          <line x1="150" y1="5" x2="150" y2="45" stroke="#c9a84c" stroke-width="0.5" stroke-dasharray="2,2"/>
+          <rect x="140" y="8" width="20" height="6" fill="#c9a84c"/>
+          <rect x="140" y="36" width="20" height="6" fill="#c9a84c"/>
+          <text x="150" y="3" fill="#c9a84c" font-size="6" font-family="JetBrains Mono,monospace" text-anchor="middle">TRACK</text>
+          <text x="220" y="28" fill="#c9a84c" font-size="7" font-family="JetBrains Mono,monospace" letter-spacing="2">240fps → 24fps · 10×</text>
+        </svg>
+      </div>
+    </div>
+    <div>
+      <div class="sd-label">Audio Sync</div>
+      <dl class="sd-list">
+        <dt>F+0</dt><dd>SILENCE continues from shot 05 cut</dd>
+        <dt>F+24</dt><dd>Single soprano voice enters — sustained vowel</dd>
+        <dt>F+108</dt><dd>Water-touch SFX — single wet "tup"</dd>
+        <dt>F+108</dt><dd>VO — "You are the producer." (dry, intimate)</dd>
+        <dt>F+120</dt><dd>Cello returns on tonic — first warm note in film</dd>
+      </dl>
+      <div class="sd-trans">
+        <span class="speaker">→ TRANSITION TO SHOT 07 (THE MORPH)</span>
+        Match-dissolve, NOT a hard cut. The paper's water-impact ripple becomes the village's outline. 12-frame crossfade. The only soft transition in the entire film. See <strong>HERO MOMENT 02</strong>.
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ SHOT 07 ═══ -->
+<div class="shot-card">
+  <div class="shot-head">
+    <span class="sh-num">SHOT 07 · UNFOLD INTO VILLAGE</span>
+    <span class="sh-tc">00:00:24:00 → 00:00:30:00</span>
+    <span class="sh-dur">144 FRAMES</span>
+    <span class="sh-act">ACT II · UNFOLDING</span>
+  </div>
+  <div class="frames">
+    <div class="frame">
+      <svg viewBox="0 0 320 180" preserveAspectRatio="xMidYMid slice">
+        <rect width="320" height="180" fill="#0a0808"/>
+        <g transform="translate(160,90)">
+          <polygon points="-50,30 -10,-40 30,30 0,15 -25,30" fill="#c9a84c"/>
+        </g>
+      </svg>
+      <span class="frame-label">IN — pure origami crane</span>
+      <span class="frame-tc">00:00:24:00</span>
+    </div>
+    <div class="frame">
+      <svg viewBox="0 0 320 180" preserveAspectRatio="xMidYMid slice">
+        <rect width="320" height="180" fill="#0a0808"/>
+        <g transform="translate(160,90)">
+          <polygon points="-50,30 -10,-40 30,30 0,15 -25,30" fill="#c9a84c" opacity="0.6"/>
+          <polygon points="35,30 45,15 55,30 55,45 35,45" fill="#c9a84c" opacity="0.7"/>
+          <polygon points="60,30 70,18 80,30 80,45 60,45" fill="#c9a84c" opacity="0.55"/>
+        </g>
+      </svg>
+      <span class="frame-label">MID — morph 50%</span>
+      <span class="frame-tc">00:00:27:00</span>
+    </div>
+    <div class="frame">
+      <svg viewBox="0 0 320 180" preserveAspectRatio="xMidYMid slice">
+        <defs>
+          <radialGradient id="s7-glow" cx="50%" cy="50%" r="50%">
+            <stop offset="0%" stop-color="rgba(201,168,76,0.2)"/>
+            <stop offset="100%" stop-color="transparent"/>
+          </radialGradient>
+        </defs>
+        <rect width="320" height="180" fill="#08080a"/>
+        <ellipse cx="160" cy="90" rx="160" ry="90" fill="url(#s7-glow)"/>
+        <g transform="translate(160,90)">
+          <polygon points="35,30 45,15 55,30 55,45 35,45" fill="#c9a84c"/>
+          <polygon points="60,30 70,18 80,30 80,45 60,45" fill="#c9a84c" opacity="0.85"/>
+          <polygon points="-50,30 -40,18 -30,30 -30,45 -50,45" fill="#c9a84c" opacity="0.7"/>
+          <polygon points="-25,30 -15,18 -5,30 -5,45 -25,45" fill="#c9a84c" opacity="0.85"/>
+          <polygon points="0,30 10,18 20,30 20,45 0,45" fill="#c9a84c" opacity="0.95"/>
+          <path d="M-50,50 Q40,60 80,50" fill="none" stroke="rgba(201,168,76,0.5)" stroke-width="0.6" stroke-dasharray="2,2"/>
+        </g>
+      </svg>
+      <span class="frame-label">OUT — full village</span>
+      <span class="frame-tc">00:00:29:23</span>
+    </div>
+  </div>
+  <div class="shot-detail">
+    <div>
+      <div class="sd-label">Camera + Motion</div>
+      <dl class="sd-list">
+        <dt>Move</dt><dd>Drone rise — 1m → 30m altitude over 144 frames</dd>
+        <dt>Morph</dt><dd>Origami → houses, single continuous CGI sequence</dd>
+        <dt>Curve</dt><dd>Ease-in-out cubic — magical, not mechanical</dd>
+      </dl>
+      <div class="move-diagram">
+        <svg viewBox="0 0 300 50">
+          <polygon points="20,40 30,25 40,40" fill="#c9a84c"/>
+          <line x1="40" y1="35" x2="260" y2="15" stroke="#c9a84c" stroke-width="0.5" stroke-dasharray="2,2"/>
+          <polygon points="260,8 270,12 268,22 256,18" fill="#c9a84c"/>
+          <text x="150" y="48" fill="#c9a84c" font-size="7" font-family="JetBrains Mono,monospace" text-anchor="middle" letter-spacing="2">DRONE RISE 1m → 30m + MORPH</text>
+        </svg>
+      </div>
+    </div>
+    <div>
+      <div class="sd-label">Audio Sync</div>
+      <dl class="sd-list">
+        <dt>F+0</dt><dd>Choir adds 2nd voice (alto)</dd>
+        <dt>F+24</dt><dd>VO — "A favour, done well, is the oldest currency."</dd>
+        <dt>F+72</dt><dd>Choir adds 3rd voice. Distant bell.</dd>
+        <dt>F+96</dt><dd>Wind enters — gentle, real exterior</dd>
+        <dt>F+132</dt><dd>Choir holds for cut</dd>
+      </dl>
+      <div class="sd-trans">
+        <span class="speaker">→ TRANSITION TO SHOT 08</span>
+        Hard cut, but the choir continues uninterrupted across the cut. The audio bridge is what tells the audience this is the same world, not a new one.
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ SHOT 08 ═══ -->
+<div class="shot-card">
+  <div class="shot-head">
+    <span class="sh-num">SHOT 08 · GROCERIES AT DOOR</span>
+    <span class="sh-tc">00:00:30:00 → 00:00:34:00</span>
+    <span class="sh-dur">96 FRAMES</span>
+    <span class="sh-act">ACT II · HUMANS</span>
+  </div>
+  <div class="frames">
+    <div class="frame">
+      <svg viewBox="0 0 320 180" preserveAspectRatio="xMidYMid slice">
+        <rect width="320" height="180" fill="#1a1208"/>
+        <rect x="60" y="40" width="80" height="120" fill="#0a0606"/>
+        <ellipse cx="200" cy="80" rx="12" ry="16" fill="#0a0606"/>
+        <rect x="190" y="93" width="20" height="50" fill="#0a0606"/>
+        <rect x="208" y="120" width="18" height="22" fill="#c9a84c" opacity="0.7"/>
+      </svg>
+      <span class="frame-label">IN — neighbour approaches</span>
+      <span class="frame-tc">00:00:30:00</span>
+    </div>
+    <div class="frame">
+      <svg viewBox="0 0 320 180" preserveAspectRatio="xMidYMid slice">
+        <rect width="320" height="180" fill="#1a1208"/>
+        <rect x="60" y="40" width="80" height="120" fill="#0a0606"/>
+        <rect x="68" y="48" width="64" height="104" fill="#2a1a08"/>
+        <rect x="68" y="48" width="64" height="104" fill="rgba(232,115,74,0.15)"/>
+        <ellipse cx="200" cy="80" rx="12" ry="16" fill="#0a0606"/>
+        <rect x="190" y="93" width="20" height="50" fill="#0a0606"/>
+        <rect x="208" y="120" width="18" height="22" fill="#c9a84c" opacity="0.7"/>
+      </svg>
+      <span class="frame-label">MID — door opens</span>
+      <span class="frame-tc">00:00:32:00</span>
+    </div>
+    <div class="frame">
+      <svg viewBox="0 0 320 180" preserveAspectRatio="xMidYMid slice">
+        <rect width="320" height="180" fill="#1a1208"/>
+        <rect x="60" y="40" width="80" height="120" fill="#0a0606"/>
+        <rect x="68" y="48" width="64" height="104" fill="#2a1a08"/>
+        <rect x="68" y="48" width="64" height="104" fill="rgba(232,115,74,0.3)"/>
+        <ellipse cx="100" cy="100" rx="14" ry="18" fill="#1a0a06"/>
+        <rect x="88" y="115" width="24" height="35" fill="#1a0a06"/>
+        <ellipse cx="200" cy="80" rx="12" ry="16" fill="#0a0606"/>
+        <rect x="190" y="93" width="20" height="50" fill="#0a0606"/>
+        <rect x="208" y="120" width="18" height="22" fill="#c9a84c" opacity="0.7"/>
+        <ellipse cx="100" cy="100" rx="100" ry="50" fill="rgba(232,115,74,0.05)"/>
+      </svg>
+      <span class="frame-label">OUT — exchange happens</span>
+      <span class="frame-tc">00:00:33:23</span>
+    </div>
+  </div>
+  <div class="shot-detail">
+    <div>
+      <div class="sd-label">Camera + Motion</div>
+      <dl class="sd-list">
+        <dt>Move</dt><dd>Locked off. Documentary stillness.</dd>
+        <dt>Speed</dt><dd>60fps capture, conformed to 24fps = 2.5× slow-mo on motion</dd>
+        <dt>Door</dt><dd>Opens F+24 → F+48. Light spills F+30 → F+60.</dd>
+      </dl>
+    </div>
+    <div>
+      <div class="sd-label">Audio Sync</div>
+      <dl class="sd-list">
+        <dt>F+0</dt><dd>Choir continues. Wind, real exterior.</dd>
+        <dt>F+24</dt><dd>Door creak — old hinges, dry</dd>
+        <dt>F+48</dt><dd>VO — "We simply gave it a ledger."</dd>
+        <dt>F+72</dt><dd>Diegetic — "Thank you, love." (older woman, soft)</dd>
+      </dl>
+      <div class="sd-trans">
+        <span class="speaker">→ TRANSITION TO SHOT 09</span>
+        Hard cut. The "thank you" finishes mid-cut. We never see her face — we hear it. The audience completes the image themselves.
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ SHOT 09 ═══ -->
+<div class="shot-card">
+  <div class="shot-head">
+    <span class="sh-num">SHOT 09 · LORA NODE / CONSTELLATION</span>
+    <span class="sh-tc">00:00:34:00 → 00:00:38:00</span>
+    <span class="sh-dur">96 FRAMES</span>
+    <span class="sh-act">ACT II · INFRASTRUCTURE</span>
+  </div>
+  <div class="frames">
+    <div class="frame">
+      <svg viewBox="0 0 320 180" preserveAspectRatio="xMidYMid slice">
+        <rect width="320" height="180" fill="#3a2818"/>
+        <polygon points="0,150 30,120 60,140 90,100 120,130 150,90 180,120 210,80 240,110 270,95 300,130 320,115 320,180 0,180" fill="#0a0606"/>
+        <g transform="translate(150,80)">
+          <rect x="-4" y="0" width="8" height="14" fill="#c9a84c"/>
+        </g>
+      </svg>
+      <span class="frame-label">IN — magic hour, hand placing</span>
+      <span class="frame-tc">00:00:34:00</span>
+    </div>
+    <div class="frame">
+      <svg viewBox="0 0 320 180" preserveAspectRatio="xMidYMid slice">
+        <rect width="320" height="180" fill="#1a1428"/>
+        <polygon points="0,150 30,120 60,140 90,100 120,130 150,90 180,120 210,80 240,110 270,95 300,130 320,115 320,180 0,180" fill="#050308"/>
+        <g transform="translate(150,80)">
+          <rect x="-4" y="0" width="8" height="14" fill="#c9a84c"/>
+          <circle cx="0" cy="-2" r="3" fill="#f0cb6a"/>
+        </g>
+        <g fill="#f0cb6a">
+          <circle cx="60" cy="120" r="2"/>
+          <circle cx="240" cy="100" r="2"/>
+        </g>
+        <line x1="150" y1="80" x2="60" y2="120" stroke="rgba(201,168,76,0.3)" stroke-width="0.4"/>
+        <line x1="150" y1="80" x2="240" y2="100" stroke="rgba(201,168,76,0.3)" stroke-width="0.4"/>
+      </svg>
+      <span class="frame-label">MID — dusk, 2 nodes light</span>
+      <span class="frame-tc">00:00:36:00</span>
+    </div>
+    <div class="frame">
+      <svg viewBox="0 0 320 180" preserveAspectRatio="xMidYMid slice">
+        <rect width="320" height="180" fill="#0a0814"/>
+        <polygon points="0,150 30,120 60,140 90,100 120,130 150,90 180,120 210,80 240,110 270,95 300,130 320,115 320,180 0,180" fill="#000"/>
+        <g transform="translate(150,80)">
+          <rect x="-4" y="0" width="8" height="14" fill="#c9a84c"/>
+          <circle cx="0" cy="-2" r="3" fill="#f0cb6a"/>
+        </g>
+        <g stroke="rgba(201,168,76,0.4)" stroke-width="0.4">
+          <line x1="150" y1="80" x2="60" y2="120"/>
+          <line x1="150" y1="80" x2="240" y2="100"/>
+          <line x1="150" y1="80" x2="120" y2="120"/>
+          <line x1="60" y1="120" x2="120" y2="120"/>
+          <line x1="240" y1="100" x2="270" y2="85"/>
+          <line x1="270" y1="85" x2="300" y2="120"/>
+        </g>
+        <g fill="#f0cb6a">
+          <circle cx="60" cy="120" r="2"/>
+          <circle cx="120" cy="120" r="2"/>
+          <circle cx="240" cy="100" r="2"/>
+          <circle cx="270" cy="85" r="2"/>
+          <circle cx="300" cy="120" r="2"/>
+        </g>
+      </svg>
+      <span class="frame-label">OUT — full mesh, night</span>
+      <span class="frame-tc">00:00:37:23</span>
+    </div>
+  </div>
+  <div class="shot-detail">
+    <div>
+      <div class="sd-label">Camera + Motion</div>
+      <dl class="sd-list">
+        <dt>Move</dt><dd>Locked wide. Time-lapse 4hrs → 4s = 3600× speed.</dd>
+        <dt>Light</dt><dd>Magic hour → blue hour → night, captured natural</dd>
+        <dt>Nodes</dt><dd>Light up sequentially: F+24, F+36, F+48, F+60, F+72, F+84</dd>
+      </dl>
+    </div>
+    <div>
+      <div class="sd-label">Audio Sync</div>
+      <dl class="sd-list">
+        <dt>F+0</dt><dd>Choir builds — 7 voices entering</dd>
+        <dt>F+24</dt><dd>VO — "One percent to the system."</dd>
+        <dt>F+48</dt><dd>VO — "One percent to your group."</dd>
+        <dt>F+24..84</dt><dd>Each node-light gets a soft tonal "ping" — glockenspiel, almost subliminal</dd>
+      </dl>
+      <div class="sd-trans">
+        <span class="speaker">→ TRANSITION TO SHOT 10</span>
+        Hard cut. The choir holds. Shot 10 is the longest single shot in the film — give it room.
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ SHOT 10 ═══ -->
+<div class="shot-card">
+  <div class="shot-head">
+    <span class="sh-num">SHOT 10 · CITY AS GOLD THREAD</span>
+    <span class="sh-tc">00:00:38:00 → 00:00:48:00</span>
+    <span class="sh-dur">240 FRAMES</span>
+    <span class="sh-act">ACT II · ECOSYSTEM</span>
+  </div>
+  <div class="frames">
+    <div class="frame">
+      <svg viewBox="0 0 320 180" preserveAspectRatio="xMidYMid slice">
+        <rect width="320" height="180" fill="#02020a"/>
+        <g stroke="rgba(201,168,76,0.3)" stroke-width="0.4" fill="none">
+          <line x1="40" y1="80" x2="280" y2="80"/>
+          <line x1="160" y1="20" x2="160" y2="180"/>
+        </g>
+        <circle cx="160" cy="80" r="3" fill="#f0cb6a"/>
+      </svg>
+      <span class="frame-label">IN — single intersection</span>
+      <span class="frame-tc">00:00:38:00</span>
+    </div>
+    <div class="frame">
+      <svg viewBox="0 0 320 180" preserveAspectRatio="xMidYMid slice">
+        <rect width="320" height="180" fill="#02020a"/>
+        <g stroke="rgba(201,168,76,0.4)" stroke-width="0.4" fill="none">
+          <line x1="40" y1="40" x2="280" y2="40"/>
+          <line x1="40" y1="80" x2="280" y2="80"/>
+          <line x1="40" y1="120" x2="280" y2="120"/>
+          <line x1="80" y1="20" x2="80" y2="180"/>
+          <line x1="160" y1="20" x2="160" y2="180"/>
+          <line x1="240" y1="20" x2="240" y2="180"/>
+        </g>
+        <g fill="#f0cb6a">
+          <circle cx="80" cy="40" r="2"/><circle cx="160" cy="40" r="2"/><circle cx="240" cy="40" r="2"/>
+          <circle cx="80" cy="80" r="2"/><circle cx="160" cy="80" r="3"/><circle cx="240" cy="80" r="2"/>
+          <circle cx="80" cy="120" r="2"/><circle cx="160" cy="120" r="2"/><circle cx="240" cy="120" r="2"/>
+        </g>
+      </svg>
+      <span class="frame-label">MID — grid forms</span>
+      <span class="frame-tc">00:00:43:00</span>
+    </div>
+    <div class="frame">
+      <svg viewBox="0 0 320 180" preserveAspectRatio="xMidYMid slice">
+        <rect width="320" height="180" fill="#02020a"/>
+        <g stroke="rgba(201,168,76,0.5)" stroke-width="0.5" fill="none">
+          <line x1="40" y1="40" x2="280" y2="40"/>
+          <line x1="40" y1="80" x2="280" y2="80"/>
+          <line x1="40" y1="120" x2="280" y2="120"/>
+          <line x1="40" y1="160" x2="280" y2="160"/>
+          <line x1="80" y1="20" x2="80" y2="180"/>
+          <line x1="160" y1="20" x2="160" y2="180"/>
+          <line x1="240" y1="20" x2="240" y2="180"/>
+          <path d="M40,40 Q160,100 280,160" stroke-width="0.3" stroke-dasharray="2,3"/>
+          <path d="M40,160 Q160,80 280,40" stroke-width="0.3" stroke-dasharray="2,3"/>
+        </g>
+        <g fill="#f0cb6a">
+          <circle cx="80" cy="40" r="2.5"/><circle cx="160" cy="40" r="3"/><circle cx="240" cy="40" r="2"/>
+          <circle cx="80" cy="80" r="2"/><circle cx="160" cy="80" r="4"/><circle cx="240" cy="80" r="2.5"/>
+          <circle cx="80" cy="120" r="3"/><circle cx="160" cy="120" r="2.5"/><circle cx="240" cy="120" r="2"/>
+          <circle cx="80" cy="160" r="2"/><circle cx="160" cy="160" r="2.5"/><circle cx="240" cy="160" r="3"/>
+        </g>
+        <circle cx="160" cy="80" r="14" fill="rgba(201,168,76,0.1)"/>
+        <text x="160" y="174" fill="rgba(201,168,76,0.5)" font-size="6" font-family="Inter,sans-serif" text-anchor="middle" letter-spacing="4">EVERY THREAD IS A HAND</text>
+      </svg>
+      <span class="frame-label">OUT — full city</span>
+      <span class="frame-tc">00:00:47:23</span>
+    </div>
+  </div>
+  <div class="shot-detail">
+    <div>
+      <div class="sd-label">Camera + Motion</div>
+      <dl class="sd-list">
+        <dt>Move</dt><dd>Slow rise + orbit. 0m → 200m altitude with 30° rotation.</dd>
+        <dt>Particle</dt><dd>Threads pulse with traffic — each pulse = one favour</dd>
+        <dt>Text</dt><dd>"EVERY THREAD IS A HAND" appears F+216, holds 24f</dd>
+      </dl>
+      <div class="move-diagram">
+        <svg viewBox="0 0 300 50">
+          <circle cx="150" cy="40" r="8" fill="none" stroke="#c9a84c" stroke-width="0.5"/>
+          <line x1="150" y1="32" x2="150" y2="10" stroke="#c9a84c" stroke-width="0.5" stroke-dasharray="2,2"/>
+          <polygon points="146,12 150,5 154,12" fill="#c9a84c"/>
+          <path d="M120,28 Q150,15 180,28" fill="none" stroke="#c9a84c" stroke-width="0.5"/>
+          <text x="50" y="48" fill="#c9a84c" font-size="7" font-family="JetBrains Mono,monospace" letter-spacing="2">RISE 200m + ORBIT 30°</text>
+        </svg>
+      </div>
+    </div>
+    <div>
+      <div class="sd-label">Audio Sync</div>
+      <dl class="sd-list">
+        <dt>F+0</dt><dd>Choir at 12 voices — full strength</dd>
+        <dt>F+24</dt><dd>Bass note enters — first low end of film</dd>
+        <dt>F+48</dt><dd>VO — "Ninety-eight to the person who needed you."</dd>
+        <dt>F+96</dt><dd>VO ends. Music carries alone for 4 seconds. Hold the awe.</dd>
+        <dt>F+216</dt><dd>Choir thins to one voice (preparing for refusal)</dd>
+      </dl>
+      <div class="sd-trans">
+        <span class="speaker">→ TRANSITION TO SHOT 11 (THE MATCH-CUT)</span>
+        Match-cut. The brightest gold node in shot 10 (centre, F+239) becomes the dimmed iris in shot 11 (centre, F+0). Pixel-locked centre composition. See <strong>HERO MOMENT 03</strong>.
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ SHOT 11 ═══ -->
+<div class="shot-card">
+  <div class="shot-head">
+    <span class="sh-num">SHOT 11 · IRIS LOST</span>
+    <span class="sh-tc">00:00:48:00 → 00:00:56:00</span>
+    <span class="sh-dur">192 FRAMES</span>
+    <span class="sh-act">ACT III · REFUSAL</span>
+  </div>
+  <div class="frames">
+    <div class="frame">
+      <svg viewBox="0 0 320 180" preserveAspectRatio="xMidYMid slice">
+        <rect width="320" height="180" fill="#000"/>
+        <ellipse cx="160" cy="90" rx="80" ry="40" fill="#3a0808"/>
+        <ellipse cx="160" cy="90" rx="80" ry="40" fill="none" stroke="rgba(192,57,43,0.5)" stroke-width="0.5"/>
+        <circle cx="160" cy="90" r="14" fill="#0a0404"/>
+      </svg>
+      <span class="frame-label">IN — match-cut from gold</span>
+      <span class="frame-tc">00:00:48:00</span>
+    </div>
+    <div class="frame">
+      <svg viewBox="0 0 320 180" preserveAspectRatio="xMidYMid slice">
+        <rect width="320" height="180" fill="#000"/>
+        <ellipse cx="160" cy="90" rx="80" ry="25" fill="#2a0606"/>
+        <ellipse cx="160" cy="90" rx="80" ry="25" fill="none" stroke="rgba(192,57,43,0.4)" stroke-width="0.5"/>
+        <circle cx="160" cy="90" r="14" fill="#0a0404"/>
+        <text x="160" y="50" fill="rgba(192,57,43,0.4)" font-size="6" font-family="JetBrains Mono,monospace" text-anchor="middle" letter-spacing="3">SIGNAL LOST</text>
+      </svg>
+      <span class="frame-label">MID — iris narrowing</span>
+      <span class="frame-tc">00:00:52:00</span>
+    </div>
+    <div class="frame">
+      <svg viewBox="0 0 320 180" preserveAspectRatio="xMidYMid slice">
+        <rect width="320" height="180" fill="#000"/>
+        <ellipse cx="160" cy="90" rx="80" ry="20" fill="#1a0404"/>
+        <ellipse cx="160" cy="90" rx="80" ry="20" fill="none" stroke="rgba(192,57,43,0.3)" stroke-width="0.5"/>
+        <circle cx="160" cy="90" r="14" fill="#0a0404"/>
+        <g stroke="rgba(192,57,43,0.3)" stroke-width="0.3" stroke-dasharray="2,4">
+          <line x1="40" y1="60" x2="280" y2="60"/>
+          <line x1="40" y1="120" x2="280" y2="120"/>
+        </g>
+        <text x="160" y="50" fill="rgba(192,57,43,0.5)" font-size="6" font-family="JetBrains Mono,monospace" text-anchor="middle" letter-spacing="3">SIGNAL LOST</text>
+        <text x="160" y="135" fill="rgba(192,57,43,0.5)" font-size="6" font-family="JetBrains Mono,monospace" text-anchor="middle" letter-spacing="3">USER NOT FOUND</text>
+        <text x="160" y="170" fill="rgba(244,244,244,0.6)" font-size="6" font-family="Inter,sans-serif" text-anchor="middle" letter-spacing="4">SO WE DESIGNED SOMETHING ELSE</text>
+      </svg>
+      <span class="frame-label">OUT — iris fully diminished</span>
+      <span class="frame-tc">00:00:55:23</span>
+    </div>
+  </div>
+  <div class="shot-detail">
+    <div>
+      <div class="sd-label">Camera + Motion</div>
+      <dl class="sd-list">
+        <dt>Move</dt><dd>Static — match-cut composition with shot 01 (mirrored)</dd>
+        <dt>Iris</dt><dd>Y-scale 1.0 → 0.25 over 192 frames (closing eye)</dd>
+        <dt>Text</dt><dd>"SIGNAL LOST" F+48, "USER NOT FOUND" F+96, final line F+144</dd>
+      </dl>
+    </div>
+    <div>
+      <div class="sd-label">Audio Sync</div>
+      <dl class="sd-list">
+        <dt>F+0</dt><dd>Single signal-lost beep — modem-error frequency, brief</dd>
+        <dt>F+24</dt><dd>Cello returns — but the note is now resolving, not building</dd>
+        <dt>F+48</dt><dd>VO — "The old system is not broken."</dd>
+        <dt>F+96</dt><dd>VO — "It is working exactly as designed."</dd>
+        <dt>F+144</dt><dd>VO — "So we designed something else."</dd>
+      </dl>
+      <div class="sd-trans">
+        <span class="speaker">→ TRANSITION TO SHOT 12</span>
+        Hard cut. Iris extinguishes. Black for 6 frames before wordmark appears — the audience has to fall a tiny bit before being caught.
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ SHOT 12 ═══ -->
+<div class="shot-card">
+  <div class="shot-head">
+    <span class="sh-num">SHOT 12 · WORDMARK</span>
+    <span class="sh-tc">00:00:56:00 → 00:01:00:00</span>
+    <span class="sh-dur">96 FRAMES</span>
+    <span class="sh-act">ACT III · MARK</span>
+  </div>
+  <div class="frames">
+    <div class="frame">
+      <svg viewBox="0 0 320 180" preserveAspectRatio="xMidYMid slice">
+        <rect width="320" height="180" fill="#000"/>
+      </svg>
+      <span class="frame-label">IN — black hold (6f)</span>
+      <span class="frame-tc">00:00:56:00</span>
+    </div>
+    <div class="frame">
+      <svg viewBox="0 0 320 180" preserveAspectRatio="xMidYMid slice">
+        <rect width="320" height="180" fill="#000"/>
+        <text x="160" y="78" fill="rgba(244,244,244,0.7)" font-family="Inter,sans-serif" font-size="22" text-anchor="middle" font-weight="200" letter-spacing="-1">Favour Economy</text>
+        <line x1="120" y1="92" x2="200" y2="92" stroke="rgba(201,168,76,0.6)" stroke-width="0.5"/>
+      </svg>
+      <span class="frame-label">MID — mark appears</span>
+      <span class="frame-tc">00:00:58:00</span>
+    </div>
+    <div class="frame">
+      <svg viewBox="0 0 320 180" preserveAspectRatio="xMidYMid slice">
+        <rect width="320" height="180" fill="#000"/>
+        <text x="160" y="78" fill="#f4f4f4" font-family="Inter,sans-serif" font-size="22" text-anchor="middle" font-weight="200" letter-spacing="-1">Favour Economy</text>
+        <line x1="120" y1="92" x2="200" y2="92" stroke="#c9a84c" stroke-width="0.5"/>
+        <text x="160" y="110" fill="rgba(201,168,76,0.85)" font-family="Inter,sans-serif" font-size="7" text-anchor="middle" letter-spacing="3" font-style="italic">Stop being consumed. Start producing.</text>
+        <text x="160" y="155" fill="rgba(106,106,126,0.7)" font-family="JetBrains Mono,monospace" font-size="6" text-anchor="middle" letter-spacing="3">FAVOUREC0NOMY.COM</text>
+      </svg>
+      <span class="frame-label">OUT — full mark + URL</span>
+      <span class="frame-tc">00:00:59:23</span>
+    </div>
+  </div>
+  <div class="shot-detail">
+    <div>
+      <div class="sd-label">Camera + Motion</div>
+      <dl class="sd-list">
+        <dt>Move</dt><dd>Static — pure typography</dd>
+        <dt>Mark</dt><dd>Fade in F+12 → F+30 (hold 60% then full)</dd>
+        <dt>Tagline</dt><dd>Fade in F+36 → F+54</dd>
+        <dt>URL</dt><dd>Fade in F+60 → F+72</dd>
+      </dl>
+    </div>
+    <div>
+      <div class="sd-label">Audio Sync</div>
+      <dl class="sd-list">
+        <dt>F+0</dt><dd>Cello resolves to tonic — sustained</dd>
+        <dt>F+12</dt><dd>Choir adds back single soprano voice</dd>
+        <dt>F+72</dt><dd>One last breath — the same voice from 0:04</dd>
+        <dt>F+96</dt><dd>OUT to silence. NO music sting. NO logo whoosh.</dd>
+      </dl>
+      <div class="sd-trans">
+        <span class="speaker">END · NO POST-ROLL</span>
+        Hard out to black at F+96. No URL repeat card. No "now available." The film ends where it ends. Trust the audience.
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════
+     EDIT DECISION LIST
+═══════════════════════════════════════════════ -->
+<div class="section">
+  <p class="section-tag"><span class="section-num">03 ·</span> EDL</p>
+  <h2 class="section-title">The cut sheet.</h2>
+  <p class="section-body">SMPTE timecode HH:MM:SS:FF at 24fps. This table imports straight into Premiere, Resolve, or FCP X via XML. Every transition specified, every duration locked.</p>
+</div>
+
+<div class="edl-wrap">
+<table class="edl">
+  <thead>
+    <tr>
+      <th>#</th>
+      <th>Source</th>
+      <th>TC IN</th>
+      <th>TC OUT</th>
+      <th>Duration</th>
+      <th>Frames</th>
+      <th>Transition</th>
+      <th>Note</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr><td>01</td><td>S01_iris_bloom_v3</td><td class="tc">00:00:00:00</td><td class="tc">00:00:04:00</td><td class="dur">4.00s</td><td>96</td><td class="trans">CUT</td><td>Hold black 0f before</td></tr>
+    <tr><td>02</td><td>S02_bedroom_pov_v2</td><td class="tc">00:00:04:00</td><td class="tc">00:00:06:00</td><td class="dur">2.00s</td><td>48</td><td class="trans">CUT</td><td>VO pre-laps</td></tr>
+    <tr><td>03</td><td>S03_argument_mic_v1</td><td class="tc">00:00:06:00</td><td class="tc">00:00:08:00</td><td class="dur">2.00s</td><td>48</td><td class="trans">J-CUT 6f</td><td>S04 audio pre-laps</td></tr>
+    <tr><td>04</td><td>S04_sleeping_face_v4</td><td class="tc">00:00:08:00</td><td class="tc">00:00:12:00</td><td class="dur">4.00s</td><td>96</td><td class="trans">CUT</td><td>Cello swell on cut</td></tr>
+    <tr><td>05</td><td>S05_servers_pullback_v2</td><td class="tc">00:00:12:00</td><td class="tc">00:00:18:00</td><td class="dur">6.00s</td><td>144</td><td class="trans">CUT TO BLACK</td><td>Hold black 12f</td></tr>
+    <tr><td>—</td><td>BLACK</td><td class="tc">00:00:18:00</td><td class="tc">00:00:18:12</td><td class="dur">0.50s</td><td>12</td><td class="trans">SILENCE</td><td>HERO MOMENT 01</td></tr>
+    <tr><td>06</td><td>S06_paper_falls_v3</td><td class="tc">00:00:18:12</td><td class="tc">00:00:24:00</td><td class="dur">5.50s</td><td>132</td><td class="trans">DISSOLVE 12f</td><td>Match-dissolve to S07</td></tr>
+    <tr><td>07</td><td>S07_unfold_village_cgi</td><td class="tc">00:00:24:00</td><td class="tc">00:00:30:00</td><td class="dur">6.00s</td><td>144</td><td class="trans">CUT</td><td>Choir bridges</td></tr>
+    <tr><td>08</td><td>S08_groceries_door_v2</td><td class="tc">00:00:30:00</td><td class="tc">00:00:34:00</td><td class="dur">4.00s</td><td>96</td><td class="trans">CUT</td><td>"Thank you" mid-cut</td></tr>
+    <tr><td>09</td><td>S09_lora_constellation</td><td class="tc">00:00:34:00</td><td class="tc">00:00:38:00</td><td class="dur">4.00s</td><td>96</td><td class="trans">CUT</td><td>Choir holds</td></tr>
+    <tr><td>10</td><td>S10_thread_city_cgi</td><td class="tc">00:00:38:00</td><td class="tc">00:00:48:00</td><td class="dur">10.00s</td><td>240</td><td class="trans">MATCH-CUT</td><td>HERO MOMENT 03</td></tr>
+    <tr><td>11</td><td>S11_iris_lost_v1</td><td class="tc">00:00:48:00</td><td class="tc">00:00:56:00</td><td class="dur">8.00s</td><td>192</td><td class="trans">CUT TO BLACK</td><td>Hold black 6f</td></tr>
+    <tr><td>—</td><td>BLACK</td><td class="tc">00:00:56:00</td><td class="tc">00:00:56:06</td><td class="dur">0.25s</td><td>6</td><td class="trans">FALL</td><td>Audience drops</td></tr>
+    <tr><td>12</td><td>S12_wordmark</td><td class="tc">00:00:56:06</td><td class="tc">00:01:00:00</td><td class="dur">3.75s</td><td>90</td><td class="trans">OUT</td><td>Hard cut to black</td></tr>
+  </tbody>
+</table>
+</div>
+
+<!-- ════════════════════════════════════════════
+     HERO MOMENTS
+═══════════════════════════════════════════════ -->
+<div class="section">
+  <p class="section-tag"><span class="section-num">04 ·</span> Hero Moments</p>
+  <h2 class="section-title">The three cuts that decide everything.</h2>
+  <p class="section-body">Three moments in the film must be perfect or the whole thing collapses. Each gets a frame-by-frame breakdown — eight frames sampled across the moment with audio sync notes. Print these and pin them above the editor's monitor.</p>
+</div>
+
+<!-- HERO 01: THE SILENCE -->
+<div class="hero-moment">
+  <div class="hm-head">
+    <div>
+      <div class="hm-num">Hero Moment 01 · The Silence</div>
+      <div class="hm-title">When the film stops, so the audience can think.</div>
+    </div>
+    <div class="hm-tc">00:00:17:00 → 00:00:19:00 · 48 frames</div>
+  </div>
+  <div class="hm-frames">
+    <div class="hm-frame">
+      <svg viewBox="0 0 320 180" preserveAspectRatio="xMidYMid slice">
+        <rect width="320" height="180" fill="#000"/>
+        <g><rect x="20" y="30" width="56" height="120" fill="#0a0a14"/><rect x="86" y="30" width="56" height="120" fill="#0a0a14"/><rect x="152" y="30" width="56" height="120" fill="#0a0a14"/><rect x="218" y="30" width="56" height="120" fill="#0a0a14"/></g>
+        <g fill="#c0392b"><circle cx="48" cy="90" r="2"/><circle cx="114" cy="90" r="2"/><circle cx="180" cy="90" r="2"/><circle cx="246" cy="90" r="2"/></g>
+        <text x="160" y="170" fill="#c0392b" font-size="9" font-family="Inter,sans-serif" text-anchor="middle" letter-spacing="6">YOU — ARE NOT — THE PRODUCT</text>
+      </svg>
+      <span class="hm-frame-tc">17:00</span>
+    </div>
+    <div class="hm-frame">
+      <svg viewBox="0 0 320 180" preserveAspectRatio="xMidYMid slice">
+        <rect width="320" height="180" fill="#000"/>
+        <g opacity="0.7"><rect x="20" y="30" width="56" height="120" fill="#0a0a14"/><rect x="86" y="30" width="56" height="120" fill="#0a0a14"/><rect x="152" y="30" width="56" height="120" fill="#0a0a14"/><rect x="218" y="30" width="56" height="120" fill="#0a0a14"/></g>
+        <text x="160" y="170" fill="#c0392b" font-size="9" font-family="Inter,sans-serif" text-anchor="middle" letter-spacing="6" opacity="0.7">YOU — ARE NOT — THE PRODUCT</text>
+      </svg>
+      <span class="hm-frame-tc">17:18</span>
+    </div>
+    <div class="hm-frame">
+      <svg viewBox="0 0 320 180" preserveAspectRatio="xMidYMid slice"><rect width="320" height="180" fill="#000"/></svg>
+      <span class="hm-frame-tc">18:00</span>
+    </div>
+    <div class="hm-frame">
+      <svg viewBox="0 0 320 180" preserveAspectRatio="xMidYMid slice"><rect width="320" height="180" fill="#000"/></svg>
+      <span class="hm-frame-tc">18:06</span>
+    </div>
+    <div class="hm-frame">
+      <svg viewBox="0 0 320 180" preserveAspectRatio="xMidYMid slice"><rect width="320" height="180" fill="#000"/></svg>
+      <span class="hm-frame-tc">18:12</span>
+    </div>
+    <div class="hm-frame">
+      <svg viewBox="0 0 320 180" preserveAspectRatio="xMidYMid slice">
+        <rect width="320" height="180" fill="#0a0a14"/>
+        <g transform="translate(160,30) rotate(-5)"><rect x="-22" y="-22" width="44" height="44" fill="#c9a84c"/></g>
+      </svg>
+      <span class="hm-frame-tc">18:18</span>
+    </div>
+    <div class="hm-frame">
+      <svg viewBox="0 0 320 180" preserveAspectRatio="xMidYMid slice">
+        <rect width="320" height="180" fill="#0a0a14"/>
+        <g transform="translate(160,55) rotate(-12)"><rect x="-22" y="-22" width="44" height="44" fill="#c9a84c"/></g>
+      </svg>
+      <span class="hm-frame-tc">19:00</span>
+    </div>
+    <div class="hm-frame">
+      <svg viewBox="0 0 320 180" preserveAspectRatio="xMidYMid slice">
+        <rect width="320" height="180" fill="#08081a"/>
+        <g transform="translate(160,80) rotate(-15)"><rect x="-22" y="-22" width="44" height="44" fill="#c9a84c"/></g>
+      </svg>
+      <span class="hm-frame-tc">19:12</span>
+    </div>
+  </div>
+  <div class="hm-body">
+    <p>The transition from the server-wall thesis into the gold paper is the breath of the film. <strong>Hold the final server frame for 24 frames after the last word lands</strong> — long enough that the audience starts to wonder if the projector has stopped. Then cut to black. <strong>Twelve frames of pure black silence.</strong> No sound, no music, no ambience. The room you're in becomes the soundtrack.</p>
+    <p>At 00:00:18:12, the gold paper enters frame top — soundlessly at first. At 00:00:19:00, the single soprano enters on a sustained vowel. <strong>This is the only place in the film where music STARTS rather than continues.</strong> The audience has been holding their breath for two seconds; the soprano is the exhale.</p>
+    <p>If your test screening reports that this gap "felt too long" — leave it. That feeling is the work. If they don't notice the silence at all, you cut it short. Add 12 more frames.</p>
+  </div>
+</div>
+
+<!-- HERO 02: PAPER MEETS WATER -->
+<div class="hero-moment">
+  <div class="hm-head">
+    <div>
+      <div class="hm-num">Hero Moment 02 · Paper Meets Water</div>
+      <div class="hm-title">The dissolve that births the village.</div>
+    </div>
+    <div class="hm-tc">00:00:23:12 → 00:00:24:12 · 24 frames</div>
+  </div>
+  <div class="hm-frames">
+    <div class="hm-frame">
+      <svg viewBox="0 0 320 180" preserveAspectRatio="xMidYMid slice">
+        <rect width="320" height="180" fill="#02020a"/>
+        <g transform="translate(160,135) rotate(-8)"><rect x="-22" y="-22" width="44" height="44" fill="#c9a84c"/></g>
+      </svg>
+      <span class="hm-frame-tc">23:12</span>
+    </div>
+    <div class="hm-frame">
+      <svg viewBox="0 0 320 180" preserveAspectRatio="xMidYMid slice">
+        <rect width="320" height="180" fill="#02020a"/>
+        <g transform="translate(160,142) rotate(-6)"><rect x="-22" y="-22" width="44" height="44" fill="#c9a84c"/></g>
+        <ellipse cx="160" cy="150" rx="20" ry="2" fill="none" stroke="rgba(201,168,76,0.5)" stroke-width="0.4"/>
+      </svg>
+      <span class="hm-frame-tc">23:15</span>
+    </div>
+    <div class="hm-frame">
+      <svg viewBox="0 0 320 180" preserveAspectRatio="xMidYMid slice">
+        <rect width="320" height="180" fill="#02020a"/>
+        <g transform="translate(160,148) rotate(-3)"><rect x="-22" y="-22" width="44" height="44" fill="#c9a84c"/></g>
+        <ellipse cx="160" cy="150" rx="40" ry="3" fill="none" stroke="rgba(201,168,76,0.6)" stroke-width="0.4"/>
+        <ellipse cx="160" cy="150" rx="60" ry="4.5" fill="none" stroke="rgba(201,168,76,0.3)" stroke-width="0.4"/>
+      </svg>
+      <span class="hm-frame-tc">23:18</span>
+    </div>
+    <div class="hm-frame">
+      <svg viewBox="0 0 320 180" preserveAspectRatio="xMidYMid slice">
+        <rect width="320" height="180" fill="#02020a"/>
+        <g transform="translate(160,150)"><rect x="-22" y="-22" width="44" height="44" fill="#c9a84c"/></g>
+        <ellipse cx="160" cy="150" rx="60" ry="4.5" fill="none" stroke="rgba(201,168,76,0.7)" stroke-width="0.5"/>
+        <ellipse cx="160" cy="150" rx="90" ry="6" fill="none" stroke="rgba(201,168,76,0.4)" stroke-width="0.4"/>
+      </svg>
+      <span class="hm-frame-tc">23:21</span>
+    </div>
+    <div class="hm-frame">
+      <svg viewBox="0 0 320 180" preserveAspectRatio="xMidYMid slice">
+        <rect width="320" height="180" fill="#06060a"/>
+        <g transform="translate(160,150)"><rect x="-22" y="-22" width="44" height="44" fill="#c9a84c" opacity="0.85"/></g>
+        <ellipse cx="160" cy="150" rx="90" ry="6" fill="none" stroke="rgba(201,168,76,0.6)" stroke-width="0.5"/>
+        <polygon points="148,128 160,118 172,128 172,140 148,140" fill="#c9a84c" opacity="0.4"/>
+      </svg>
+      <span class="hm-frame-tc">24:00</span>
+    </div>
+    <div class="hm-frame">
+      <svg viewBox="0 0 320 180" preserveAspectRatio="xMidYMid slice">
+        <rect width="320" height="180" fill="#0a0808"/>
+        <g transform="translate(160,120)"><rect x="-22" y="-22" width="44" height="44" fill="#c9a84c" opacity="0.7"/></g>
+        <polygon points="138,108 160,90 182,108 182,132 138,132" fill="#c9a84c" opacity="0.7"/>
+      </svg>
+      <span class="hm-frame-tc">24:03</span>
+    </div>
+    <div class="hm-frame">
+      <svg viewBox="0 0 320 180" preserveAspectRatio="xMidYMid slice">
+        <rect width="320" height="180" fill="#0a0808"/>
+        <polygon points="-50,30 -10,-40 30,30" transform="translate(160,90)" fill="#c9a84c" opacity="0.85"/>
+      </svg>
+      <span class="hm-frame-tc">24:09</span>
+    </div>
+    <div class="hm-frame">
+      <svg viewBox="0 0 320 180" preserveAspectRatio="xMidYMid slice">
+        <rect width="320" height="180" fill="#0a0808"/>
+        <g transform="translate(160,90)"><polygon points="-50,30 -10,-40 30,30 0,15 -25,30" fill="#c9a84c"/></g>
+      </svg>
+      <span class="hm-frame-tc">24:12</span>
+    </div>
+  </div>
+  <div class="hm-body">
+    <p>The water-touch at 00:00:23:18 must be <strong>frame-accurate to the soprano's vocal entry</strong>. The paper hits, the ripple spreads, the sound enters — three events on the same frame. The composer cuts to picture, not the other way around.</p>
+    <p>The dissolve from paper to origami crane (24:00 → 24:12) is the only soft transition in the film. <strong>Use a luminance-matched dissolve</strong>, not a straight cross-fade — the gold of the paper should bleed into the gold of the crane without a colour shift. If you can't tell where one ends and the other begins, you've done it right.</p>
+    <p>The water SFX is a single "tup" — recorded with a finger on still water in a glass bowl. Do NOT use a stock library splash. Stock splashes have presence; this needs absence with a single point of contact.</p>
+  </div>
+</div>
+
+<!-- HERO 03: THE MATCH-CUT -->
+<div class="hero-moment">
+  <div class="hm-head">
+    <div>
+      <div class="hm-num">Hero Moment 03 · Gold-to-Iris Match-Cut</div>
+      <div class="hm-title">The hardest cut in the film. Pixel-locked.</div>
+    </div>
+    <div class="hm-tc">00:00:47:18 → 00:00:48:06 · 12 frames</div>
+  </div>
+  <div class="hm-frames">
+    <div class="hm-frame">
+      <svg viewBox="0 0 320 180" preserveAspectRatio="xMidYMid slice">
+        <rect width="320" height="180" fill="#02020a"/>
+        <circle cx="160" cy="80" r="14" fill="rgba(201,168,76,0.1)"/>
+        <circle cx="160" cy="80" r="22" fill="rgba(201,168,76,0.04)"/>
+        <circle cx="160" cy="80" r="4" fill="#f0cb6a"/>
+      </svg>
+      <span class="hm-frame-tc">47:18</span>
+    </div>
+    <div class="hm-frame">
+      <svg viewBox="0 0 320 180" preserveAspectRatio="xMidYMid slice">
+        <rect width="320" height="180" fill="#02020a"/>
+        <circle cx="160" cy="80" r="14" fill="rgba(201,168,76,0.15)"/>
+        <circle cx="160" cy="80" r="6" fill="#f0cb6a"/>
+      </svg>
+      <span class="hm-frame-tc">47:21</span>
+    </div>
+    <div class="hm-frame">
+      <svg viewBox="0 0 320 180" preserveAspectRatio="xMidYMid slice">
+        <rect width="320" height="180" fill="#02020a"/>
+        <circle cx="160" cy="80" r="22" fill="rgba(201,168,76,0.2)"/>
+        <circle cx="160" cy="80" r="10" fill="#f0cb6a"/>
+      </svg>
+      <span class="hm-frame-tc">47:23</span>
+    </div>
+    <div class="hm-frame">
+      <svg viewBox="0 0 320 180" preserveAspectRatio="xMidYMid slice">
+        <rect width="320" height="180" fill="#000"/>
+        <ellipse cx="160" cy="90" rx="28" ry="28" fill="#3a0808"/>
+        <circle cx="160" cy="90" r="14" fill="#0a0404"/>
+      </svg>
+      <span class="hm-frame-tc">48:00</span>
+    </div>
+    <div class="hm-frame">
+      <svg viewBox="0 0 320 180" preserveAspectRatio="xMidYMid slice">
+        <rect width="320" height="180" fill="#000"/>
+        <ellipse cx="160" cy="90" rx="40" ry="35" fill="#3a0808"/>
+        <ellipse cx="160" cy="90" rx="40" ry="35" fill="none" stroke="rgba(192,57,43,0.4)" stroke-width="0.5"/>
+        <circle cx="160" cy="90" r="14" fill="#0a0404"/>
+      </svg>
+      <span class="hm-frame-tc">48:01</span>
+    </div>
+    <div class="hm-frame">
+      <svg viewBox="0 0 320 180" preserveAspectRatio="xMidYMid slice">
+        <rect width="320" height="180" fill="#000"/>
+        <ellipse cx="160" cy="90" rx="60" ry="38" fill="#3a0808"/>
+        <ellipse cx="160" cy="90" rx="60" ry="38" fill="none" stroke="rgba(192,57,43,0.5)" stroke-width="0.5"/>
+        <circle cx="160" cy="90" r="14" fill="#0a0404"/>
+      </svg>
+      <span class="hm-frame-tc">48:02</span>
+    </div>
+    <div class="hm-frame">
+      <svg viewBox="0 0 320 180" preserveAspectRatio="xMidYMid slice">
+        <rect width="320" height="180" fill="#000"/>
+        <ellipse cx="160" cy="90" rx="80" ry="40" fill="#3a0808"/>
+        <ellipse cx="160" cy="90" rx="80" ry="40" fill="none" stroke="rgba(192,57,43,0.5)" stroke-width="0.5"/>
+        <circle cx="160" cy="90" r="14" fill="#0a0404"/>
+      </svg>
+      <span class="hm-frame-tc">48:04</span>
+    </div>
+    <div class="hm-frame">
+      <svg viewBox="0 0 320 180" preserveAspectRatio="xMidYMid slice">
+        <rect width="320" height="180" fill="#000"/>
+        <ellipse cx="160" cy="90" rx="80" ry="40" fill="#3a0808"/>
+        <ellipse cx="160" cy="90" rx="80" ry="40" fill="none" stroke="rgba(192,57,43,0.5)" stroke-width="0.5"/>
+        <circle cx="160" cy="90" r="14" fill="#0a0404"/>
+        <text x="160" y="50" fill="rgba(192,57,43,0.4)" font-size="6" font-family="JetBrains Mono,monospace" text-anchor="middle" letter-spacing="3">SIGNAL LOST</text>
+      </svg>
+      <span class="hm-frame-tc">48:06</span>
+    </div>
+  </div>
+  <div class="hm-body">
+    <p>The brightest gold node in shot 10 (centre, frame 47:23) and the centre of the iris in shot 11 (frame 48:00) <strong>must occupy the same pixel coordinates</strong>. Not approximately. Exactly. The audience's pupil tracks the bright point — if it moves on the cut, the magic dies.</p>
+    <p>The cut itself is on a single frame: <strong>00:00:48:00</strong>. The gold node fills frame, then in one frame becomes the iris of the surveillance system. The villain has returned — but it is now small, dim, and blind. The audience understands without being told that the favour world has overwhelmed it.</p>
+    <p>Audio across the cut: the choir's last sustained note from shot 10 cuts hard against a single signal-lost beep on the same frame. <strong>One frame of audio overlap</strong> — the two worlds collide and one wins. Mix the beep at -18LUFS so it feels small. The choir was full. The system is now a whisper.</p>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════
+     ON-SCREEN TEXT TIMING
+═══════════════════════════════════════════════ -->
+<div class="section">
+  <p class="section-tag"><span class="section-num">05 ·</span> Text Timing</p>
+  <h2 class="section-title">Read time, not screen time.</h2>
+  <p class="section-body">Average reader = 4 words/second silent, 2.5 words/second comprehending. Every text card is timed for the slower number, then held an extra 12 frames. The audience must finish reading before the cut, or the cut robs the line.</p>
+</div>
+
+<div class="text-grid">
+  <div class="text-card">
+    <div class="text-display"><span class="word">SOMEONE IS WATCHING</span></div>
+    <dl>
+      <dt>Cards In</dt><dd>00:00:02:12</dd>
+      <dt>Cards Out</dt><dd>00:00:03:23</dd>
+      <dt>Words</dt><dd>3</dd>
+      <dt>Read Time</dt><dd>1.20s required</dd>
+      <dt>Screen Time</dt><dd>1.47s allotted</dd>
+      <dt>Margin</dt><dd>+0.27s safe</dd>
+    </dl>
+  </div>
+
+  <div class="text-card">
+    <div class="text-display"><span class="word">YOU&nbsp;&nbsp;&middot;&nbsp;&nbsp;ARE NOT&nbsp;&nbsp;&middot;&nbsp;&nbsp;THE PRODUCT</span></div>
+    <dl>
+      <dt>Cards In</dt><dd>00:00:16:00 (staggered)</dd>
+      <dt>Cards Out</dt><dd>00:00:18:00</dd>
+      <dt>Words</dt><dd>4 (one per beat)</dd>
+      <dt>Read Time</dt><dd>1.60s minimum</dd>
+      <dt>Screen Time</dt><dd>2.00s — one beat each</dd>
+      <dt>Margin</dt><dd>+0.40s — held for emphasis</dd>
+    </dl>
+  </div>
+
+  <div class="text-card">
+    <div class="text-display">
+      <div>
+        <div class="word" style="font-size:1.1rem">SO WE DESIGNED SOMETHING ELSE</div>
+      </div>
+    </div>
+    <dl>
+      <dt>Cards In</dt><dd>00:00:54:00</dd>
+      <dt>Cards Out</dt><dd>00:00:55:23</dd>
+      <dt>Words</dt><dd>5</dd>
+      <dt>Read Time</dt><dd>2.00s</dd>
+      <dt>Screen Time</dt><dd>1.95s + VO</dd>
+      <dt>Margin</dt><dd>VO carries comprehension</dd>
+    </dl>
+  </div>
+
+  <div class="text-card">
+    <div class="text-display">
+      <div>
+        <div class="word" style="font-size:1rem;letter-spacing:-0.02em">Favour Economy</div>
+        <div style="font-family:Inter;font-size:0.6rem;color:#c9a84c;font-style:italic;letter-spacing:0.2em;margin-top:6px">Stop being consumed. Start producing.</div>
+      </div>
+    </div>
+    <dl>
+      <dt>Mark In</dt><dd>00:00:56:18</dd>
+      <dt>Tagline In</dt><dd>00:00:57:12</dd>
+      <dt>URL In</dt><dd>00:00:58:12</dd>
+      <dt>Hold</dt><dd>00:01:00:00</dd>
+      <dt>Total</dt><dd>3.42s on-screen</dd>
+      <dt>Margin</dt><dd>2× over comfort read time</dd>
+    </dl>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════
+     DELIVERABLES
+═══════════════════════════════════════════════ -->
+<div class="section">
+  <p class="section-tag"><span class="section-num">06 ·</span> Deliverables</p>
+  <h2 class="section-title">What ships, in which format.</h2>
+  <p class="section-body">The cut spawns a family. Each derivative is conformed from the same master, never re-edited. Same VO, same music, same frame ratios — only duration and crop change. This guarantees the campaign feels like one film, not a series.</p>
+</div>
+
+<div class="deliv-grid">
+
+  <div class="deliv-card">
+    <h4>HERO · 60s Master</h4>
+    <ul>
+      <li><span class="check"></span><span>ProRes 4444 master</span><span class="spec">4K · 24fps</span></li>
+      <li><span class="check"></span><span>DCP for cinema</span><span class="spec">2K · 5.1</span></li>
+      <li><span class="check"></span><span>YouTube H.264</span><span class="spec">1080p · stereo</span></li>
+      <li><span class="check"></span><span>Broadcast HD master</span><span class="spec">1080i · 5.1</span></li>
+      <li><span class="check"></span><span>Subtitle file</span><span class="spec">SRT · WebVTT</span></li>
+      <li><span class="check"></span><span>Audio stems</span><span class="spec">VO · MX · SFX · stereo + 5.1</span></li>
+    </ul>
+  </div>
+
+  <div class="deliv-card">
+    <h4>BROADCAST · 30s Cut</h4>
+    <ul>
+      <li><span class="check"></span><span>Conform from master</span><span class="spec">no re-edit</span></li>
+      <li><span class="check"></span><span>Trims: shots 02·03·09 removed</span><span class="spec">−30 frames each</span></li>
+      <li><span class="check"></span><span>VO re-record (shorter)</span><span class="spec">same talent</span></li>
+      <li><span class="check"></span><span>TV-spec mix</span><span class="spec">−24 LUFS · BS.1770</span></li>
+      <li><span class="check"></span><span>16:9 + 4:3 safe</span><span class="spec">title-safe verified</span></li>
+    </ul>
+  </div>
+
+  <div class="deliv-card">
+    <h4>SOCIAL · 15s Teaser</h4>
+    <ul>
+      <li><span class="check"></span><span>Shots 06 → 12 only</span><span class="spec">no surveillance act</span></li>
+      <li><span class="check"></span><span>Three-word fold</span><span class="spec">PRIVACY · PRODUCER · POWER</span></li>
+      <li><span class="check"></span><span>9:16 vertical</span><span class="spec">TikTok · Reels</span></li>
+      <li><span class="check"></span><span>1:1 square</span><span class="spec">feed autoplay</span></li>
+      <li><span class="check"></span><span>Sound-off captions</span><span class="spec">burned-in safe area</span></li>
+      <li><span class="check"></span><span>No CTA card</span><span class="spec">URL in caption only</span></li>
+    </ul>
+  </div>
+
+</div>
+
+<!-- ════════════════════════════════════════════
+     FINAL NOTES
+═══════════════════════════════════════════════ -->
+<div class="section">
+  <p class="section-tag"><span class="section-num">07 ·</span> Editor's Notes</p>
+  <h2 class="section-title">Five rules. Print these.</h2>
+</div>
+
+<div class="text-grid" style="grid-template-columns:1fr">
+  <div class="text-card" style="padding:2rem">
+    <ol style="list-style:none;counter-reset:rules;padding-left:0">
+      <li style="counter-increment:rules;padding:1rem 0;border-bottom:1px solid var(--dim);font-size:0.95rem;color:rgba(244,244,244,0.9);line-height:1.6;display:grid;grid-template-columns:50px 1fr;gap:1rem">
+        <span style="font-family:var(--mono);color:var(--gold);font-size:1.4rem;font-weight:200">01</span>
+        <span><strong style="color:var(--gold)">Defend the silence at 00:00:18:00.</strong> Every test screening will tell you to shorten it. Don't. The film fails without it.</span>
+      </li>
+      <li style="counter-increment:rules;padding:1rem 0;border-bottom:1px solid var(--dim);font-size:0.95rem;color:rgba(244,244,244,0.9);line-height:1.6;display:grid;grid-template-columns:50px 1fr;gap:1rem">
+        <span style="font-family:var(--mono);color:var(--gold);font-size:1.4rem;font-weight:200">02</span>
+        <span><strong style="color:var(--gold)">Pixel-lock the match-cut at 00:00:48:00.</strong> If the centres are off by even 4px, the magic dies. Use a guide overlay during conform.</span>
+      </li>
+      <li style="counter-increment:rules;padding:1rem 0;border-bottom:1px solid var(--dim);font-size:0.95rem;color:rgba(244,244,244,0.9);line-height:1.6;display:grid;grid-template-columns:50px 1fr;gap:1rem">
+        <span style="font-family:var(--mono);color:var(--gold);font-size:1.4rem;font-weight:200">03</span>
+        <span><strong style="color:var(--gold)">Never sweeten the cuts.</strong> No whoosh, no riser, no impact. Eleven of twelve transitions are hard cuts. The discomfort IS the form.</span>
+      </li>
+      <li style="counter-increment:rules;padding:1rem 0;border-bottom:1px solid var(--dim);font-size:0.95rem;color:rgba(244,244,244,0.9);line-height:1.6;display:grid;grid-template-columns:50px 1fr;gap:1rem">
+        <span style="font-family:var(--mono);color:var(--gold);font-size:1.4rem;font-weight:200">04</span>
+        <span><strong style="color:var(--gold)">Cut the music to picture, never the other way.</strong> If a word lands wrong, move the picture. The cello and choir are the spine — bend the visuals around them.</span>
+      </li>
+      <li style="counter-increment:rules;padding:1rem 0;font-size:0.95rem;color:rgba(244,244,244,0.9);line-height:1.6;display:grid;grid-template-columns:50px 1fr;gap:1rem">
+        <span style="font-family:var(--mono);color:var(--gold);font-size:1.4rem;font-weight:200">05</span>
+        <span><strong style="color:var(--gold)">End at 00:01:00:00.</strong> No URL repeat card. No legal bug. No "now available." The film ends where it ends. Trust the audience to type the URL themselves.</span>
+      </li>
+    </ol>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════
+     CLOSING
+═══════════════════════════════════════════════ -->
+<hr style="border:none;border-top:1px solid rgba(201,168,76,0.2);margin:5rem 0 0">
+
+<div style="text-align:center;padding:4rem 0 2rem">
+  <p class="section-tag" style="text-align:center">Picture Lock</p>
+  <h2 style="font-size:clamp(2rem,5vw,4rem);font-weight:200;letter-spacing:-0.02em;line-height:1.1;margin-top:0.6rem">
+    1,440 frames.<br>Not <span style="color:var(--gold)">one</span> wasted.
+  </h2>
+  <p style="font-size:1rem;color:var(--muted);max-width:560px;margin:1.5rem auto 0;line-height:1.7">
+    A great commercial is sixty seconds long. A great commercial that lasts is sixty seconds with one moment that wouldn't fit anywhere else in your life. This is that moment.
+  </p>
+  <div style="margin-top:3rem">
+    <span class="clap">PICTURE LOCK</span>
+    <span class="clap copper">FINAL CUT</span>
+    <span class="clap dark">SHIP</span>
+  </div>
+</div>
+
+</div><!-- /page -->
+
+<div class="footer">
+  <div class="footer-logo">Favour Economy</div>
+  <div class="footer-tag">The Unfolding · Animatic Spec · v1.0 · 1,440 frames</div>
+  <div class="footer-links">
+    <a href="index.html">Cinematic Pitch</a>
+    <a href="brochure.html">Brochure</a>
+    <a href="storyboard.html">Storyboard</a>
+    <a href="mailto:hello@favoureconomy.com">Contact</a>
+  </div>
+</div>
+
+</body>
+</html>
