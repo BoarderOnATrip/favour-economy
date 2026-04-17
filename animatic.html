@@ -394,8 +394,32 @@ body { background: var(--black); }
 }
 .move-diagram svg { width: 100%; height: 50px; }
 </style>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@200;300;400;500;600&display=swap" rel="stylesheet">
 </head>
 <body>
+
+<!-- ═══ SITE NAV ═══ -->
+<nav id="site-nav" style="
+  position: fixed; top: 0; left: 0; right: 0; z-index: 10001;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 1.5rem; height: 48px;
+  background: rgba(5,5,8,0.85); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid rgba(201,168,76,0.08);
+  font-family: 'Outfit', -apple-system, sans-serif;
+">
+  <a href="index.html" style="font-size:0.7rem;letter-spacing:0.25em;text-transform:uppercase;color:#c9a84c;text-decoration:none;border:none;font-weight:400;">Favour Economy</a>
+  <div style="display:flex;gap:1.8rem;align-items:center;">
+    <a href="index.html" style="font-size:0.62rem;letter-spacing:0.18em;text-transform:uppercase;color:#8a8a96;text-decoration:none;border:none;transition:color 0.3s;" onmouseover="this.style.color='#c9a84c'" onmouseout="this.style.color='#8a8a96'">Vision</a>
+    <a href="brochure.html" style="font-size:0.62rem;letter-spacing:0.18em;text-transform:uppercase;color:#8a8a96;text-decoration:none;border:none;transition:color 0.3s;" onmouseover="this.style.color='#c9a84c'" onmouseout="this.style.color='#8a8a96'">The Case</a>
+    <a href="whitepaper.html" style="font-size:0.62rem;letter-spacing:0.18em;text-transform:uppercase;color:#8a8a96;text-decoration:none;border:none;transition:color 0.3s;" onmouseover="this.style.color='#c9a84c'" onmouseout="this.style.color='#8a8a96'">Whitepaper</a>
+    <a href="storyboard.html" style="font-size:0.62rem;letter-spacing:0.18em;text-transform:uppercase;color:#8a8a96;text-decoration:none;border:none;transition:color 0.3s;" onmouseover="this.style.color='#c9a84c'" onmouseout="this.style.color='#8a8a96'">Storyboard</a>
+    <a href="animatic.html" style="font-size:0.62rem;letter-spacing:0.18em;text-transform:uppercase;color:#c9a84c;text-decoration:none;border:none;">Animatic</a>
+    <a href="campaign.html" style="font-size:0.62rem;letter-spacing:0.18em;text-transform:uppercase;color:#8a8a96;text-decoration:none;border:none;transition:color 0.3s;" onmouseover="this.style.color='#c9a84c'" onmouseout="this.style.color='#8a8a96'">Campaign</a>
+    <a href="mailto:hello@favoureconomy.com?subject=I want to join" style="font-size:0.6rem;letter-spacing:0.15em;text-transform:uppercase;color:#050508;text-decoration:none;border:none;background:#c9a84c;padding:0.35rem 0.9rem;font-weight:500;transition:background 0.3s;" onmouseover="this.style.background='#f0cb6a'" onmouseout="this.style.background='#c9a84c'">Join</a>
+  </div>
+</nav>
+<div style="height:48px;"></div>
+<!-- ═══ /SITE NAV ═══ -->
 
 <!-- ════════════════════════════════════════════
      COVER
@@ -2006,8 +2030,10 @@ body { background: var(--black); }
   <div class="footer-tag">The Unfolding · Animatic Spec · v1.0 · 1,440 frames</div>
   <div class="footer-links">
     <a href="index.html">Cinematic Pitch</a>
-    <a href="brochure.html">Brochure</a>
+    <a href="brochure.html">The Case</a>
+    <a href="whitepaper.html">Whitepaper</a>
     <a href="storyboard.html">Storyboard</a>
+    <a href="campaign.html">Campaign</a>
     <a href="mailto:hello@favoureconomy.com">Contact</a>
   </div>
 </div>

@@ -1,0 +1,2032 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Favour Economy — Protocol Whitepaper v0.1</title>
+<meta name="description" content="A mobilization protocol for the post-consumer age. The Favour Economy whitepaper — by T$TimeMoney.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=Outfit:wght@200;300;400;500;600&family=JetBrains+Mono:wght@300;400&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --black:    #050508;
+  --deep:     #08080f;
+  --char:     #0d0d14;
+  --navy:     #080c1a;
+  --gold:     #c9a84c;
+  --gold-b:   #f0cb6a;
+  --gold-dim: rgba(201,168,76,0.15);
+  --copper:   #e8734a;
+  --copper-dim: rgba(232,115,74,0.15);
+  --amber:    #d49a3c;
+  --white:    #f4f4f4;
+  --paper:    #ebe6d8;
+  --muted:    #8a8a96;
+  --low:      #505060;
+  --dim:      #1e1e2a;
+  --red:      #c0392b;
+  --green:    #4caf7a;
+  --display:  'Cormorant Garamond', Georgia, serif;
+  --body:     'Outfit', -apple-system, sans-serif;
+  --mono:     'JetBrains Mono', 'Courier New', monospace;
+}
+
+html {
+  background: var(--black);
+  color: var(--white);
+  font-family: var(--body);
+  font-weight: 300;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  scroll-behavior: smooth;
+  font-size: 17px;
+}
+body { background: var(--black); overflow-x: hidden; }
+
+/* ── TYPOGRAPHY PRIMITIVES ── */
+h1, h2, h3, h4 { font-family: var(--display); font-weight: 400; line-height: 1.15; letter-spacing: -0.01em; }
+h1 { font-size: clamp(3.2rem, 8vw, 6.5rem); font-weight: 300; }
+h2 { font-size: clamp(2.2rem, 5vw, 3.8rem); font-weight: 300; margin-bottom: 1.5rem; }
+h3 { font-size: clamp(1.5rem, 3vw, 2.2rem); font-weight: 400; margin-top: 2.5rem; margin-bottom: 1rem; }
+h4 { font-size: clamp(1.15rem, 2vw, 1.4rem); font-weight: 500; margin-top: 2rem; margin-bottom: 0.7rem; color: var(--gold); letter-spacing: 0.02em; }
+
+p { margin-bottom: 1.2rem; color: rgba(244,244,244,0.82); }
+p.lead { font-size: 1.15rem; color: rgba(244,244,244,0.9); }
+
+em { font-style: italic; color: var(--paper); }
+strong { font-weight: 500; color: var(--white); }
+code { font-family: var(--mono); font-size: 0.88em; background: rgba(201,168,76,0.08); color: var(--gold-b); padding: 0.1em 0.4em; border-radius: 2px; }
+
+a { color: var(--gold); text-decoration: none; border-bottom: 1px solid rgba(201,168,76,0.3); transition: color 0.3s, border-color 0.3s; }
+a:hover { color: var(--gold-b); border-color: var(--gold-b); }
+
+/* ── LAYOUT ── */
+.page { max-width: 780px; margin: 0 auto; padding: 0 2rem; }
+.page-wide { max-width: 1040px; margin: 0 auto; padding: 0 2rem; }
+
+/* ── PROGRESS BAR ── */
+#progress {
+  position: fixed; top: 0; left: 0;
+  height: 2px; width: 0%; top: 48px;
+  background: linear-gradient(to right, var(--copper), var(--gold));
+  z-index: 10000;
+  transition: width 0.1s linear;
+}
+
+/* ── SIDE NAV ── */
+#side-nav {
+  position: fixed;
+  right: 1.5rem;
+  top: calc(50% + 24px);
+  transform: translateY(-50%);
+  z-index: 999;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  max-height: 80vh;
+  overflow-y: auto;
+  padding: 0.5rem 0;
+}
+#side-nav::-webkit-scrollbar { width: 0; }
+#side-nav a {
+  display: block;
+  font-size: 0.62rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--low);
+  border: none;
+  padding: 0.35rem 0.7rem 0.35rem 1.2rem;
+  position: relative;
+  transition: color 0.3s;
+  white-space: nowrap;
+  max-width: 180px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+#side-nav a::before {
+  content: '';
+  position: absolute;
+  left: 0; top: 50%;
+  width: 8px; height: 1px;
+  background: var(--low);
+  transition: width 0.3s, background 0.3s;
+}
+#side-nav a:hover { color: var(--gold); }
+#side-nav a:hover::before { background: var(--gold); width: 14px; }
+#side-nav a.active { color: var(--gold); }
+#side-nav a.active::before { background: var(--gold); width: 18px; }
+
+@media (max-width: 1200px) { #side-nav { display: none; } }
+
+/* ── COVER ── */
+.cover {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 6rem 2rem 4rem; min-height: calc(100vh - 48px);
+  position: relative;
+  overflow: hidden;
+  background: var(--black);
+}
+.cover::before {
+  content: '';
+  position: absolute; inset: 0;
+  background:
+    radial-gradient(ellipse 70% 50% at 50% 40%, rgba(201,168,76,0.06) 0%, transparent 65%),
+    radial-gradient(ellipse 40% 30% at 50% 80%, rgba(232,115,74,0.04) 0%, transparent 70%);
+  pointer-events: none;
+}
+.cover-mark {
+  width: 68px; height: 68px;
+  margin-bottom: 2.5rem;
+  position: relative;
+}
+.cover-mark-outer {
+  position: absolute; inset: 0;
+  border: 1px solid var(--gold);
+  transform: rotate(45deg);
+  animation: spin-slow 40s linear infinite;
+}
+.cover-mark-inner {
+  position: absolute; top: 50%; left: 50%;
+  width: 40px; height: 40px;
+  margin-top: -20px; margin-left: -20px;
+  border: 1px solid rgba(201,168,76,0.4);
+  animation: spin-slow 28s linear infinite reverse;
+}
+.cover-mark-dot {
+  position: absolute; top: 50%; left: 50%;
+  width: 6px; height: 6px;
+  margin-top: -3px; margin-left: -3px;
+  background: var(--gold);
+  border-radius: 50%;
+  animation: pulse-soft 3s ease-in-out infinite;
+}
+@keyframes spin-slow { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+@keyframes pulse-soft { 0%, 100% { opacity: 0.7; } 50% { opacity: 1; box-shadow: 0 0 20px var(--gold); } }
+
+.cover-eyebrow {
+  font-size: 0.65rem;
+  letter-spacing: 0.4em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 1.2rem;
+}
+.cover-title {
+  font-family: var(--display);
+  font-weight: 300;
+  font-size: clamp(3rem, 10vw, 7.5rem);
+  line-height: 0.95;
+  letter-spacing: -0.02em;
+  max-width: 16ch;
+}
+.cover-title em { font-style: italic; color: var(--gold); }
+.cover-sub {
+  font-family: var(--display);
+  font-style: italic;
+  font-weight: 300;
+  font-size: clamp(1.2rem, 2.8vw, 1.8rem);
+  color: var(--muted);
+  margin-top: 1.8rem;
+  max-width: 40ch;
+  line-height: 1.4;
+}
+.cover-meta {
+  margin-top: 4rem;
+  display: flex;
+  gap: 3rem;
+  flex-wrap: wrap;
+  justify-content: center;
+  font-size: 0.68rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--low);
+}
+.cover-meta span em { font-style: normal; color: var(--paper); }
+.cover-scroll-hint {
+  position: absolute;
+  bottom: 2.5rem;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 0.6rem;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: var(--low);
+  animation: float 3s ease-in-out infinite;
+}
+@keyframes float { 0%, 100% { transform: translateX(-50%) translateY(0); } 50% { transform: translateX(-50%) translateY(-6px); } }
+
+/* ── TOC ── */
+.toc-section {
+  padding: 8rem 2rem;
+  background: var(--deep);
+  border-top: 1px solid var(--dim);
+  border-bottom: 1px solid var(--dim);
+}
+.toc-title {
+  font-size: 0.65rem;
+  letter-spacing: 0.35em;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin-bottom: 3rem;
+  text-align: center;
+}
+.toc-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 2rem 3rem;
+  max-width: 900px;
+  margin: 0 auto;
+}
+@media (max-width: 700px) { .toc-grid { grid-template-columns: 1fr; } }
+.toc-part {
+  padding: 1.5rem 0;
+  border-top: 1px solid var(--dim);
+}
+.toc-part-num {
+  font-family: var(--mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.15em;
+  color: var(--copper);
+  margin-bottom: 0.3rem;
+}
+.toc-part-title {
+  font-family: var(--display);
+  font-size: 1.6rem;
+  font-weight: 400;
+  color: var(--white);
+  margin-bottom: 1rem;
+}
+.toc-part-title em { font-style: italic; color: var(--gold); }
+.toc-links {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+.toc-links a {
+  font-size: 0.85rem;
+  color: var(--muted);
+  border: none;
+  padding: 0.15rem 0;
+  transition: color 0.3s, padding-left 0.3s;
+}
+.toc-links a:hover { color: var(--gold); padding-left: 0.5rem; }
+
+/* ── SECTION STRUCTURE ── */
+section.part {
+  padding: 8rem 0 5rem;
+  position: relative;
+}
+section.part-alt {
+  background: var(--deep);
+  border-top: 1px solid var(--dim);
+  border-bottom: 1px solid var(--dim);
+}
+.part-header {
+  text-align: center;
+  margin-bottom: 5rem;
+}
+.part-number {
+  font-family: var(--mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.4em;
+  color: var(--copper);
+  margin-bottom: 1rem;
+}
+.part-title {
+  font-family: var(--display);
+  font-size: clamp(2.5rem, 6vw, 4.5rem);
+  font-weight: 300;
+  line-height: 1.05;
+  letter-spacing: -0.02em;
+  max-width: 14ch;
+  margin: 0 auto;
+}
+.part-title em { font-style: italic; color: var(--gold); }
+.part-lede {
+  font-family: var(--display);
+  font-style: italic;
+  font-size: 1.35rem;
+  font-weight: 300;
+  color: var(--muted);
+  max-width: 36ch;
+  margin: 1.5rem auto 0;
+  line-height: 1.4;
+}
+
+/* ── IN-PAGE SECTIONS ── */
+section.sub {
+  padding: 2rem 0 3rem;
+  scroll-margin-top: 2rem;
+}
+.sub-eyebrow {
+  font-family: var(--mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: var(--copper);
+  margin-bottom: 0.8rem;
+}
+
+/* ── PULL QUOTE ── */
+.pull {
+  font-family: var(--display);
+  font-style: italic;
+  font-size: clamp(1.4rem, 3vw, 2rem);
+  font-weight: 300;
+  line-height: 1.35;
+  color: var(--white);
+  border-left: 2px solid var(--gold);
+  padding: 0.5rem 0 0.5rem 2rem;
+  margin: 2.5rem 0;
+  max-width: 40ch;
+}
+.pull em { font-style: italic; color: var(--gold); }
+.pull.copper { border-left-color: var(--copper); }
+.pull.copper em { color: var(--copper); }
+
+/* ── CALLOUT ── */
+.callout {
+  border: 1px solid var(--gold-dim);
+  background: rgba(201,168,76,0.03);
+  padding: 2rem 2.2rem;
+  margin: 2.5rem 0;
+  position: relative;
+}
+.callout::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0;
+  width: 3px; height: 100%;
+  background: var(--gold);
+}
+.callout-label {
+  font-family: var(--mono);
+  font-size: 0.65rem;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin-bottom: 0.8rem;
+}
+.callout p { font-size: 1rem; color: var(--white); }
+.callout p:last-child { margin-bottom: 0; }
+.callout.copper { border-color: var(--copper-dim); background: rgba(232,115,74,0.03); }
+.callout.copper::before { background: var(--copper); }
+.callout.copper .callout-label { color: var(--copper); }
+
+/* ── DEFINITION BLOCK ── */
+.define {
+  border: 1px solid var(--dim);
+  padding: 1.8rem 2rem;
+  margin: 2rem 0;
+  background: rgba(255,255,255,0.01);
+}
+.define-term {
+  font-family: var(--display);
+  font-size: 1.5rem;
+  font-weight: 400;
+  color: var(--gold);
+  margin-bottom: 0.5rem;
+  font-style: italic;
+}
+.define-body { color: var(--white); font-size: 0.95rem; line-height: 1.65; }
+.define-body p { color: rgba(244,244,244,0.85); }
+
+/* ── SPEC LIST ── */
+.spec-list {
+  list-style: none;
+  margin: 1.5rem 0 2rem;
+  padding: 0;
+}
+.spec-list li {
+  padding: 0.8rem 0 0.8rem 1.8rem;
+  border-bottom: 1px solid rgba(255,255,255,0.04);
+  position: relative;
+  font-size: 0.92rem;
+  color: rgba(244,244,244,0.82);
+  line-height: 1.65;
+}
+.spec-list li::before {
+  content: '§';
+  position: absolute;
+  left: 0; top: 0.75rem;
+  color: var(--gold);
+  font-family: var(--display);
+  font-size: 1.1rem;
+}
+.spec-list li strong { color: var(--gold-b); font-weight: 400; }
+
+/* ── NUMBERED STEPS ── */
+.steps { counter-reset: step; margin: 2rem 0; padding: 0; list-style: none; }
+.steps li {
+  counter-increment: step;
+  padding: 1.2rem 0 1.2rem 3.2rem;
+  border-top: 1px solid var(--dim);
+  position: relative;
+  font-size: 0.95rem;
+  line-height: 1.6;
+  color: rgba(244,244,244,0.85);
+}
+.steps li:last-child { border-bottom: 1px solid var(--dim); }
+.steps li::before {
+  content: counter(step, decimal-leading-zero);
+  position: absolute;
+  left: 0; top: 1.3rem;
+  font-family: var(--mono);
+  font-size: 0.75rem;
+  color: var(--copper);
+  letter-spacing: 0.1em;
+}
+.steps li strong { color: var(--gold); font-weight: 500; }
+
+/* ── DIAGRAM CONTAINER ── */
+.diagram {
+  margin: 3rem auto;
+  padding: 2rem;
+  border: 1px solid var(--dim);
+  background: rgba(255,255,255,0.01);
+  max-width: 100%;
+}
+.diagram-caption {
+  font-family: var(--display);
+  font-style: italic;
+  font-size: 0.9rem;
+  color: var(--muted);
+  text-align: center;
+  margin-top: 1rem;
+  line-height: 1.4;
+}
+.diagram svg { width: 100%; height: auto; display: block; }
+
+/* ── COMPARISON TABLE ── */
+.ctable {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 2rem 0;
+  font-size: 0.88rem;
+}
+.ctable th {
+  padding: 0.9rem 1rem;
+  font-family: var(--mono);
+  font-size: 0.6rem;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  font-weight: 400;
+  text-align: left;
+  border-bottom: 1px solid var(--dim);
+  color: var(--muted);
+}
+.ctable th.bad { color: rgba(192,57,43,0.8); }
+.ctable th.good { color: var(--gold); }
+.ctable td {
+  padding: 0.9rem 1rem;
+  border-bottom: 1px solid rgba(255,255,255,0.04);
+  vertical-align: top;
+  line-height: 1.55;
+}
+.ctable td:first-child { font-family: var(--mono); font-size: 0.72rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--low); }
+.ctable td.bad { color: rgba(192,57,43,0.9); }
+.ctable td.good { color: rgba(76,175,122,0.95); }
+
+/* ── FORMULA / CODE BLOCK ── */
+.formula {
+  font-family: var(--mono);
+  background: rgba(201,168,76,0.04);
+  border: 1px solid var(--gold-dim);
+  padding: 1.5rem 2rem;
+  margin: 2rem 0;
+  font-size: 0.88rem;
+  color: var(--gold-b);
+  line-height: 1.7;
+  white-space: pre-wrap;
+  overflow-x: auto;
+}
+.formula .comment { color: var(--low); font-style: italic; }
+.formula .keyword { color: var(--copper); }
+
+/* ── TRIPTYCH ── */
+.trip {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.2rem;
+  margin: 2.5rem 0;
+}
+@media (max-width: 680px) { .trip { grid-template-columns: 1fr; } }
+.trip-card {
+  padding: 1.8rem 1.4rem;
+  border: 1px solid var(--dim);
+  background: rgba(255,255,255,0.015);
+  transition: border-color 0.3s;
+}
+.trip-card:hover { border-color: var(--gold-dim); }
+.trip-card-eye {
+  font-family: var(--mono);
+  font-size: 0.62rem;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--copper);
+  margin-bottom: 0.6rem;
+}
+.trip-card-t {
+  font-family: var(--display);
+  font-size: 1.35rem;
+  font-weight: 400;
+  color: var(--white);
+  margin-bottom: 0.6rem;
+  font-style: italic;
+}
+.trip-card-b { font-size: 0.82rem; color: var(--muted); line-height: 1.6; }
+
+/* ── WORKED EXAMPLE / NARRATIVE ── */
+.story {
+  padding: 3rem 2.5rem;
+  background: linear-gradient(180deg, rgba(201,168,76,0.02) 0%, transparent 100%);
+  border-top: 1px solid var(--gold-dim);
+  border-bottom: 1px solid var(--gold-dim);
+  margin: 3rem -1rem;
+  position: relative;
+}
+.story-label {
+  font-family: var(--mono);
+  font-size: 0.62rem;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin-bottom: 1.2rem;
+}
+.story p {
+  font-family: var(--display);
+  font-style: italic;
+  font-size: 1.15rem;
+  line-height: 1.55;
+  color: rgba(244,244,244,0.9);
+  margin-bottom: 1.2rem;
+  max-width: 44ch;
+}
+.story p.annotation {
+  font-family: var(--body);
+  font-style: normal;
+  font-size: 0.82rem;
+  color: var(--muted);
+  line-height: 1.6;
+  padding-left: 1.2rem;
+  border-left: 1px solid var(--gold-dim);
+  margin: 0 0 1.5rem 0;
+}
+.story p.annotation strong { color: var(--gold); font-weight: 400; }
+
+/* ── FOOTER ── */
+.footer {
+  padding: 6rem 2rem 4rem; min-height: calc(100vh - 48px);
+  text-align: center;
+  border-top: 1px solid var(--dim);
+  background: var(--black);
+}
+.footer-mark {
+  width: 44px; height: 44px;
+  margin: 0 auto 1.5rem;
+  position: relative;
+}
+.footer-mark::before, .footer-mark::after {
+  content: '';
+  position: absolute; inset: 0;
+  border: 1px solid var(--gold);
+  transform: rotate(45deg);
+}
+.footer-mark::after {
+  width: 50%; height: 50%;
+  top: 25%; left: 25%;
+  border-color: rgba(201,168,76,0.4);
+  transform: rotate(0deg);
+}
+.footer-name {
+  font-family: var(--display);
+  font-size: 1.4rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--white);
+}
+.footer-tag {
+  font-family: var(--display);
+  font-style: italic;
+  font-size: 0.95rem;
+  color: var(--muted);
+  margin-top: 0.5rem;
+}
+.footer-links {
+  display: flex;
+  gap: 2rem;
+  justify-content: center;
+  margin-top: 2rem;
+  flex-wrap: wrap;
+}
+.footer-links a {
+  font-family: var(--mono);
+  font-size: 0.65rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--muted);
+  border: none;
+}
+.footer-sig {
+  margin-top: 3rem;
+  font-family: var(--mono);
+  font-size: 0.6rem;
+  letter-spacing: 0.18em;
+  color: var(--low);
+}
+.footer-sig .sig {
+  font-family: var(--display);
+  font-style: italic;
+  font-size: 0.85rem;
+  letter-spacing: 0.05em;
+  color: var(--gold);
+  display: block;
+  margin-top: 0.4rem;
+}
+
+/* ── REVEAL ANIMATIONS ── */
+.reveal {
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 0.9s ease, transform 0.9s ease;
+}
+.reveal.show { opacity: 1; transform: translateY(0); }
+
+/* ── RESPONSIVE ADJUSTMENTS ── */
+@media (max-width: 640px) {
+  html { font-size: 16px; }
+  .page, .page-wide { padding: 0 1.2rem; }
+  .callout, .define { padding: 1.5rem 1.3rem; }
+  .story { padding: 2rem 1.5rem; margin: 2rem -0.5rem; }
+  .cover-meta { gap: 1.5rem; font-size: 0.6rem; }
+}
+</style>
+</head>
+<body>
+<!-- ═══ SITE NAV ═══ -->
+<nav id="site-nav" style="
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 10001;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 1.5rem;
+  height: 48px;
+  background: rgba(5,5,8,0.85);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid rgba(201,168,76,0.08);
+  font-family: 'Outfit', -apple-system, sans-serif;
+">
+  <a href="/" style="
+    font-size: 0.7rem;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: #c9a84c;
+    text-decoration: none;
+    border: none;
+    font-weight: 400;
+  ">Favour Economy</a>
+  <div style="display: flex; gap: 1.8rem; align-items: center;">
+    <a href="/" style="font-size: 0.62rem; letter-spacing: 0.18em; text-transform: uppercase; color: #8a8a96; text-decoration: none; border: none; transition: color 0.3s;" onmouseover="this.style.color='#c9a84c'" onmouseout="this.style.color='#8a8a96'">Vision</a>
+    <a href="/the-case.html" style="font-size: 0.62rem; letter-spacing: 0.18em; text-transform: uppercase; color: #8a8a96; text-decoration: none; border: none; transition: color 0.3s;" onmouseover="this.style.color='#c9a84c'" onmouseout="this.style.color='#8a8a96'">The Case</a>
+    <a href="/whitepaper.html" style="font-size: 0.62rem; letter-spacing: 0.18em; text-transform: uppercase; color: #8a8a96; text-decoration: none; border: none; transition: color 0.3s;" onmouseover="this.style.color='#c9a84c'" onmouseout="this.style.color='#8a8a96'">Whitepaper</a>
+    <a href="mailto:hello@favoureconomy.com?subject=I want to join" style="font-size: 0.6rem; letter-spacing: 0.15em; text-transform: uppercase; color: #050508; text-decoration: none; border: none; background: #c9a84c; padding: 0.35rem 0.9rem; font-weight: 500; transition: background 0.3s;" onmouseover="this.style.background='#f0cb6a'" onmouseout="this.style.background='#c9a84c'">Join</a>
+  </div>
+</nav>
+<div style="height: 48px;"></div>
+<!-- ═══ /SITE NAV ═══ -->
+
+
+<div id="progress"></div>
+
+<!-- ═══════════════════════════════════════════════════════
+     SIDE NAVIGATION
+═══════════════════════════════════════════════════════ -->
+<nav id="side-nav" aria-label="Document sections">
+  <a href="#cover">Cover</a>
+  <a href="#abstract">Abstract</a>
+  <a href="#part-1">I · First Principles</a>
+  <a href="#part-2">II · The Protocol</a>
+  <a href="#part-3">III · Infrastructure</a>
+  <a href="#part-4">IV · Governance</a>
+  <a href="#part-5">V · The First Favour</a>
+  <a href="#part-6">VI · Roadmap</a>
+  <a href="#part-7">VII · Appendices</a>
+</nav>
+
+<!-- ═══════════════════════════════════════════════════════
+     COVER
+═══════════════════════════════════════════════════════ -->
+<section class="cover" id="cover">
+  <div class="cover-mark">
+    <div class="cover-mark-outer"></div>
+    <div class="cover-mark-inner"></div>
+    <div class="cover-mark-dot"></div>
+  </div>
+  <p class="cover-eyebrow">The Favour Economy · Protocol Whitepaper</p>
+  <h1 class="cover-title">A <em>mobilization</em><br>protocol for the<br>post-consumer age.</h1>
+  <p class="cover-sub">On favours, groups, and the infrastructure of what we build together when the old economy stops serving us.</p>
+  <div class="cover-meta">
+    <span>By <em>T$TimeMoney</em></span>
+    <span>Version <em>0.1</em></span>
+    <span>April <em>2026</em></span>
+  </div>
+  <p class="cover-scroll-hint">↓ Continue</p>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════
+     ABSTRACT
+═══════════════════════════════════════════════════════ -->
+<section class="part part-alt" id="abstract">
+  <div class="page">
+    <p class="sub-eyebrow">Abstract</p>
+    <h2>What this document is, and isn't.</h2>
+    <p class="lead">This paper specifies the Favour Economy — a decentralised protocol for coordinating favours between people who would not otherwise find each other, priced in a native unit of account called the <em>FavourBuck</em>, settled through a non-interest-bearing charitable escrow, and defended by an incentive structure that rewards mobilisation rather than accumulation.</p>
+
+    <p>The protocol is built around a single atomic unit: the <em>Logistic</em> — an origin, a destination, a time constraint, and a Rider specifying what skills, capital, equipment, and willingness are needed to complete it. Everything else in the system, from a bag of frozen breastmilk hand-delivered to a struggling mother to a coordinated global response to a regional flood, composes from Logistics.</p>
+
+    <p>This is not a whitepaper in the crypto sense. There is no pre-mine, no speculative token, no promise of price appreciation. The FavourBuck is designed as a medium of exchange for mobilising human capacity, not a store of value. Its defining property is that it carries <em>no compound interest</em> — by structural choice, not regulatory accident — and that it is issued against completed real-world favours rather than against capital.</p>
+
+    <p>The system is designed to be, in order of priority: <em>safe</em> for the people who use it, <em>useful</em> for the communities who build it, <em>defensible</em> under the regulatory regimes of the jurisdictions it operates in, and <em>durable</em> against the failure modes that have ended every prior attempt at a favour economy.</p>
+
+    <p>This document exists to be read closely by the people who will build, fund, operate, regulate, and participate in the system — and to serve as the canonical reference against which all subsequent implementations, pages, use-case documents, and community protocols are measured.</p>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════
+     TABLE OF CONTENTS
+═══════════════════════════════════════════════════════ -->
+<section class="toc-section">
+  <div class="page-wide">
+    <p class="toc-title">· Contents ·</p>
+    <div class="toc-grid">
+
+      <div class="toc-part">
+        <p class="toc-part-num">PART I</p>
+        <h3 class="toc-part-title"><em>First Principles</em></h3>
+        <div class="toc-links">
+          <a href="#what-is-a-favour">What a favour is</a>
+          <a href="#the-mobilization-gap">The mobilisation gap</a>
+          <a href="#the-logistic">The Logistic — the atomic unit</a>
+          <a href="#the-surface">The Surface Layer</a>
+          <a href="#the-group">The Group</a>
+        </div>
+      </div>
+
+      <div class="toc-part">
+        <p class="toc-part-num">PART II</p>
+        <h3 class="toc-part-title">The <em>Protocol</em></h3>
+        <div class="toc-links">
+          <a href="#favourbucks">FavourBucks</a>
+          <a href="#minting">Minting and circulation</a>
+          <a href="#escrow">The Escrow model</a>
+          <a href="#on-chain-off-chain">On-chain and off-chain</a>
+          <a href="#pricing">Pricing and negotiation</a>
+          <a href="#reputation">Reputation and availability</a>
+          <a href="#witness">The Witness layer</a>
+        </div>
+      </div>
+
+      <div class="toc-part">
+        <p class="toc-part-num">PART III</p>
+        <h3 class="toc-part-title"><em>Infrastructure</em> Futures</h3>
+        <div class="toc-links">
+          <a href="#mesh">The mesh network</a>
+          <a href="#payout-curve">The asymptotic payout curve</a>
+          <a href="#pay-to-map">Pay to map</a>
+          <a href="#verification">Verification and lab networks</a>
+          <a href="#group-commons">Group commons and insurance</a>
+        </div>
+      </div>
+
+      <div class="toc-part">
+        <p class="toc-part-num">PART IV</p>
+        <h3 class="toc-part-title"><em>Governance</em> and Regulation</h3>
+        <div class="toc-links">
+          <a href="#charity-structure">The charity structure</a>
+          <a href="#regulatory-posture">Regulatory posture</a>
+          <a href="#privacy">Privacy by design</a>
+          <a href="#cash-corridor">The cash corridor</a>
+          <a href="#dispute">Dispute resolution</a>
+        </div>
+      </div>
+
+      <div class="toc-part">
+        <p class="toc-part-num">PART V</p>
+        <h3 class="toc-part-title">The <em>First Favour</em></h3>
+        <div class="toc-links">
+          <a href="#breastmilk">The breastmilk, told straight</a>
+          <a href="#first-annotated">The breastmilk, annotated</a>
+          <a href="#why-this-case">Why this case, first</a>
+        </div>
+      </div>
+
+      <div class="toc-part">
+        <p class="toc-part-num">PART VI</p>
+        <h3 class="toc-part-title"><em>Roadmap</em></h3>
+        <div class="toc-links">
+          <a href="#status">What exists today</a>
+          <a href="#phase-1">Phase one — charter and pilot</a>
+          <a href="#phase-2">Phase two — regional mesh</a>
+          <a href="#phase-3">Phase three — federation</a>
+          <a href="#participate">How to participate</a>
+        </div>
+      </div>
+
+      <div class="toc-part" style="grid-column: 1 / -1;">
+        <p class="toc-part-num">PART VII</p>
+        <h3 class="toc-part-title"><em>Appendices</em></h3>
+        <div class="toc-links" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 0.4rem 2rem;">
+          <a href="#a-glossary">A · Glossary of terms</a>
+          <a href="#b-formulas">B · Formulas and specifications</a>
+          <a href="#c-precedents">C · Precedents and prior art</a>
+          <a href="#d-risks">D · Known risks and open questions</a>
+          <a href="#e-changelog">E · Version history</a>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════
+     PART I — FIRST PRINCIPLES
+═══════════════════════════════════════════════════════ -->
+<section class="part" id="part-1">
+  <div class="page-wide">
+    <div class="part-header">
+      <p class="part-number">PART I</p>
+      <h2 class="part-title">First <em>Principles</em></h2>
+      <p class="part-lede">What a favour is. Why the existing economy cannot price it. And why that failure matters.</p>
+    </div>
+  </div>
+
+  <div class="page">
+
+    <section class="sub" id="what-is-a-favour">
+      <p class="sub-eyebrow">§ 1.1</p>
+      <h3>What a favour is.</h3>
+      <p>A favour is a transfer of value between people that the market cannot efficiently price. It may carry a cash-equivalent somewhere inside it — an hour of labour, a litre of milk, a ride across town — but its defining property is that the <em>act of giving</em> is part of what is being given. A paid courier delivering frozen milk is performing a service. A friend-of-a-friend making the same delivery, at the same hour, in the same car, is performing a favour. The milk is identical. The delivery is identical. What differs is the social fact.</p>
+
+      <p>This is not sentimentality. It is an observation with structural consequences. Favours carry information about relationship, trust, and availability that cash transactions strip out. In a functioning society, most of the coordination that keeps daily life running — childcare swaps, airport pickups, hand-me-down equipment, neighbour-on-neighbour help — happens through favours, not through priced exchanges. When these systems break down, the result is not that cash transactions expand to fill the gap. The result is that the coordination stops happening at all, and people suffer in ways that no amount of money can buy them out of.</p>
+
+      <div class="define">
+        <div class="define-term">Favour, n.</div>
+        <div class="define-body">
+          <p>A voluntary transfer of capability, time, skill, material, or capital from one party to another or from a group to a party, carried out under social rather than purely commercial terms, and generating a record of relationship that outlasts the transaction itself.</p>
+        </div>
+      </div>
+
+      <p>Every human society has had favour networks. What varies is whether those networks are formalised — and if so, how.</p>
+    </section>
+
+    <section class="sub" id="the-mobilization-gap">
+      <p class="sub-eyebrow">§ 1.2</p>
+      <h3>The mobilisation gap.</h3>
+      <p>At any given moment in any modern city there exists an enormous reservoir of latent capacity: people with spare time, unused equipment, underutilised skills, and small amounts of discretionary capital who would <em>willingly</em> contribute to a worthwhile favour if the right one were offered to them on the right terms. And at the same moment, there exists a parallel reservoir of unmet need: people who require a very specific favour — breastmilk, a ride, a trade skill, coordinated help — and cannot find it within their immediate network.</p>
+
+      <p>These two reservoirs are close to each other, physically and socially. They are separated by a failure of mobilisation. The market does not match them because the transactions are too small, too specific, too context-dependent, or too freighted with social meaning to be priced efficiently. Charity does not match them because the coordination overhead is too high for any individual act. Friendship networks do not match them because the relevant parties are friends-of-friends-of-friends, and the social graph does not reach.</p>
+
+      <p>The Favour Economy exists to close this gap. It is not a charity, though it shares some properties with one. It is not a marketplace, though it has some market mechanics. It is <em>a coordination protocol</em> for mobilising favour capacity at scales that exceed any individual's social graph.</p>
+
+      <p class="pull">The gap between those who need and those who can give has always been the system. We are building a different system.</p>
+    </section>
+
+    <section class="sub" id="the-logistic">
+      <p class="sub-eyebrow">§ 1.3</p>
+      <h3>The Logistic — the atomic unit.</h3>
+      <p>The protocol is built around a single primitive: the <em>Logistic</em>. A Logistic is the smallest well-formed unit of favour activity. It can be composed into larger favours; it can be decomposed into its constituent elements; but it cannot be meaningfully reduced further without losing the thing that makes it operable.</p>
+
+      <div class="define">
+        <div class="define-term">Logistic, n.</div>
+        <div class="define-body">
+          <p>A proposed transfer defined by four elements: an <strong>Origin</strong> (where the transfer begins), a <strong>Destination</strong> (where it completes), a <strong>Time</strong> constraint (when it must happen), and a <strong>Rider</strong> (the full specification of what capabilities, skills, equipment, capital, and willingness are required to fulfil it).</p>
+        </div>
+      </div>
+
+      <p>The Rider is the most important of the four elements, and the most easily misunderstood. It is not a person. It is the specification — the "spec sheet" attached to the Logistic that says, in effect: <em>to fulfil this favour, the network requires someone with these capabilities, in this place, at this time, with this equipment, willing to do this work</em>. The Rider is how the protocol expresses what a favour actually needs. A matching engine then finds the people (the Surfaces) whose capabilities intersect the Rider's requirements.</p>
+
+      <p>A breastmilk delivery is a Logistic: origin is the donor's freezer, destination is the recipient's freezer, time is "within six hours of donor's availability," Rider specifies "insulated transport, discretion, willingness to handle human bodily fluid, no known illness, brief verbal confirmation on delivery." A barn-raising is a stack of Logistics: dozens of small origin-to-destination transfers (tools, lumber, bodies, meals, coordination) converging on a shared destination under a shared time window, each with its own Rider. A co-ordinated disaster response is thousands of Logistics composed in real time.</p>
+
+      <div class="diagram">
+        <svg viewBox="0 0 680 260" xmlns="http://www.w3.org/2000/svg" aria-label="Logistic anatomy diagram">
+          <defs>
+            <radialGradient id="origin-grad" cx="50%" cy="50%" r="50%">
+              <stop offset="0%" stop-color="#e8734a"/>
+              <stop offset="100%" stop-color="rgba(232,115,74,0.2)"/>
+            </radialGradient>
+            <radialGradient id="dest-grad" cx="50%" cy="50%" r="50%">
+              <stop offset="0%" stop-color="#c9a84c"/>
+              <stop offset="100%" stop-color="rgba(201,168,76,0.2)"/>
+            </radialGradient>
+          </defs>
+          <!-- Time arc -->
+          <path d="M 120 130 Q 340 40 560 130" stroke="rgba(244,244,244,0.12)" stroke-width="1" stroke-dasharray="4,5" fill="none"/>
+          <text x="340" y="45" fill="rgba(244,244,244,0.4)" font-size="10" text-anchor="middle" font-family="JetBrains Mono, monospace" letter-spacing="2">TIME CONSTRAINT</text>
+          <!-- Connection line -->
+          <path d="M 140 130 C 260 180 420 180 540 130" stroke="#c9a84c" stroke-width="1.5" fill="none" opacity="0.7"/>
+          <!-- Origin -->
+          <circle cx="120" cy="130" r="24" fill="rgba(232,115,74,0.08)" stroke="rgba(232,115,74,0.3)" stroke-width="1"/>
+          <circle cx="120" cy="130" r="10" fill="url(#origin-grad)"/>
+          <text x="120" y="175" fill="#e8734a" font-size="10" text-anchor="middle" font-family="JetBrains Mono, monospace" letter-spacing="3">ORIGIN</text>
+          <text x="120" y="195" fill="rgba(244,244,244,0.5)" font-size="9" text-anchor="middle" font-family="Outfit, sans-serif">where it starts</text>
+          <!-- Destination -->
+          <circle cx="560" cy="130" r="24" fill="rgba(201,168,76,0.08)" stroke="rgba(201,168,76,0.3)" stroke-width="1"/>
+          <circle cx="560" cy="130" r="10" fill="url(#dest-grad)"/>
+          <text x="560" y="175" fill="#c9a84c" font-size="10" text-anchor="middle" font-family="JetBrains Mono, monospace" letter-spacing="3">DESTINATION</text>
+          <text x="560" y="195" fill="rgba(244,244,244,0.5)" font-size="9" text-anchor="middle" font-family="Outfit, sans-serif">where it completes</text>
+          <!-- Rider label in middle -->
+          <rect x="280" y="150" width="120" height="60" fill="rgba(201,168,76,0.04)" stroke="rgba(201,168,76,0.25)" stroke-width="1"/>
+          <text x="340" y="172" fill="#c9a84c" font-size="10" text-anchor="middle" font-family="JetBrains Mono, monospace" letter-spacing="2">THE RIDER</text>
+          <text x="340" y="188" fill="rgba(244,244,244,0.55)" font-size="9" text-anchor="middle" font-family="Outfit, sans-serif">skills · capital</text>
+          <text x="340" y="200" fill="rgba(244,244,244,0.55)" font-size="9" text-anchor="middle" font-family="Outfit, sans-serif">time · equipment</text>
+          <!-- Bracket from path to Rider -->
+          <line x1="340" y1="150" x2="340" y2="135" stroke="rgba(201,168,76,0.3)" stroke-width="0.8" stroke-dasharray="2,2"/>
+          <!-- Title -->
+          <text x="340" y="235" fill="rgba(244,244,244,0.7)" font-size="11" text-anchor="middle" font-family="Cormorant Garamond, serif" font-style="italic">One Logistic — four elements, one connection</text>
+        </svg>
+        <p class="diagram-caption">Every favour in the network — from a cup of sugar to a continental disaster response — composes from Logistics of this form.</p>
+      </div>
+
+      <p>The four-element structure is deliberately minimal. It is sufficient to describe any transfer, it is computable, and it maps cleanly onto both digital matching and physical routing. The Rider does the heavy lifting: by making the requirements explicit, it lets the network find candidates algorithmically, and it lets humans assess whether a given favour is within their means before they commit.</p>
+    </section>
+
+    <section class="sub" id="the-surface">
+      <p class="sub-eyebrow">§ 1.4</p>
+      <h3>The Surface Layer.</h3>
+      <p>If the Logistic is the unit of demand, the Surface is the unit of supply. A Surface is the intersection of a willing person, their available time, their skills, their capital, and their location — one thin slice of useful work, published to the network in a form the matching engine can reason about.</p>
+
+      <div class="define">
+        <div class="define-term">Surface, n.</div>
+        <div class="define-body">
+          <p>A machine-readable declaration of a person's availability to contribute to favours, consisting of willingness (what kinds of favours they will do), time (when they are available), skills (what they can do well), capital (what material resources they can contribute), and location (where they can do it from). A Surface is valid for a declared window; expired Surfaces are not matched.</p>
+        </div>
+      </div>
+
+      <p>No single Surface is sufficient to fulfil a non-trivial favour. A ride to the airport might require one Surface (a driver with a car and two free hours). A breastmilk delivery requires at least two (a donor and a transporter). A community response to a flooded basement might require fifteen (bodies, pumps, trucks, coordination, food, childcare-for-the-responders). The protocol's matching engine <em>stacks</em> Surfaces — finding combinations that jointly satisfy a Rider — and this stacking is the system's most distinctive capability.</p>
+
+      <p>Traditional labour markets match one worker to one job. Traditional charities match one volunteer to one task. The Favour Economy matches <em>compositions of people</em> to <em>compositions of need</em>. Most of what communities actually require is the latter, and most of what existing systems fail to deliver is the latter, and this is why most favour-like attempts at coordination fail: they treat favours as one-to-one transactions when favours are intrinsically many-to-one or many-to-many.</p>
+
+      <div class="diagram">
+        <svg viewBox="0 0 600 280" xmlns="http://www.w3.org/2000/svg" aria-label="Surface stack diagram">
+          <!-- Rider requirement box -->
+          <rect x="220" y="20" width="160" height="40" fill="rgba(232,115,74,0.06)" stroke="rgba(232,115,74,0.4)" stroke-width="1"/>
+          <text x="300" y="37" fill="#e8734a" font-size="9" text-anchor="middle" font-family="JetBrains Mono, monospace" letter-spacing="2">RIDER REQUIREMENT</text>
+          <text x="300" y="52" fill="rgba(244,244,244,0.5)" font-size="8" text-anchor="middle" font-family="Outfit, sans-serif">breastmilk · transport · 6hr window</text>
+
+          <!-- Surfaces stacking up -->
+          <!-- Surface 1: Donor -->
+          <g transform="translate(60,100)">
+            <rect x="0" y="0" width="140" height="28" fill="rgba(201,168,76,0.04)" stroke="rgba(201,168,76,0.3)" stroke-width="1"/>
+            <text x="70" y="12" fill="#c9a84c" font-size="7" text-anchor="middle" font-family="JetBrains Mono, monospace" letter-spacing="1">SURFACE · DONOR</text>
+            <text x="70" y="22" fill="rgba(244,244,244,0.55)" font-size="7" text-anchor="middle" font-family="Outfit, sans-serif">surplus milk · available today</text>
+          </g>
+          <!-- Surface 2: Transporter -->
+          <g transform="translate(230,100)">
+            <rect x="0" y="0" width="140" height="28" fill="rgba(201,168,76,0.04)" stroke="rgba(201,168,76,0.3)" stroke-width="1"/>
+            <text x="70" y="12" fill="#c9a84c" font-size="7" text-anchor="middle" font-family="JetBrains Mono, monospace" letter-spacing="1">SURFACE · TRANSPORT</text>
+            <text x="70" y="22" fill="rgba(244,244,244,0.55)" font-size="7" text-anchor="middle" font-family="Outfit, sans-serif">car · cooler · free 3-5pm</text>
+          </g>
+          <!-- Surface 3: Coordinator -->
+          <g transform="translate(400,100)">
+            <rect x="0" y="0" width="140" height="28" fill="rgba(201,168,76,0.04)" stroke="rgba(201,168,76,0.3)" stroke-width="1"/>
+            <text x="70" y="12" fill="#c9a84c" font-size="7" text-anchor="middle" font-family="JetBrains Mono, monospace" letter-spacing="1">SURFACE · COORD.</text>
+            <text x="70" y="22" fill="rgba(244,244,244,0.55)" font-size="7" text-anchor="middle" font-family="Outfit, sans-serif">knows both · verifies handoff</text>
+          </g>
+
+          <!-- Arrows up to stack point -->
+          <line x1="130" y1="100" x2="280" y2="75" stroke="rgba(201,168,76,0.3)" stroke-width="0.8"/>
+          <line x1="300" y1="100" x2="300" y2="75" stroke="rgba(201,168,76,0.3)" stroke-width="0.8"/>
+          <line x1="470" y1="100" x2="320" y2="75" stroke="rgba(201,168,76,0.3)" stroke-width="0.8"/>
+
+          <!-- Stacked surfaces (physical representation) -->
+          <g transform="translate(180,160)">
+            <rect x="0" y="0" width="240" height="14" fill="rgba(201,168,76,0.12)" stroke="rgba(201,168,76,0.3)" stroke-width="0.8"/>
+            <rect x="0" y="18" width="240" height="14" fill="rgba(201,168,76,0.18)" stroke="rgba(201,168,76,0.35)" stroke-width="0.8"/>
+            <rect x="0" y="36" width="240" height="14" fill="rgba(201,168,76,0.24)" stroke="rgba(201,168,76,0.4)" stroke-width="0.8"/>
+            <text x="120" y="64" fill="#c9a84c" font-size="9" text-anchor="middle" font-family="JetBrains Mono, monospace" letter-spacing="2">3 SURFACES STACKED</text>
+          </g>
+
+          <!-- Fulfilled Logistic -->
+          <rect x="220" y="238" width="160" height="28" fill="rgba(76,175,122,0.06)" stroke="rgba(76,175,122,0.35)" stroke-width="1"/>
+          <text x="300" y="251" fill="rgba(76,175,122,0.85)" font-size="9" text-anchor="middle" font-family="JetBrains Mono, monospace" letter-spacing="2">LOGISTIC FULFILLED</text>
+          <text x="300" y="262" fill="rgba(244,244,244,0.5)" font-size="8" text-anchor="middle" font-family="Outfit, sans-serif">milk delivered · receipt closed</text>
+
+          <!-- Connection from stack to fulfilled -->
+          <line x1="300" y1="220" x2="300" y2="238" stroke="rgba(201,168,76,0.4)" stroke-width="1" stroke-dasharray="2,2"/>
+        </svg>
+        <p class="diagram-caption">Three Surfaces — donor, transporter, coordinator — stack to satisfy a single Logistic. No participant could have completed the favour alone.</p>
+      </div>
+
+      <p>A person with a broad declared Surface — many skills, wide availability, generous willingness — participates in many Logistics and accumulates reputation quickly. A person with a narrow Surface participates in fewer but often more specialised Logistics. Both are valuable. The network prizes <em>accuracy</em> of Surface declaration above breadth: a narrow Surface that reliably delivers is worth more than a broad one that over-promises, because the protocol's value depends on the honesty of its availability signals. This design choice is load-bearing, and we return to it in §2.6.</p>
+    </section>
+
+    <section class="sub" id="the-group">
+      <p class="sub-eyebrow">§ 1.5</p>
+      <h3>The Group.</h3>
+      <p>Above the individual Surface sits the <em>Group</em> — a formal collective of members who pool a small share of every favour they transact to build shared wealth, shared assets, and shared protection. A Group can be a neighbourhood, a trade guild, a friend circle, a religious community, or a family. Its only requirement is that its members choose to be accounted together.</p>
+
+      <div class="define">
+        <div class="define-term">Group, n.</div>
+        <div class="define-body">
+          <p>A collective of Favour Economy members who elect to pool a defined percentage of their transaction flow into a shared fund, used to acquire shared assets, underwrite mutual insurance, pay dividends to members, and fund group favours that exceed any individual member's capacity.</p>
+        </div>
+      </div>
+
+      <p>The Group is the structural answer to the oldest failure mode of mutual-aid economies: the burnout of high-contributors. In a pure peer-to-peer favour network, the 10% of participants who give most end up subsidising the other 90%, and eventually leave. In a Group-mediated network, individual contributions aggregate into collective capacity, so no single giver carries a disproportionate load, and every contribution visibly builds the common wealth of a community the giver is part of.</p>
+
+      <p>Groups are also the structural answer to the problem of favour <em>scale</em>. Most genuinely transformational favours — a community garden, a shared vehicle, mutual childcare, a disaster-response reserve, a cooperative tool library — exceed any individual's willingness or capacity. The Group is how the protocol expresses favours from <em>a collective to its members</em>, and from <em>one collective to another</em>. When the protocol says "mobilisation," this is most of what it means.</p>
+
+      <div class="trip">
+        <div class="trip-card">
+          <p class="trip-card-eye">01 · SHARED ASSETS</p>
+          <p class="trip-card-t">Own together.</p>
+          <p class="trip-card-b">Tools, vehicles, equipment, spaces — held by the Group, used by members at cost, maintained from the common fund. Private ownership of rarely-used capital is a waste the Group architecturally prevents.</p>
+        </div>
+        <div class="trip-card">
+          <p class="trip-card-eye">02 · MUTUAL INSURANCE</p>
+          <p class="trip-card-t">Underwrite together.</p>
+          <p class="trip-card-b">Child insurance, elder care, disability protection — underwritten by the Group's own reserve, paid out by the Group's own decision, at scales that make commercial insurance unnecessary for most events.</p>
+        </div>
+        <div class="trip-card">
+          <p class="trip-card-eye">03 · DIVIDENDS</p>
+          <p class="trip-card-t">Earn together.</p>
+          <p class="trip-card-b">When the Group fund earns interest, rents assets, or receives favour-payments, distributions flow to members proportional to their contribution. Participation compounds into shared wealth.</p>
+        </div>
+      </div>
+
+      <p>Groups vary widely in size, focus, and governance. A street-block Group might have 25 members and a fund of a few thousand FavourBucks. A trade-guild Group might span a city, a region, or a continent. The protocol imposes no upper limit on membership or scope; it only requires that Groups be legally constituted entities (a co-operative, a charity, or an equivalent vehicle in the relevant jurisdiction) so that their fund can be held, accounted, and audited. See §4 for the regulatory structure.</p>
+
+      <p class="pull copper">A Group of friends. A city block. A trade collective. <em>Any size. Any focus. Permanently owned by its members.</em></p>
+    </section>
+
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════
+     PART II — THE PROTOCOL
+═══════════════════════════════════════════════════════ -->
+<section class="part part-alt" id="part-2">
+  <div class="page-wide">
+    <div class="part-header">
+      <p class="part-number">PART II</p>
+      <h2 class="part-title">The <em>Protocol</em></h2>
+      <p class="part-lede">FavourBucks, escrow, pricing, reputation, and the mechanics that make the system self-consistent.</p>
+    </div>
+  </div>
+
+  <div class="page">
+
+    <section class="sub" id="favourbucks">
+      <p class="sub-eyebrow">§ 2.1</p>
+      <h3>FavourBucks.</h3>
+      <p>The FavourBuck (FB) is the protocol's native unit of account. It is designed explicitly and exclusively as a medium of exchange for mobilising favours. It is not a store of value, not a speculative asset, and not a currency in the sovereign sense.</p>
+
+      <p>The defining design choice — the one that distinguishes FavourBucks from every crypto-token and most local currencies that have preceded them — is that the FavourBuck carries <em>no compound interest, ever</em>. This is not a default setting that can be changed. It is a structural property of the protocol. Balances do not grow by being held. They grow only by being earned through completed favours or acquired through cash purchase.</p>
+
+      <div class="callout">
+        <p class="callout-label">· Design Principle ·</p>
+        <p><strong>No compound interest.</strong> Because favours are not debt, the unit that represents them must not behave like debt. Compound interest is the mechanism by which currency creates economic asymmetry over time. The FavourBuck refuses it by construction.</p>
+      </div>
+
+      <p>This choice has consequences. It means the FavourBuck is a poor vehicle for saving in the conventional sense — holding FBs does not make you richer, it only preserves the ability to request future favours. It means the protocol cannot offer yield to depositors, which rules out a large class of financial-product integrations. And it means hoarding is systemically discouraged without any need for demurrage: in a world where held FBs do not grow while the cash economy around them does, the rational actor spends FBs on favours rather than sitting on them.</p>
+
+      <p>The FavourBuck is, in this sense, an intentionally <em>limited</em> currency. Its power comes from what it refuses to do. It refuses to reward accumulation, refuses to carry debt forward through generations, and refuses to accrue value while its holder sleeps. What it offers in exchange is <em>liquidity of mobilisation</em> — the ability to move human capacity quickly, at scale, without the distortions that compound finance introduces into every other measurement of value.</p>
+    </section>
+
+    <section class="sub" id="minting">
+      <p class="sub-eyebrow">§ 2.2</p>
+      <h3>Minting and circulation.</h3>
+      <p>FavourBucks enter circulation through two paths. The first is <em>cash-primed minting</em>, in which a user purchases FBs with conventional currency at a published rate. The cash flows into the charitable escrow (§2.3) where it is held as reserve against the FBs in circulation. The second is <em>favour-completion minting</em>, in which the completion of a verified favour results in FBs being issued to the fulfilling party.</p>
+
+      <ol class="steps">
+        <li><strong>Cash-primed minting.</strong> A user pays cash into the system and receives FBs at the published rate. The cash flows to the charitable escrow. New FBs are created in the user's account. The system's reserve and float both grow by the same amount. This path exists primarily to solve cold-start — new users need FBs immediately, before they have done any favours — and to fund Group favours requiring purchased materials.</li>
+        <li><strong>Favour-completion minting.</strong> A Logistic is proposed, contracted, and fulfilled. Upon verification of completion (see §2.7 on witnessing), the protocol mints FBs into the fulfilling party's account at the agreed price. No prior cash is required. This path is how the majority of FBs enter circulation once the system is operating at scale, and it ties FB supply growth directly to real mobilisation activity.</li>
+        <li><strong>Secondary trades.</strong> FBs can be transferred between accounts in exchange for cash or other FBs. These transfers do not mint new FBs — they only redistribute existing ones. They are the protocol's liquidity mechanism, allowing FB holders to cash out if they wish and allowing new entrants to buy FBs from existing holders rather than from the charity.</li>
+      </ol>
+
+      <p>Both minting paths are bounded. Cash-primed minting is bounded by the reserve policy — the charity does not mint more FBs than its reserves can notionally support, though the ratio is managed to allow reasonable expansion. Favour-completion minting is bounded by the witness layer — no favour, no mint. The supply of FBs therefore grows with the network's <em>verified activity</em>, which is exactly the quantity the protocol is trying to track.</p>
+
+      <div class="diagram">
+        <svg viewBox="0 0 680 220" xmlns="http://www.w3.org/2000/svg" aria-label="Minting paths diagram">
+          <!-- Cash path -->
+          <g>
+            <rect x="20" y="40" width="120" height="44" fill="rgba(232,115,74,0.06)" stroke="rgba(232,115,74,0.4)" stroke-width="1"/>
+            <text x="80" y="58" fill="#e8734a" font-size="9" text-anchor="middle" font-family="JetBrains Mono, monospace" letter-spacing="2">CASH</text>
+            <text x="80" y="72" fill="rgba(244,244,244,0.55)" font-size="8" text-anchor="middle" font-family="Outfit, sans-serif">user pays in</text>
+            <!-- arrow -->
+            <path d="M 142 62 L 220 62" stroke="rgba(232,115,74,0.5)" stroke-width="1"/>
+            <polygon points="220,59 228,62 220,65" fill="rgba(232,115,74,0.6)"/>
+            <text x="180" y="54" fill="rgba(232,115,74,0.5)" font-size="7" text-anchor="middle" font-family="JetBrains Mono, monospace" letter-spacing="1">PRIMING</text>
+          </g>
+          <!-- Charity escrow central -->
+          <rect x="228" y="20" width="220" height="170" fill="rgba(201,168,76,0.03)" stroke="rgba(201,168,76,0.35)" stroke-width="1"/>
+          <text x="338" y="48" fill="#c9a84c" font-size="10" text-anchor="middle" font-family="JetBrains Mono, monospace" letter-spacing="2">CHARITY ESCROW</text>
+          <text x="338" y="65" fill="rgba(244,244,244,0.5)" font-size="8" text-anchor="middle" font-family="Outfit, sans-serif">reserve · issuance · audit</text>
+          <circle cx="338" cy="105" r="30" fill="none" stroke="rgba(201,168,76,0.3)" stroke-width="1"/>
+          <circle cx="338" cy="105" r="18" fill="none" stroke="rgba(201,168,76,0.4)" stroke-width="1"/>
+          <circle cx="338" cy="105" r="6" fill="#c9a84c"/>
+          <text x="338" y="170" fill="rgba(244,244,244,0.4)" font-size="7" text-anchor="middle" font-family="JetBrains Mono, monospace" letter-spacing="2">FB SUPPLY · MINT · REDEEM</text>
+
+          <!-- Favour completion path -->
+          <g>
+            <rect x="540" y="40" width="120" height="44" fill="rgba(201,168,76,0.06)" stroke="rgba(201,168,76,0.4)" stroke-width="1"/>
+            <text x="600" y="58" fill="#c9a84c" font-size="9" text-anchor="middle" font-family="JetBrains Mono, monospace" letter-spacing="2">FAVOUR DONE</text>
+            <text x="600" y="72" fill="rgba(244,244,244,0.55)" font-size="8" text-anchor="middle" font-family="Outfit, sans-serif">witnessed · verified</text>
+            <!-- arrow -->
+            <path d="M 538 62 L 454 62" stroke="rgba(201,168,76,0.5)" stroke-width="1"/>
+            <polygon points="454,59 446,62 454,65" fill="rgba(201,168,76,0.6)"/>
+            <text x="496" y="54" fill="rgba(201,168,76,0.5)" font-size="7" text-anchor="middle" font-family="JetBrains Mono, monospace" letter-spacing="1">COMPLETION</text>
+          </g>
+
+          <!-- Out to users -->
+          <path d="M 80 90 L 80 160 L 228 160" stroke="rgba(232,115,74,0.3)" stroke-width="1" fill="none" stroke-dasharray="3,3"/>
+          <path d="M 600 90 L 600 160 L 452 160" stroke="rgba(201,168,76,0.3)" stroke-width="1" fill="none" stroke-dasharray="3,3"/>
+        </svg>
+        <p class="diagram-caption">Two minting paths into a single escrow. Cash primes the reserve; verified favours expand the supply.</p>
+      </div>
+    </section>
+
+    <section class="sub" id="escrow">
+      <p class="sub-eyebrow">§ 2.3</p>
+      <h3>The Escrow model.</h3>
+      <p>Every FavourBuck transaction in the system flows through a charitable escrow. The escrow holds the funds for an instant — long enough to verify, split, and route — and then releases them. It is not a bank, in the sense that it does not lend, does not pay yield, and does not leverage deposits. It is a protocol-level clearinghouse whose sole job is to ensure that every transaction is properly split, properly recorded, and properly settled.</p>
+
+      <p>The standard split for on-chain transactions is 98% to the recipient, 1% to the system, 1% to the recipient's Group.</p>
+
+      <ul class="spec-list">
+        <li><strong>98% to the recipient.</strong> The party who performed the favour receives 98% of the agreed price, denominated in FavourBucks, settled to their account the moment the witness layer closes the Logistic.</li>
+        <li><strong>1% to the system.</strong> The protocol's operating cost — hosting, engineering, audit, dispute resolution, regulatory compliance — is funded from a 1% fee on every on-chain transaction. This is the only revenue the charitable entity takes.</li>
+        <li><strong>1% to the Group.</strong> The recipient's declared Group receives 1%, which compounds into the Group's shared fund over time. Members who are not part of a Group have this 1% directed to a regional mutual-aid pool by default, which they can later redirect to a Group they join.</li>
+      </ul>
+
+      <p>The 1%+1% friction is deliberately small. The protocol aims to be roughly an order of magnitude cheaper than conventional payment rails (which typically take 2-4% per transaction in fees alone, before currency conversion, cross-border surcharges, and platform margins). The small margin is viable because the protocol runs as a charity, not a shareholder-owned corporation, and does not need to generate returns for external capital.</p>
+
+      <div class="callout copper">
+        <p class="callout-label">· The Cash Corridor ·</p>
+        <p>Off-chain settlements (cash-in-hand, direct barter, private arrangements that happen within the social graph the protocol enabled) are not invisible to the protocol if the parties wish to report them. Reported off-chain settlements carry a <strong>15% surcharge</strong>, paid in FBs, split between mesh infrastructure funding and the recipient's Group benefits fund. Unreported off-chain settlements are — structurally — not visible to the protocol at all, because they never enter it. The 15% rate is calibrated to make on-chain settlement the strictly dominant economic choice for anyone who isn't purchasing privacy for a specific reason.</p>
+      </div>
+
+      <p>The escrow is legally and operationally separate from the protocol's development entity. It is held by a registered charitable organisation whose purpose, governance, and fiduciary duties are scoped to the operation of the Favour Economy escrow and nothing else. The separation exists to protect the reserve from operational risk (the charity's assets are not the engineering team's, and vice versa) and to establish a clean governance boundary — the charity's board answers to its members and its regulator, not to the engineering team.</p>
+    </section>
+
+    <section class="sub" id="on-chain-off-chain">
+      <p class="sub-eyebrow">§ 2.4</p>
+      <h3>On-chain and off-chain.</h3>
+      <p>The protocol distinguishes between <em>on-chain</em> transactions (recorded in the public ledger, verifiable by any participant, subject to the standard 1%+1% split) and <em>off-chain</em> transactions (settled privately between the parties, not entered into the public ledger). Both are legitimate. They serve different purposes.</p>
+
+      <p>On-chain transactions are the default, and should be the overwhelming majority of system activity. They are the fastest, cheapest, most liquid form of settlement. They are publicly verifiable, which supports reputation, audit, and dispute resolution. They generate FavourBucks via the completion-minting path. They contribute to Group funds. They are what lets the system <em>see itself</em> and learn from its own activity.</p>
+
+      <p>Off-chain transactions exist for the cases where privacy is required and the parties accept the surcharge in exchange. A sensitive favour — a private family matter, a delicate professional situation, a favour between parties in a jurisdiction where visibility would create legal or social risk — may be conducted off-chain. The surcharge is 15%, structurally higher than the on-chain cost, because the protocol is optimised to prefer transparency. The surcharge funds infrastructure (mesh network, verification labs, group benefits) rather than flowing to a private operator, so even off-chain activity contributes to common wealth.</p>
+
+      <ul class="spec-list">
+        <li><strong>On-chain default.</strong> The protocol's UI, matching engine, and reputation layer all assume on-chain settlement. Choosing on-chain requires no additional steps. It is the fastest path for everyone.</li>
+        <li><strong>Off-chain as exception.</strong> Off-chain settlement requires explicit election at the time of the contract. Parties must both consent to the off-chain designation, must declare the cash-equivalent value, and must pay the 15% surcharge in FBs.</li>
+        <li><strong>Private but declared.</strong> Off-chain transactions are private in content — the protocol does not record the details — but their existence is declared, and the surcharge is paid. Fully unreported cash transactions are, by definition, not transactions the protocol knows about.</li>
+      </ul>
+
+      <div class="callout">
+        <p class="callout-label">· A Societal Imperative ·</p>
+        <p>Every economy has grey activity. The Favour Economy acknowledges this reality and structures its response: <strong>on-chain is transparent, cheap, and builds common wealth</strong>; off-chain is private, expensive, and still builds common wealth (via surcharge); fully unreported is the old system, not ours. Participants are not forced into transparency, but transparency is the strictly better option in almost every case, and the protocol's architecture makes this visible.</p>
+      </div>
+    </section>
+
+    <section class="sub" id="pricing">
+      <p class="sub-eyebrow">§ 2.5</p>
+      <h3>Pricing and negotiation.</h3>
+      <p>Pricing in the Favour Economy is <em>negotiated</em>. The protocol does not set prices. It provides the infrastructure by which buyers and sellers can propose, counter, accept, or walk away from terms. In practice this produces three distinct patterns of price discovery, which the system supports natively.</p>
+
+      <ul class="spec-list">
+        <li><strong>Standard favours.</strong> For common, well-defined favour types (a ride to the airport, an hour of yard work, a delivery within a given radius), the protocol publishes reference prices derived from the moving median of recent completed transactions of the same type. These are not enforced prices — they are informational anchors that reduce negotiation overhead for routine favours.</li>
+        <li><strong>Bespoke favours.</strong> For specific, situational, or unusual favours (the breastmilk case is bespoke), the seller posts an offer and the buyer responds. Either party may counter. A contract forms when both agree. The price is whatever the parties settle on, recorded on-chain.</li>
+        <li><strong>Group-funded favours.</strong> For large favours exceeding any individual's capacity, the system supports aggregate funding: many members contribute small amounts of FBs (or commit Surfaces) toward a proposed group favour, and the favour activates when the threshold is met. This is how the protocol expresses things like community tool purchases, disaster-response reserves, or scholarships.</li>
+      </ul>
+
+      <p>The philosophical point: no party has privileged pricing power. The seller posts; the buyer decides by accepting, countering, or walking; both may negotiate. Price emerges from the meeting of offer and decision, which is the correct decentralised posture for a protocol that refuses to become an intermediary with an opinion about value.</p>
+
+      <p class="pull">No one dictates the price of a favour. Price emerges from the meeting of offer and decision.</p>
+    </section>
+
+    <section class="sub" id="reputation">
+      <p class="sub-eyebrow">§ 2.6</p>
+      <h3>Reputation and availability.</h3>
+      <p>Reputation is the protocol's primary non-monetary incentive. It is how the system distinguishes trustworthy participants from opportunistic ones, how it routes Riders to the Surfaces most likely to fulfil them, and how it gates access to higher-stakes favours. Because FavourBucks do not grow through accumulation, reputation is the quantity participants are incentivised to build.</p>
+
+      <p>Reputation is earned through:</p>
+
+      <ul class="spec-list">
+        <li><strong>Honoured availability.</strong> When a participant declares a Surface — "I am available for these kinds of favours, at these times, in this area" — and the network calls on them within that declaration, and they deliver, their reputation grows. When they decline or fail to deliver within a declared window, their reputation is reduced. This is the single most important reputation signal, because it measures the one thing the network most needs to know: <em>can this declaration be trusted</em>.</li>
+        <li><strong>Accurate pricing.</strong> Participants whose favours complete at close to their proposed price, without renegotiation or dispute, earn reputation faster. Participants whose completions routinely differ from their proposals (up or down) earn more slowly.</li>
+        <li><strong>Witness closures.</strong> Favours that close cleanly — all parties confirm completion, no dispute is raised — contribute to reputation. Favours that close with disputes, even if resolved in the participant's favour, contribute less.</li>
+        <li><strong>Group standing.</strong> Members whose Groups endorse them (via Group vote or delegated reputation bond) inherit a portion of their Group's accumulated standing. This lets established Groups vouch for new members, accelerating onboarding.</li>
+      </ul>
+
+      <p>Availability deserves its own treatment, because it is the mechanic that makes the protocol's mobilisation claims credible. A participant can be paid (in FBs) to declare availability — a "standby Surface" — in exchange for agreeing to be reachable within a stated window. If called on during that window for a favour within the scope of their declaration, they must either fulfil it or release the Surface with sufficient notice that the network can route to someone else.</p>
+
+      <p>Failure to honour a declared availability is the protocol's most serious reputation event. The design principle is simple and strong: <em>if you were paid to be available and you weren't, you weren't actually available</em>. The FBs earned against that declaration are clawed back — not as a penalty layered on top of the system, but as a correction to a record that was false. A participant who repeatedly over-declares availability and under-delivers loses, disproportionately, the FBs they earned from those declarations.</p>
+
+      <div class="callout copper">
+        <p class="callout-label">· The Availability Principle ·</p>
+        <p><strong>Under-promise, over-deliver.</strong> The protocol rewards accurate declarations and punishes over-declaration more than under-declaration. A participant who claims availability for half the time they can actually cover, and delivers reliably within that window, accumulates reputation faster than one who claims availability for all their time and fails occasionally. This asymmetry is what makes the network's mobilisation capacity a truthful signal.</p>
+      </div>
+
+      <p>A crucial refinement: availability clawbacks are proportional to notice. A participant who declares availability for a month and fails on day two loses the FBs corresponding to the portion of the month they falsely claimed. A participant who updates their Surface to "unavailable" on day twenty, before any network call on them has occurred, forfeits only the days they declared but did not honour. This rewards <em>honest updating</em> of availability as much as initial accuracy, and it prevents the system from collapsing to short-horizon declarations only.</p>
+    </section>
+
+    <section class="sub" id="witness">
+      <p class="sub-eyebrow">§ 2.7</p>
+      <h3>The Witness layer.</h3>
+      <p>A favour is not complete when one party says it is. A favour is complete when the network can verify — to an appropriate standard of proof for the favour's scale — that the agreed work was done. The Witness layer is the protocol's mechanism for this verification.</p>
+
+      <p>Different classes of favour require different classes of witness. The protocol defines four:</p>
+
+      <ul class="spec-list">
+        <li><strong>Self-witnessed.</strong> The lowest class. Small, low-stakes favours (small rides, minor errands, personal favours between known parties) close on a simple mutual confirmation between the two parties. The protocol takes the confirmation at face value; reputation systems handle any abuse.</li>
+        <li><strong>Third-party witnessed.</strong> The middle class. Favours above a threshold value, or of a class where disputes are historically more common, require a third member of the network — the coordinator role — to confirm completion. The coordinator may be an individual member with sufficient reputation, or a Group representative.</li>
+        <li><strong>Multi-party witnessed.</strong> Large or high-stakes favours — particularly group favours involving many Surfaces — require multiple witnesses, typically one per major Surface contributing to the favour. The protocol records the set of confirmations and closes the Logistic when a quorum of witnesses confirms.</li>
+        <li><strong>Instrumentally witnessed.</strong> Favours with technical or safety implications may require instrumental verification in addition to human witness. A breastmilk delivery might call on a lab network node for a safety screen (see §3.4). A delivery of equipment might require a photographic confirmation. The instruments report to the Witness layer just as a human would.</li>
+      </ul>
+
+      <p>The Witness layer is also the protocol's dispute-resolution substrate. A disputed favour is one where the witnesses disagree or where a party contests a closure. Disputes are resolved through a ladder: direct renegotiation between the parties first, Group arbitration second (if the parties share a Group or adjacent Groups), regional arbitration third (a small panel of high-reputation members), and charitable-entity arbitration only in the final case. Most disputes resolve at the first or second step; the system is designed to minimise the need for higher escalation.</p>
+    </section>
+
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════
+     PART III — INFRASTRUCTURE FUTURES
+═══════════════════════════════════════════════════════ -->
+<section class="part" id="part-3">
+  <div class="page-wide">
+    <div class="part-header">
+      <p class="part-number">PART III</p>
+      <h2 class="part-title"><em>Infrastructure</em> Futures</h2>
+      <p class="part-lede">How the network pays its contributors to build the substrate it runs on — and why early coverage is worth most.</p>
+    </div>
+  </div>
+
+  <div class="page">
+
+    <section class="sub" id="mesh">
+      <p class="sub-eyebrow">§ 3.1</p>
+      <h3>The mesh network.</h3>
+      <p>The Favour Economy's matching, witnessing, and settlement functions can operate over the conventional internet. But the conventional internet is, by design, surveilled, centralised, rented, and fragile in ways that matter more as the protocol scales. A system whose purpose is to mobilise capacity when conventional systems fail cannot itself depend entirely on conventional systems.</p>
+
+      <p>The protocol's substrate is therefore a decentralised mesh network, built on Reticulum and compatible LoRa-class radio technology, operated by member-run nodes, and capable of carrying protocol traffic without any dependence on commercial internet infrastructure. The mesh is built incrementally, paid for out of system fees, and owned — in the most literal sense — by the people who run its nodes.</p>
+
+      <div class="define">
+        <div class="define-term">The Mesh, n.</div>
+        <div class="define-body">
+          <p>The Favour Economy's native communications substrate. A federation of Reticulum-based mesh network nodes operated by member-participants, funded by the protocol's infrastructure budget, and used to carry favour-protocol traffic without dependence on commercial internet infrastructure. Operational offline, encrypted by default, censorship-resistant by design.</p>
+        </div>
+      </div>
+
+      <p>In practice, a node operator sets up a small radio node — a consumer-grade LoRa device, a Raspberry Pi with a radio hat, or a dedicated appliance — at their home, business, or another suitable location. The node joins the mesh, begins relaying packets for the network, and earns recurring FavourBucks proportional to its contribution. The contribution is measured by three quantities: coverage (how much previously-unserved geography this node reaches), reliability (uptime against declared availability), and traffic (how many packets the node relays for other members).</p>
+
+      <p>The mesh is not a commercial ISP replacement. Its throughput is low by consumer-internet standards — tens to hundreds of bits per second in the radio link layer, sufficient for favour-protocol messaging but not for video streaming or large file transfer. What it offers is not bandwidth but <em>presence</em>: a communications substrate that exists in places, times, and conditions where the conventional internet does not, and that belongs to its operators.</p>
+    </section>
+
+    <section class="sub" id="payout-curve">
+      <p class="sub-eyebrow">§ 3.2</p>
+      <h3>The asymptotic payout curve.</h3>
+      <p>The economic design of mesh compensation is the protocol's most carefully calibrated incentive structure. It must reward node operators sufficiently to motivate coverage in underserved areas, while avoiding the failure mode of rewarding redundant coverage in already-saturated areas. The design is an <em>asymptotic per-node payout</em>: the first node in a previously-uncovered area earns the most; the second, less; the third, less still; and the curve asymptotes toward zero as the area saturates.</p>
+
+      <div class="diagram">
+        <svg viewBox="0 0 620 260" xmlns="http://www.w3.org/2000/svg" aria-label="Asymptotic payout curve">
+          <defs>
+            <linearGradient id="curve-grad" x1="0" y1="0" x2="1" y2="0">
+              <stop offset="0%" stop-color="#c9a84c"/>
+              <stop offset="50%" stop-color="#e8734a"/>
+              <stop offset="100%" stop-color="rgba(232,115,74,0.2)"/>
+            </linearGradient>
+          </defs>
+          <!-- Axes -->
+          <line x1="60" y1="220" x2="580" y2="220" stroke="rgba(244,244,244,0.15)" stroke-width="1"/>
+          <line x1="60" y1="30" x2="60" y2="220" stroke="rgba(244,244,244,0.15)" stroke-width="1"/>
+          <!-- Grid lines -->
+          <line x1="60" y1="120" x2="580" y2="120" stroke="rgba(244,244,244,0.04)" stroke-width="1" stroke-dasharray="3,5"/>
+          <line x1="200" y1="30" x2="200" y2="220" stroke="rgba(244,244,244,0.04)" stroke-width="1" stroke-dasharray="3,5"/>
+          <line x1="340" y1="30" x2="340" y2="220" stroke="rgba(244,244,244,0.04)" stroke-width="1" stroke-dasharray="3,5"/>
+          <line x1="480" y1="30" x2="480" y2="220" stroke="rgba(244,244,244,0.04)" stroke-width="1" stroke-dasharray="3,5"/>
+          <!-- Curve: R(n) = R_max / (1 + alpha*n) -->
+          <path d="M 60 40 C 100 42 140 58 200 92 C 260 125 340 170 420 195 C 500 212 540 216 580 218" stroke="url(#curve-grad)" stroke-width="2.5" fill="none"/>
+          <!-- Early adopter shaded region -->
+          <rect x="60" y="30" width="140" height="190" fill="rgba(201,168,76,0.04)"/>
+          <text x="130" y="25" fill="rgba(201,168,76,0.6)" font-size="8" text-anchor="middle" font-family="JetBrains Mono, monospace" letter-spacing="2">EARLY</text>
+          <!-- Sample points -->
+          <circle cx="85" cy="48" r="4" fill="#c9a84c"/>
+          <circle cx="150" cy="78" r="4" fill="#c9a84c" opacity="0.8"/>
+          <circle cx="280" cy="145" r="4" fill="#e8734a" opacity="0.7"/>
+          <circle cx="420" cy="195" r="4" fill="#e8734a" opacity="0.5"/>
+          <circle cx="540" cy="216" r="4" fill="rgba(232,115,74,0.4)"/>
+          <!-- Labels -->
+          <text x="85" y="35" fill="rgba(201,168,76,0.9)" font-size="8" text-anchor="middle" font-family="Outfit, sans-serif">1st</text>
+          <text x="150" y="65" fill="rgba(201,168,76,0.7)" font-size="8" text-anchor="middle" font-family="Outfit, sans-serif">2nd</text>
+          <text x="280" y="132" fill="rgba(232,115,74,0.7)" font-size="8" text-anchor="middle" font-family="Outfit, sans-serif">5th</text>
+          <text x="420" y="182" fill="rgba(232,115,74,0.5)" font-size="8" text-anchor="middle" font-family="Outfit, sans-serif">10th</text>
+          <text x="540" y="205" fill="rgba(232,115,74,0.4)" font-size="8" text-anchor="middle" font-family="Outfit, sans-serif">20th</text>
+          <!-- Axis labels -->
+          <text x="320" y="250" fill="rgba(244,244,244,0.4)" font-size="9" text-anchor="middle" font-family="JetBrains Mono, monospace" letter-spacing="2">NODE COUNT IN AREA →</text>
+          <text x="30" y="125" fill="rgba(244,244,244,0.4)" font-size="9" text-anchor="middle" font-family="JetBrains Mono, monospace" letter-spacing="2" transform="rotate(-90,30,125)">PER-NODE REWARD</text>
+          <!-- Annotations -->
+          <text x="60" y="45" fill="rgba(201,168,76,0.5)" font-size="8" font-family="Outfit, sans-serif">R_max</text>
+          <text x="560" y="230" fill="rgba(232,115,74,0.4)" font-size="8" font-family="Outfit, sans-serif">→ 0</text>
+        </svg>
+        <p class="diagram-caption">Per-node reward as a function of local node count. Early operators in sparse areas earn most; saturated areas approach zero marginal reward.</p>
+      </div>
+
+      <p>A simplified mathematical form for the per-node reward is:</p>
+
+      <div class="formula">
+<span class="comment">// Per-node reward R as a function of local node count n</span>
+R(n) = R_max × <span class="keyword">reliability</span>(node) / (1 + α × n)
+
+<span class="comment">// Where:</span>
+R_max       = <span class="keyword">maximum reward</span> for a first node in a coverage gap
+reliability = <span class="keyword">0.0–1.0</span>, based on uptime vs declared availability
+n           = <span class="keyword">number of nodes</span> currently covering this area
+α           = <span class="keyword">saturation coefficient</span> (tuned per region)</div>
+
+      <p>The reliability multiplier is critical. A first node in an uncovered area that claims availability but is offline half the time provides a false signal of coverage, which is worse than no node. The multiplier ensures that compensation tracks <em>actual</em> usefulness. Unreliable nodes see their rewards drop sharply, which naturally starves them out of the system — not as a penalty, but as the economic consequence of unreliability.</p>
+
+      <p>The saturation coefficient α is tuned by region to reflect local coverage needs. Dense urban areas saturate quickly (low α tolerates few nodes before rewards drop). Rural or disaster-prone areas saturate slowly (higher α rewards many nodes, because redundancy is valuable where infrastructure is fragile). The coefficient is set by the charity's infrastructure committee and published openly; it is an auditable parameter, not a proprietary secret.</p>
+
+      <p>The overall effect: the mesh grows toward coverage gaps. Node operators are economically motivated to set up in places with unmet need rather than to pile into already-served areas. Over time, the network fills in, reward-per-node asymptotes toward zero in saturated regions, and the system self-stabilises at a coverage level that reflects actual mobilisation demand.</p>
+    </section>
+
+    <section class="sub" id="pay-to-map">
+      <p class="sub-eyebrow">§ 3.3</p>
+      <h3>Pay to map.</h3>
+      <p>Related to the mesh is the protocol's geographic substrate: a community-owned map of the world, built by members, updated continuously, and used by the matching engine to route Logistics efficiently. The Pay-to-Map programme compensates members in FavourBucks for contributing mapping data — streets, addresses, accessibility details, local landmarks, route times, seasonal variations, disaster-relevant geography — that improves the network's routing quality.</p>
+
+      <p>Mapping contributions are compensated on a per-area basis, with the same asymptotic curve as the mesh: the first accurate map of a given square kilometre earns most, and subsequent updates (corrections, refinements, seasonal data) earn smaller recurring amounts. As the map matures, the per-contribution reward approaches zero in well-mapped areas, and the economic incentive shifts to maintaining freshness and filling gaps.</p>
+
+      <p>The map produced by this programme is <em>owned by the protocol's charitable entity</em> and is available to members for routing at no additional cost. It is not licensed to external commercial parties, and it is not sold. It is a commons — built by members, for members — and its persistence is a direct function of member participation.</p>
+    </section>
+
+    <section class="sub" id="verification">
+      <p class="sub-eyebrow">§ 3.4</p>
+      <h3>Verification and lab networks.</h3>
+      <p>Some favours carry technical, safety, or health-adjacent considerations that benefit from instrumental verification beyond what a human witness can provide. Breastmilk, as in Part V's worked example, can carry pathogens and medication traces that a visual inspection cannot detect. Home-preserved food can harbour botulism. Water from an unfamiliar well can carry heavy metals or coliforms. A favour involving transfer of such materials between parties who are not otherwise intimate benefits from — and sometimes requires — a small, fast, inexpensive verification step.</p>
+
+      <p>The protocol supports the development of a <em>lab network</em>: member-affiliated laboratories (a clinic, a university lab, a municipal testing facility, a certified home lab) that perform small-sample screens for favours that request them. A requesting party pays the lab fee in FBs; the lab returns a pass-or-flag result to the Witness layer; the favour either closes or is held pending resolution. Lab nodes, like mesh nodes, are compensated per result and accumulate reputation proportional to their accuracy and turnaround time.</p>
+
+      <p>The lab network is also the gateway for a broader capability the protocol anticipates: <em>distributed citizen science and safety infrastructure</em>. A community that can screen its own breastmilk shares, verify its own well water, test its own soil for lead, and confirm its own food preservation is a community with concrete material autonomy. This is a significant long-term capability, and the Favour Economy's lab-network primitives are designed to enable it.</p>
+
+      <div class="callout">
+        <p class="callout-label">· Health-Adjacent Favours ·</p>
+        <p>Favours involving bodily fluids, food, water, medications, or other substances with non-obvious safety profiles are marked in the protocol with a <strong>health-adjacent flag</strong>. The flag triggers an informed-consent checklist between parties (disclosure of relevant health history, medications, conditions) and may optionally route the favour through a lab-network node. The goal is not gatekeeping but informed participation.</p>
+      </div>
+    </section>
+
+    <section class="sub" id="group-commons">
+      <p class="sub-eyebrow">§ 3.5</p>
+      <h3>Group commons and insurance.</h3>
+      <p>Returning to the Group structure introduced in §1.5: each Group holds a fund that accumulates from the 1% share of every member transaction, plus any additional contributions members choose to make, plus any interest earned from the Group's own deployments (see below). The fund is deployed by the Group's governance — members vote on allocations, with voting power proportional to contribution history — across three general categories.</p>
+
+      <ul class="spec-list">
+        <li><strong>Shared assets.</strong> The Group uses fund capital to acquire physical assets that members collectively use — a truck, a set of power tools, a laundry machine, a community kitchen, a van, a chainsaw collection, a commercial-grade espresso machine. Members book assets against the Group's calendar, pay a nominal use fee (in FBs) that funds maintenance, and the Group's per-member cost of capital drops dramatically relative to private ownership of rarely-used equipment.</li>
+        <li><strong>Mutual insurance.</strong> The Group pools a reserve against predictable member-level catastrophes — child-raising costs, elder care, disability, emergency expenses — and pays out according to its own charter. Payouts are small enough that the reserve remains solvent, and governance decisions about qualifying events are made by the Group's own members, who know the participants personally. This is insurance at the scale where trust is possible; it is not a commercial insurance replacement for very-large-loss events.</li>
+        <li><strong>Dividends.</strong> When the Group's fund generates surplus — through asset rental, favour-matching fees the Group collects as a match-maker, or conservative non-compound deployments of its reserve — members receive proportional distributions. This is the most literal form of the protocol's promise that participation compounds into collective wealth.</li>
+      </ul>
+
+      <p>Groups are legally constituted. In Canadian practice this would typically be a registered co-operative corporation, a non-share capital corporation, or — for Groups operating within a larger registered charity — a sub-fund with defined governance. The protocol's central charitable entity supports Groups with templates, governance tooling, and audit infrastructure, but does not operate Groups directly. Each Group is self-governing, member-owned, and member-responsible.</p>
+
+      <p class="pull">A Group of friends. A city block. A trade collective. <em>Ownership spreads, benefits multiply, and no one single member carries the load of the whole.</em></p>
+    </section>
+
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════
+     PART IV — GOVERNANCE AND REGULATION
+═══════════════════════════════════════════════════════ -->
+<section class="part part-alt" id="part-4">
+  <div class="page-wide">
+    <div class="part-header">
+      <p class="part-number">PART IV</p>
+      <h2 class="part-title"><em>Governance</em> and Regulation</h2>
+      <p class="part-lede">A protocol that intends to last must first be legal, then be legitimate, and only then be clever.</p>
+    </div>
+  </div>
+
+  <div class="page">
+
+    <section class="sub" id="charity-structure">
+      <p class="sub-eyebrow">§ 4.1</p>
+      <h3>The charity structure.</h3>
+      <p>The Favour Economy is operated by a registered charitable organisation whose mission is explicitly and exclusively the mobilisation of favour capacity for public benefit. The charity holds the escrow reserve, mints and redeems FavourBucks, operates the matching and witness infrastructure, funds mesh and mapping nodes through the infrastructure budget, and provides the governance and audit functions the protocol requires.</p>
+
+      <p>The choice of a charitable vehicle — rather than a for-profit corporation, a decentralised autonomous organisation with no legal personhood, or a loose federation of participants — is deliberate and foundational. It is the single most important structural decision the protocol makes, because it determines how every other question about governance, taxation, user protection, and durability gets answered.</p>
+
+      <ul class="spec-list">
+        <li><strong>Mission lock.</strong> A charity's governing documents bind it to its charitable purpose. The Favour Economy charity cannot pivot to a surveillance-advertising business model, cannot be acquired by a private buyer and redirected, and cannot be quietly converted into an extractive platform. Mission drift, the most common failure mode of well-intentioned networks, is prevented by legal instrument.</li>
+        <li><strong>Regulatory standing.</strong> A registered charity has a defined relationship with tax and regulatory authorities. This clarity is valuable precisely because it removes ambiguity — the charity knows what rules it operates under, the authorities know what they are looking at, and members can rely on both.</li>
+        <li><strong>Fiduciary duty.</strong> The charity's board owes duties to its members and its public-benefit purpose. Not to shareholders. Not to capital markets. The incentives of the governing body are aligned with the protocol's users by legal construction.</li>
+        <li><strong>Transparent accounting.</strong> Charitable organisations file public accounts. Members, regulators, and researchers can verify that the protocol's reserve is intact, its fees are as stated, and its infrastructure budget is deployed as described.</li>
+      </ul>
+
+      <p>In Canadian context, this is a federally registered charitable corporation with objects scoped to the operation of the Favour Economy. Equivalent structures exist in most jurisdictions: U.S. 501(c)(3), UK registered charity, Australian registered charity with the ACNC, and similar. The protocol's governance model is designed to be replicable across jurisdictions, with the understanding that each regional charity operates under its own legal framework and co-operates with others under a federated agreement (see §6.3).</p>
+
+      <div class="callout">
+        <p class="callout-label">· On Why Not a DAO ·</p>
+        <p>Decentralised Autonomous Organisations were seriously considered and deliberately rejected as the primary legal vehicle. Their appeal is real — member-owned governance, code-enforced rules, transparent operations — but their legal standing in most jurisdictions is unclear, and unclear legal standing means every participant bears legal risk the protocol cannot help them carry. A registered charity with <strong>DAO-style member governance mechanisms inside it</strong> captures the benefits of both. The protocol may adopt DAO primitives for specific functions (Group governance, infrastructure allocation votes, witness arbitration) while preserving a legal shell that regulators, banks, and members can work with.</p>
+      </div>
+    </section>
+
+    <section class="sub" id="regulatory-posture">
+      <p class="sub-eyebrow">§ 4.2</p>
+      <h3>Regulatory posture.</h3>
+      <p>The protocol's regulatory posture is <em>clean, conservative, and cooperative</em>. The Favour Economy intends to be legal in every jurisdiction in which it operates, and intends to earn that legality through structural design rather than through opacity.</p>
+
+      <p>Several specific questions deserve direct treatment.</p>
+
+      <h4>Are FavourBucks a currency, a security, or a voucher?</h4>
+
+      <p>The FavourBuck is designed to function as a charitable voucher — a claim on future favour-capacity within a defined network, issued by a registered charity, non-interest-bearing, redeemable for services rather than cash. This characterisation is deliberate and has regulatory implications.</p>
+
+      <p>In most jurisdictions, a voucher issued by a registered charity for use within its programme is not a security (it represents no ownership interest, no expectation of profit, and no dividend claim). It is typically not a currency (it has no legal-tender status, no sovereign issuer, and narrow acceptance). And the cash-primed minting path is structured as a donation-with-voucher-receipt arrangement rather than as a currency purchase, which aligns with established charitable-gift precedent.</p>
+
+      <p>The protocol will seek advance legal opinion and, where available, regulatory pre-clearance (a "no-action letter" equivalent, a CRA advance ruling, or similar) before launch in each jurisdiction. Where pre-clearance is not available, it will publish its legal analysis and invite regulatory engagement. The goal is to make the protocol's regulatory status a matter of record, not of interpretation.</p>
+
+      <h4>Are favour transactions taxable?</h4>
+
+      <p>This question has a layered answer. Pure peer-to-peer mutual aid — favours exchanged between individuals within a community context, of reasonable value, not conducted as a commercial business — is generally not taxable income in most jurisdictions, following well-established precedents for time-banks and mutual-aid networks. The Favour Economy's default operating mode fits this pattern.</p>
+
+      <p>However, some activity in the network will be commercial in character — a professional performing their trade, a business offering services through the protocol, a Group operating at a scale that makes its activity economically material. Commercial activity is taxable. The protocol does not claim otherwise and does not structure itself to evade commercial tax obligations. On-chain records are available to participants for their own tax compliance, and the charity will issue whatever receipts and reports are required by regulators.</p>
+
+      <p>The protocol's posture is: <em>the law applies, we help members comply, we do not structure for evasion</em>. Members who use the protocol for clearly commercial activity bear ordinary commercial tax obligations. Members using it for genuine mutual-aid activity bear no obligation beyond what they would in any other mutual-aid context. The distinction is familiar to any jurisdiction that has regulated charitable mutual-aid before.</p>
+
+      <h4>Is the charity itself subject to specific oversight?</h4>
+
+      <p>Yes. A registered charity in Canada is supervised by the Canada Revenue Agency's Charities Directorate, is subject to the Income Tax Act's charitable provisions, files a T3010 annual information return, and must meet public-benefit and governance requirements to maintain its registration. The Favour Economy's charitable operator will meet all applicable requirements and will publish its T3010 (or jurisdictional equivalent) openly.</p>
+
+      <p>The charity will also be subject to anti-money-laundering and counter-terrorism-financing regulations applicable to financial-service-like activities. The protocol's architecture supports this: transaction records are auditable, identity verification is available for transactions above defined thresholds, and the charity maintains the reporting relationships with FINTRAC (or jurisdictional equivalent) that its activities require.</p>
+
+      <div class="callout copper">
+        <p class="callout-label">· The Regulatory Commitment ·</p>
+        <p>The Favour Economy chooses legitimacy over cleverness. Every design decision that trades legal clarity for short-term convenience is rejected. Every design decision that strengthens the protocol's legal standing — even at the cost of complexity — is accepted. This is not a constraint. <strong>It is the condition that allows the protocol to be durable.</strong></p>
+      </div>
+    </section>
+
+    <section class="sub" id="privacy">
+      <p class="sub-eyebrow">§ 4.3</p>
+      <h3>Privacy by design.</h3>
+      <p>The protocol distinguishes sharply between <em>privacy</em> and <em>evasion</em>. Privacy is a legitimate user expectation: participants should be able to conduct ordinary favours without those favours being exposed to the general public, to data brokers, or to adversaries. Evasion is the use of technical opacity to conceal legally reportable activity from the authorities that have lawful jurisdiction over it. The Favour Economy embraces privacy and refuses evasion.</p>
+
+      <p>Several architectural choices implement this distinction.</p>
+
+      <ul class="spec-list">
+        <li><strong>Encrypted by default.</strong> All protocol traffic is encrypted end-to-end. Only the parties to a transaction, and the witnesses they designate, can read its content. The charity's servers handle ciphertext routing and metadata but cannot decrypt transaction bodies. This protects participants from commercial surveillance, from data breaches, and from casual observation by unaffiliated parties.</li>
+        <li><strong>Public ledger, private detail.</strong> On-chain transactions record the existence, value, and participants of a transaction — the minimum needed for reputation, audit, and dispute resolution — but not the content or details of the underlying favour. "FBs transferred from Alice to Bob, 50 FB, closed" is public. "What Alice and Bob specifically did" is not.</li>
+        <li><strong>Minimal identity linkage.</strong> Participants operate under protocol-level identifiers that are not required to be tied to legal identity for most transactions. For small-scale favours, pseudonymity is the default. For larger-scale, commercial-character, or regulated transactions, legal-identity verification is triggered by defined thresholds, following standard know-your-customer practice.</li>
+        <li><strong>Lawful compliance.</strong> When the charity receives a lawful order from a competent authority — a court order, a regulatory demand within the authority's scope — it complies with that order to the extent required by law, and only to that extent. Participants affected are notified where law permits. The protocol does not build back-doors for authorities, and does not build evasion mechanisms against them. It meets its legal obligations and defends its users within them.</li>
+      </ul>
+
+      <p>The off-chain settlement path discussed in §2.4 is the protocol's mechanism for parties who require privacy above the protocol's default level. It is not the mechanism for evading taxation. The 15% surcharge on declared off-chain settlements is priced for privacy-seekers, not tax-avoiders. Unreported cash transactions between individuals, outside the protocol entirely, are — in any economy — subject to the jurisdiction's existing tax laws, and the Favour Economy makes no claim to exempt them.</p>
+    </section>
+
+    <section class="sub" id="cash-corridor">
+      <p class="sub-eyebrow">§ 4.4</p>
+      <h3>The cash corridor.</h3>
+      <p>Because the protocol accepts cash at the priming step and allows cash-equivalent secondary trades, it is — in regulatory terms — a money service business in some jurisdictions, at least for certain operations. The charity will therefore register as an MSB (or equivalent) where required, will comply with applicable reporting thresholds, will maintain transaction records for the legally-required retention periods, and will file reports as required.</p>
+
+      <p>This is not a burden to be minimised; it is a feature of operating legitimately in a regulated space. It is also why the protocol does not attempt to be a full banking substitute. The FavourBuck is a voucher for favour-redemption, not a deposit product. The charity does not hold customer funds as a bank does; it holds a reserve against its own voucher issuance. The distinction is legally and operationally significant.</p>
+    </section>
+
+    <section class="sub" id="dispute">
+      <p class="sub-eyebrow">§ 4.5</p>
+      <h3>Dispute resolution.</h3>
+      <p>Most favours in the protocol complete cleanly. When they do not — when one party claims completion the other disputes, when witnesses disagree, when a favour was partially fulfilled in an ambiguous way — the protocol provides a four-step ladder for resolution.</p>
+
+      <ol class="steps">
+        <li><strong>Direct renegotiation.</strong> The parties to the Logistic attempt to resolve the disagreement between themselves, with the witness's confirmation or any instrumental evidence available as input. Most disputes close here. The protocol provides structured messaging and offers mediated conversation templates, but does not intervene unless invited.</li>
+        <li><strong>Group arbitration.</strong> If both parties share a Group, or belong to closely adjacent Groups, Group-level arbitration is available: a small panel of senior members hears the dispute and renders a decision. Group arbitration is fast, contextual, and binding within the Group's charter. It is the right mechanism for most community-scale disputes.</li>
+        <li><strong>Regional arbitration.</strong> If Group arbitration is not applicable or yields no resolution, a regional panel — drawn from high-reputation members across multiple Groups in a region, rotated to avoid capture — hears the case. Regional arbitration is slower, more formal, and produces a reasoned written decision that is added to the protocol's case-law archive.</li>
+        <li><strong>Charitable-entity arbitration.</strong> As a final step, and only in cases of unusual scale, precedent-setting importance, or Group-level conflict of interest, the charity's own dispute committee hears the case. These cases are rare and are expected to be the basis on which the protocol's case law evolves.</li>
+      </ol>
+
+      <p>Arbitration decisions at any level can affect reputation, redistribute FavourBucks, enforce clawbacks, or (in severe cases) suspend accounts. They do not affect legal rights that exist outside the protocol: participants retain all ordinary legal remedies, and the protocol's own decisions do not preclude court action in cases where the underlying facts involve violations of law. The protocol is a coordination layer, not a legal system.</p>
+
+    </section>
+
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════
+     PART V — THE FIRST FAVOUR
+═══════════════════════════════════════════════════════ -->
+<section class="part" id="part-5">
+  <div class="page-wide">
+    <div class="part-header">
+      <p class="part-number">PART V</p>
+      <h2 class="part-title">The <em>First Favour</em></h2>
+      <p class="part-lede">A worked example. Told first as it would be told. Then shown as the protocol sees it.</p>
+    </div>
+  </div>
+
+  <div class="page">
+
+    <section class="sub" id="breastmilk">
+      <p class="sub-eyebrow">§ 5.1</p>
+      <h3>The breastmilk, told straight.</h3>
+
+      <div class="story">
+        <p class="story-label">· Peterborough, Ontario. A Tuesday in October. ·</p>
+
+        <p>There is a mother who cannot produce enough breastmilk for her infant. She has tried everything. The pediatrician has been kind. The formula is fine. But the baby is not thriving on it, and the mother is in a kind of despair she will not recognise for what it is until much later.</p>
+
+        <p>She posts in a community forum, late on a Tuesday night, not really asking for help. Just saying it out loud.</p>
+
+        <p>A woman three neighbourhoods over, reading the forum while her own infant sleeps, has a freezer full of milk she has been pumping beyond need. She has been meaning to donate it but the formal milk-bank process is slow and requires the baby to be hospitalised. This mother's baby is not hospitalised. This mother just needs milk.</p>
+
+        <p>The second woman messages the first. They do not know each other. They live ten minutes apart.</p>
+
+        <p>Between them — through a favour network that one of them has used before and the other has just joined — a transporter is found: a man who drives past both houses on his way home from work, has an insulated cooler in the back of his car from a camping trip the previous weekend, and does not mind adding twelve minutes to his commute.</p>
+
+        <p>A coordinator — a woman who knows both mothers from a prenatal group she helped run years ago — volunteers to verify the handoff, because the donor mother wants to know the milk is getting to a real baby and the receiving mother wants to know the milk is actually what was offered.</p>
+
+        <p>There is a brief call. Consent forms are exchanged — this is a bodily fluid, and the donor discloses her medication history, her health, her recent diet. The receiving mother confirms she has read and understood, and accepts the milk on its terms. A small sample is dropped at a local clinic for a next-day screen, a safety precaution the receiving mother requests and the donor appreciates.</p>
+
+        <p>The transporter arrives at the donor's house at 5:47 PM. The cooler goes from freezer to cooler to car in under three minutes. He drives. He arrives at the receiving mother's house at 6:11 PM. The receiving mother is crying when she opens the door. The transporter hands her the cooler. He does not stay. He does not need to.</p>
+
+        <p>There is a note inside, written by the donor, in handwriting. It says: <em>from one mother to another. I am glad you asked.</em></p>
+
+        <p>The baby feeds that night. The mother sleeps, briefly, for the first time in three days.</p>
+
+        <p>This favour cost, in total, about ninety minutes of four people's time, one slightly-longer commute, one insulated cooler, and the willingness of four strangers to trust each other over the course of a single afternoon. It is not a transaction that any amount of money could have produced, because the thing being transferred is not just milk.</p>
+
+        <p>It is also exactly the kind of thing the Favour Economy exists to make possible at scale.</p>
+      </div>
+    </section>
+
+    <section class="sub" id="first-annotated">
+      <p class="sub-eyebrow">§ 5.2</p>
+      <h3>The breastmilk, annotated.</h3>
+
+      <p>The same favour, observed from inside the protocol:</p>
+
+      <div class="story">
+        <p class="story-label">· As the protocol sees it ·</p>
+
+        <p>The receiving mother's forum post is, from the protocol's perspective, the initiation of a Logistic: a request for a transfer with an Origin (any donor's freezer), a Destination (her freezer), a Time constraint (as soon as possible, within 24 hours), and a Rider specifying breastmilk, transportability, willingness to disclose medication history, acceptance of optional lab screen, and preferred geographic radius.</p>
+
+        <p class="annotation"><strong>Logistic initiation.</strong> The Logistic is created with a health-adjacent flag (§3.4), which triggers the disclosure protocol and routes candidate matches through the lab-network option. The Rider specifies the human witness layer (§2.7) because the favour is bespoke and high-trust.</p>
+
+        <p>The donor's freezer surplus is, in protocol terms, a Surface she has previously declared — "I have breastmilk available for donation, medication-free for 18 months, willing to transport within 30km, available within 24 hours of request." The matching engine identifies her as a candidate.</p>
+
+        <p class="annotation"><strong>Surface match.</strong> The donor's declared Surface (§1.4) intersects the receiving mother's Rider on skills (lactation), material (breastmilk), willingness (donation), and location (within radius). Reputation from prior favours weights her ahead of other candidates.</p>
+
+        <p>The transporter is found by a second Surface match: drivers with insulated containers, available within the time window, willing to handle health-adjacent material. The engine identifies three candidates; the first to accept the contract secures it.</p>
+
+        <p class="annotation"><strong>Surface stacking.</strong> Two Surfaces (donor + transporter) now compose against the single Rider. Neither could satisfy it alone. The protocol's matching engine is solving a composition problem, not a simple one-to-one match.</p>
+
+        <p>The coordinator is a member of the receiving mother's informal Group — a local parenting circle that has elected to be accounted as a Group within the protocol. Her offer to witness the handoff is recorded as a third Surface contribution, earning her reputation but no FavourBucks (she declines payment, as is her right).</p>
+
+        <p class="annotation"><strong>Witness designation.</strong> The coordinator serves as the designated third-party witness (§2.7). Her participation triggers Group-level reputation weighting — because she and the receiving mother share a Group, the favour's clean completion will reinforce the Group's internal trust graph.</p>
+
+        <p>Pricing: the donor offers the milk at 0 FB. The transporter prices his contribution at 40 FB (the network's moving median for similar-distance transport is 35, he priced slightly above because of the health-adjacent category). The receiving mother accepts both terms. The lab screen is 60 FB, paid by the receiving mother directly to the lab node. The coordinator works for free, bankable as reputation.</p>
+
+        <p class="annotation"><strong>Pricing.</strong> Each element is priced independently (§2.5). The donor's 0 FB offering is a pure gift — the protocol supports this natively as a favour of zero price, which still triggers all the protocol mechanics (witness, reputation, record) without FB settlement. This is an important capability: the protocol does not require monetisation to record and support pure gifts.</p>
+
+        <p>The handoff is witnessed (the coordinator confirms via a protocol message that she saw the cooler transfer, unopened, and confirms the receiving mother's identity). The lab screen returns clear the next morning. The Logistic closes.</p>
+
+        <p class="annotation"><strong>Witness closure.</strong> Multi-party witness confirmation (§2.7) closes the Logistic. The health-adjacent flag escalates the closure to require the lab result before full settlement. When the screen returns clear, the FBs for the transporter (40 FB) and lab (60 FB) settle. The donor receives reputation; so do the coordinator and the transporter. The receiving mother's Group receives 1% of each settled transaction (1 FB, in this case — symbolic more than material, but compounding).</p>
+
+        <p>The note is not recorded. It never belonged to the protocol.</p>
+
+        <p class="annotation"><strong>What the protocol does not see.</strong> The handwritten note, the tears at the door, the words at the handoff — these are the social residue of the favour, and they remain between the parties. The protocol's job is to make the coordination possible. What passes between the humans at the moment of contact is theirs.</p>
+      </div>
+    </section>
+
+    <section class="sub" id="why-this-case">
+      <p class="sub-eyebrow">§ 5.3</p>
+      <h3>Why this case, first.</h3>
+      <p>The breastmilk case is, deliberately, the first worked example in this document. It is not representative of the median favour — most favours will be rides, errands, deliveries, trades, meals, and small coordination tasks. It is, however, diagnostic. It exhibits every structural feature the protocol is built to handle, in a form that makes the features legible.</p>
+
+      <ul class="spec-list">
+        <li><strong>It cannot be priced by the market.</strong> Commercial milk sharing exists but is medicalised, slow, and scope-limited. The market does not reach this mother and this donor in this window. The Favour Economy is not competing with commerce; it is occupying a space commerce does not serve.</li>
+        <li><strong>It is stackable.</strong> Four Surfaces compose to satisfy one Logistic. No one of them could have completed the favour alone. This is the composition primitive that distinguishes the protocol from one-to-one marketplaces and one-to-one volunteer platforms.</li>
+        <li><strong>It is witnessable.</strong> The handoff is concrete, the recipient's confirmation is direct, the lab screen provides instrumental evidence. The protocol can close this Logistic cleanly.</li>
+        <li><strong>It is health-adjacent.</strong> It exercises the informed-consent flag, the lab-network integration, and the multi-party witness escalation. A simpler favour would not test these.</li>
+        <li><strong>It is Group-adjacent.</strong> The coordinator's Group membership triggers Group-level reputation effects. The receiving mother's 1% Group allocation, though tiny, establishes the mechanism.</li>
+        <li><strong>It is emotionally gravitational.</strong> Every person who hears the story remembers it. The protocol's first demonstration favours should be the ones people want to tell each other about — and this is that kind of story.</li>
+      </ul>
+
+      <p>Subsequent documents in the Favour Economy's public-facing suite will develop additional use-cases at lower emotional weight and more routine frequency: the Ryder earning recurring income, the Group acquiring shared tools, the mesh-node operator, the sliding-scale professional, the community disaster response. Each of these will use the same annotation structure — story first, protocol mechanics second — and each will build on the primitives established here.</p>
+
+      <p class="pull">Every protocol needs a creation story. <em>Ours is a bag of milk, hand-delivered, with a note.</em></p>
+    </section>
+
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════
+     PART VI — ROADMAP
+═══════════════════════════════════════════════════════ -->
+<section class="part part-alt" id="part-6">
+  <div class="page-wide">
+    <div class="part-header">
+      <p class="part-number">PART VI</p>
+      <h2 class="part-title"><em>Roadmap</em></h2>
+      <p class="part-lede">What exists today, what is being built, and how to join.</p>
+    </div>
+  </div>
+
+  <div class="page">
+
+    <section class="sub" id="status">
+      <p class="sub-eyebrow">§ 6.1</p>
+      <h3>What exists today.</h3>
+      <p>This whitepaper is the protocol's first canonical document. As of its publication, the following are in place:</p>
+
+      <ul class="spec-list">
+        <li><strong>Protocol specification.</strong> The document you are reading. This is the source of truth against which every subsequent implementation, community resource, and public-facing page is measured.</li>
+        <li><strong>Public-facing site.</strong> An editorial site presenting the Favour Economy's vision to general audiences, including a cinematic introduction and a framing document on the producer-vs-consumer inversion.</li>
+        <li><strong>Community formation.</strong> A Discord community for builders, potential participants, and interested parties. Early discussion is scoped to implementation priorities, charter design, and pilot-favour selection.</li>
+        <li><strong>Charitable entity formation.</strong> Legal work underway to constitute the protocol's operating charity in Canada, with provision for sister entities in additional jurisdictions as the protocol expands.</li>
+      </ul>
+
+      <p>What does not yet exist: a production protocol implementation, a live escrow, a member-facing matching engine, or a mesh network operating at scale. These are the objects of the subsequent phases.</p>
+    </section>
+
+    <section class="sub" id="phase-1">
+      <p class="sub-eyebrow">§ 6.2</p>
+      <h3>Phase one — charter and pilot.</h3>
+      <p>Phase one establishes the legal, governance, and pilot-implementation foundations. It has the following objectives:</p>
+
+      <ul class="spec-list">
+        <li><strong>Charity formation and registration.</strong> Incorporation of the Favour Economy Canadian charity, application for charitable status, establishment of the founding board, adoption of governing documents that encode the protocol's structural commitments (non-compound-interest, mission lock, public transparency, member governance).</li>
+        <li><strong>Legal opinion on FavourBuck classification.</strong> Advance legal analysis — and where possible advance regulatory ruling — on the FavourBuck's status as a charitable voucher rather than a security or currency, in each jurisdiction of initial operation.</li>
+        <li><strong>Pilot protocol implementation.</strong> A minimum-viable protocol implementation supporting the Logistic/Surface/Rider primitives, a single-party witness layer, cash-primed FB issuance, and on-chain settlement. Scope limited to make the first hundred favours possible, not to scale.</li>
+        <li><strong>First demonstration favours.</strong> Execution of ten to twenty first-case favours — of the kind exemplified in Part V — in the protocol's first region of operation. These favours are documented carefully, published (with participant consent), and serve as the narrative foundation for broader onboarding.</li>
+        <li><strong>Founding Groups.</strong> Formation of the first three to five Groups — community, trade, or affinity — each operating at pilot scale with the protocol's Group primitives. These become the governance and operational templates for Groups that follow.</li>
+      </ul>
+    </section>
+
+    <section class="sub" id="phase-2">
+      <p class="sub-eyebrow">§ 6.3</p>
+      <h3>Phase two — regional mesh and scale.</h3>
+      <p>Phase two extends the protocol from pilot to regional operation. Objectives:</p>
+
+      <ul class="spec-list">
+        <li><strong>Mesh network pilot.</strong> Deployment of the first mesh-node cohort — initially 50–200 nodes in a single region — implementing the asymptotic payout curve, reliability scoring, and protocol traffic routing. The mesh pilot is an engineering and economic validation, not yet a replacement for conventional internet carriage.</li>
+        <li><strong>Multi-party witness layer.</strong> Completion of the multi-party and instrumental witnessing capabilities, enabling higher-stakes group favours and health-adjacent favours at production quality.</li>
+        <li><strong>Lab network pilot.</strong> Onboarding of the first lab-network partners for health-adjacent verification, beginning with breastmilk and water-quality screens, expanding as demand and partnerships emerge.</li>
+        <li><strong>Favour-completion minting.</strong> Activation of the favour-completion minting path (§2.2) once the witness layer is verified at scale. This is the transition from cash-primed-only issuance to organic supply growth tied to real activity.</li>
+        <li><strong>Group governance tooling.</strong> Production-grade Group formation, fund management, voting, and insurance primitives. Groups operating at this phase can reach the hundreds of members and hold fund balances in the tens of thousands of FavourBucks.</li>
+        <li><strong>Regulatory ratification.</strong> Any regulatory guidance, rulings, or adjustments emerging from Phase 1 are formalised in the protocol's operational procedures. Second-jurisdiction expansion planning begins.</li>
+      </ul>
+    </section>
+
+    <section class="sub" id="phase-3">
+      <p class="sub-eyebrow">§ 6.4</p>
+      <h3>Phase three — federation.</h3>
+      <p>Phase three establishes the Favour Economy as a federated system across multiple jurisdictions, with interoperable protocol implementations and cross-border favour flow. Objectives:</p>
+
+      <ul class="spec-list">
+        <li><strong>Sister charity formation.</strong> Registered charitable entities in additional jurisdictions (initial targets: U.S., U.K., select E.U. member states), each operating under its own legal framework, federating under a shared protocol charter.</li>
+        <li><strong>Cross-border favour protocol.</strong> Protocol mechanisms for Logistics that cross jurisdictional boundaries, with appropriate regulatory handling (cash conversion, tax reporting, witness accreditation) at the boundary.</li>
+        <li><strong>Global mesh expansion.</strong> Mesh network extension to support inter-regional traffic, including the provisioning of long-haul relays and backup terrestrial/satellite infrastructure where geographic coverage requires it.</li>
+        <li><strong>Insurance federation.</strong> A cross-Group insurance reserve for large-scale events (regional disasters, wide-scale crises) underwritten by the federation of Groups, triggered by agreed criteria, and paid out across jurisdictions as needed.</li>
+        <li><strong>Governance maturation.</strong> Transition of the protocol's governance from founder-led stewardship to member-elected leadership, with formal protocols for amendment, upgrade, and dispute resolution at the federation level.</li>
+      </ul>
+
+      <p>Timelines are deliberately not specified in this document. The protocol is not on a deadline. Each phase completes when its objectives are demonstrably met, not when a calendar says so. A premature transition between phases is worse than a delayed one; durability is the governing virtue.</p>
+    </section>
+
+    <section class="sub" id="participate">
+      <p class="sub-eyebrow">§ 6.5</p>
+      <h3>How to participate.</h3>
+      <p>The protocol is built by and for its participants. There are several distinct ways to engage, each appropriate to different backgrounds and stages of the system.</p>
+
+      <div class="trip">
+        <div class="trip-card">
+          <p class="trip-card-eye">01 · BUILD</p>
+          <p class="trip-card-t">Engineers. Architects. Operators.</p>
+          <p class="trip-card-b">The protocol needs people who can write the matching engine, the witness layer, the mesh stack, the Group governance tools. If you build systems, the Discord's #build channel is the right entry point.</p>
+        </div>
+        <div class="trip-card">
+          <p class="trip-card-eye">02 · FUND</p>
+          <p class="trip-card-t">Early supporters. Donors.</p>
+          <p class="trip-card-b">The charity accepts donations toward its operating costs — legal, engineering, infrastructure. Charitable gift status applies in Canada (and equivalents in other jurisdictions). Reach out through the site.</p>
+        </div>
+        <div class="trip-card">
+          <p class="trip-card-eye">03 · JOIN</p>
+          <p class="trip-card-t">Members. Group-starters.</p>
+          <p class="trip-card-b">Form a Group. Declare a Surface. Ask for a favour. Offer one. As the pilot opens in your region, you become a founding member. The system's value grows with every person who does.</p>
+        </div>
+        <div class="trip-card">
+          <p class="trip-card-eye">04 · OPERATE</p>
+          <p class="trip-card-t">Node operators. Lab partners.</p>
+          <p class="trip-card-b">Run a mesh node. Offer verification services as a lab partner. Map your city. Each of these is an infrastructure role that earns recurring FavourBucks and builds the substrate the network depends on.</p>
+        </div>
+        <div class="trip-card">
+          <p class="trip-card-eye">05 · GOVERN</p>
+          <p class="trip-card-t">Arbiters. Witnesses.</p>
+          <p class="trip-card-b">Serve on regional arbitration panels. Become a trusted witness for health-adjacent or high-stakes favours. Contribute to the protocol's case law. Reputation, not wealth, is the qualification.</p>
+        </div>
+        <div class="trip-card">
+          <p class="trip-card-eye">06 · ADVOCATE</p>
+          <p class="trip-card-t">Writers. Organisers. Translators.</p>
+          <p class="trip-card-b">The protocol's adoption depends as much on clarity of communication as on engineering quality. Write, translate, organise local gatherings. The document you are reading is one of many that will be needed.</p>
+        </div>
+      </div>
+
+      <p>Where to go next: the project's Discord server is the primary venue for builders, early members, and potential collaborators. Role-specific channels let you find the conversation most relevant to your contribution. Use-case pages on the site develop specific favour archetypes in more detail. Contact addresses for charitable gifts, media enquiries, and partnership discussions are published on the site's contact page.</p>
+
+    </section>
+
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════
+     PART VII — APPENDICES
+═══════════════════════════════════════════════════════ -->
+<section class="part" id="part-7">
+  <div class="page-wide">
+    <div class="part-header">
+      <p class="part-number">PART VII</p>
+      <h2 class="part-title"><em>Appendices</em></h2>
+      <p class="part-lede">Reference material for close readers, implementers, and auditors.</p>
+    </div>
+  </div>
+
+  <div class="page">
+
+    <section class="sub" id="a-glossary">
+      <p class="sub-eyebrow">Appendix A</p>
+      <h3>Glossary of terms.</h3>
+
+      <div class="define">
+        <div class="define-term">Availability</div>
+        <div class="define-body"><p>The declared willingness of a member to fulfil favours matching a given Surface within a specified time window. Paid availability claims are subject to reputation clawback if not honoured (§2.6).</p></div>
+      </div>
+
+      <div class="define">
+        <div class="define-term">Charity (the)</div>
+        <div class="define-body"><p>The registered charitable organisation that operates the protocol's escrow, issues and redeems FavourBucks, and provides the governance, audit, and legal substrate for the system. Each jurisdiction has its own charity federated under a shared charter (§4.1).</p></div>
+      </div>
+
+      <div class="define">
+        <div class="define-term">Escrow</div>
+        <div class="define-body"><p>The protocol's transaction clearinghouse, operated by the Charity. Holds funds for an instant, splits per the standard formula, and releases to counterparties. Not a bank; does not lend or pay yield (§2.3).</p></div>
+      </div>
+
+      <div class="define">
+        <div class="define-term">FavourBuck (FB)</div>
+        <div class="define-body"><p>The protocol's native unit of account. A non-interest-bearing voucher redeemable for favours within the network. Issued by the Charity through cash-priming or favour-completion minting (§2.1–2.2).</p></div>
+      </div>
+
+      <div class="define">
+        <div class="define-term">Group</div>
+        <div class="define-body"><p>A legally-constituted collective of members who pool a share of their transaction flow to acquire shared assets, underwrite mutual insurance, and pay dividends. The structural answer to burnout in mutual-aid networks (§1.5).</p></div>
+      </div>
+
+      <div class="define">
+        <div class="define-term">Logistic</div>
+        <div class="define-body"><p>The protocol's atomic unit of favour activity. Defined by Origin, Destination, Time constraint, and Rider. All favours compose from Logistics (§1.3).</p></div>
+      </div>
+
+      <div class="define">
+        <div class="define-term">Mesh (the)</div>
+        <div class="define-body"><p>The protocol's native communications substrate, built on Reticulum and compatible LoRa-class radio technology, operated by member-run nodes, funded by protocol infrastructure fees (§3.1).</p></div>
+      </div>
+
+      <div class="define">
+        <div class="define-term">Rider</div>
+        <div class="define-body"><p>The specification attached to a Logistic describing what capabilities, skills, equipment, capital, and willingness are required to fulfil the favour. Not a person — the spec sheet a person must match to be selected (§1.3).</p></div>
+      </div>
+
+      <div class="define">
+        <div class="define-term">Surface</div>
+        <div class="define-body"><p>A member's declared availability to contribute to favours — their willingness, time, skills, capital, and location published in a form the matching engine can reason about. Surfaces stack to satisfy composite Riders (§1.4).</p></div>
+      </div>
+
+      <div class="define">
+        <div class="define-term">Witness (layer)</div>
+        <div class="define-body"><p>The protocol's verification mechanism for favour completion. Self-witnessed, third-party witnessed, multi-party witnessed, or instrumentally witnessed, depending on the favour's scale and class (§2.7).</p></div>
+      </div>
+    </section>
+
+    <section class="sub" id="b-formulas">
+      <p class="sub-eyebrow">Appendix B</p>
+      <h3>Formulas and specifications.</h3>
+
+      <h4>B.1 — On-chain transaction split</h4>
+      <div class="formula">
+<span class="comment">// Standard on-chain settlement</span>
+recipient_receives = transaction_value × 0.98
+system_fee         = transaction_value × 0.01
+group_share        = transaction_value × 0.01
+
+<span class="comment">// Where no Group is declared, group_share routes to</span>
+<span class="comment">// the regional mutual-aid pool pending member assignment.</span></div>
+
+      <h4>B.2 — Off-chain transaction surcharge</h4>
+      <div class="formula">
+<span class="comment">// Declared off-chain settlement</span>
+surcharge          = declared_value × 0.15
+mesh_allocation    = surcharge × 0.60   <span class="comment">// infrastructure</span>
+group_benefits     = surcharge × 0.40   <span class="comment">// group common-good</span>
+
+<span class="comment">// Paid in FBs by the declaring parties at the time</span>
+<span class="comment">// of off-chain election. No cash passes through protocol.</span></div>
+
+      <h4>B.3 — Mesh-node per-reward function</h4>
+      <div class="formula">
+<span class="comment">// Per-node reward as a function of local saturation</span>
+R(node) = R_max × reliability(node) / (1 + α × n_local)
+
+<span class="comment">// where:</span>
+R_max        = regional maximum, set by Charity infrastructure committee
+reliability  = rolling 30-day uptime vs declared availability, [0.0, 1.0]
+α            = saturation coefficient, tuned per region
+n_local      = count of active nodes providing overlapping coverage
+
+<span class="comment">// Computed hourly. Paid weekly in FBs.</span></div>
+
+      <h4>B.4 — Reputation update on favour closure</h4>
+      <div class="formula">
+<span class="comment">// On clean closure (no dispute, witness confirms)</span>
+rep_delta = base_gain × favour_stake × witness_class_multiplier
+
+<span class="comment">// On disputed closure resolved in party's favour</span>
+rep_delta = base_gain × favour_stake × 0.3
+
+<span class="comment">// On disputed closure resolved against</span>
+rep_delta = -base_loss × favour_stake × dispute_severity
+
+<span class="comment">// On availability clawback</span>
+rep_delta = -base_loss × claimed_window × (1 - honoured_fraction)</div>
+
+      <h4>B.5 — Cash-primed FB exchange rate</h4>
+      <div class="formula">
+<span class="comment">// Initial reference rate, subject to periodic review</span>
+1 FavourBuck ≈ 1 CAD  (at protocol launch in Canada)
+
+<span class="comment">// Rate is a reference, not a peg. Charity maintains reserve</span>
+<span class="comment">// sufficient to redeem a target fraction of circulating FBs</span>
+<span class="comment">// at the reference rate, adjusted as the system matures.</span></div>
+    </section>
+
+    <section class="sub" id="c-precedents">
+      <p class="sub-eyebrow">Appendix C</p>
+      <h3>Precedents and prior art.</h3>
+      <p>The Favour Economy is not without intellectual ancestry. Several prior traditions inform its design, and any serious reader should be acquainted with the following:</p>
+
+      <ul class="spec-list">
+        <li><strong>Time banking.</strong> Edgar Cahn's Time Dollar system (1980s onward) established the modern precedent for service-hour accounting as a mutual-aid currency. The Favour Economy departs from time-banking in that FavourBucks are not time-denominated — favours can be priced by negotiation, and hours are not the unit. But the charitable-voucher precedent established by Time Dollars is the regulatory foundation on which the FavourBuck's classification rests.</li>
+        <li><strong>LETS (Local Exchange Trading Systems).</strong> Michael Linton's 1980s LETS design pioneered mutual-credit accounting — members' balances can go negative, the system tracks debt rather than issuing a fixed supply. The Favour Economy rejects mutual-credit in favour of fixed-supply voucher accounting to preserve balance integrity and simplify regulatory treatment, but acknowledges LETS as a precedent for community-scale alternative currency.</li>
+        <li><strong>Wörgl Schwundgeld.</strong> The 1932 Austrian experiment with demurrage-based currency, inspired by Silvio Gesell, famously accelerated local economic activity during the Great Depression. The Favour Economy considered but rejected demurrage in favour of no-compound-interest; the effect is similar (discouraging hoarding) but the mechanism is structurally cleaner.</li>
+        <li><strong>Ithaca HOURS, BerkShares, and modern local currencies.</strong> Various local-scrip currencies in the U.S. provide operational precedent for geographic-scope alternative money. The Favour Economy's regional-charity federation model draws on these implementations' lessons about the importance of legal-entity structure.</li>
+        <li><strong>Freecycle, Buy Nothing groups.</strong> Large-scale demonstrations that non-monetary exchange at community scale is feasible, and that the limiting factor is not economic but coordinative. The Favour Economy takes from these a conviction about the scale of latent mutual-aid capacity, and attempts to provide the coordination layer they lack.</li>
+        <li><strong>Holochain and mutual-credit distributed systems.</strong> Agent-centric distributed-ledger designs inform the protocol's approach to reputation and identity. The Favour Economy does not itself use Holochain as its implementation substrate (the choice of substrate is an engineering decision deferred to implementation), but acknowledges the design tradition.</li>
+        <li><strong>The Reticulum Network Stack.</strong> Mark Qvist's Reticulum is the specific mesh-networking protocol on which the Favour Economy's mesh substrate is built. Reticulum's encrypted-by-default, identity-first, medium-independent design is a direct structural fit for the protocol's communications needs.</li>
+      </ul>
+    </section>
+
+    <section class="sub" id="d-risks">
+      <p class="sub-eyebrow">Appendix D</p>
+      <h3>Known risks and open questions.</h3>
+      <p>In the interest of honesty, the following are known risks, open design questions, and acknowledged limitations of the current protocol specification. A serious reader should weigh these alongside the proposal.</p>
+
+      <ul class="spec-list">
+        <li><strong>Cold-start risk.</strong> A favour network's utility scales with its membership. Below a critical mass, participants may join, find few matches, and leave. The protocol mitigates this with cash-primed FB issuance (so new members can participate immediately) and Group-driven onboarding (so members arrive in cohorts), but the risk is real and the first regions of operation must be selected with care.</li>
+        <li><strong>Regulatory variability.</strong> The charitable-voucher classification is well-precedented in Canada and several peer jurisdictions, but is not uniformly accepted worldwide. Expansion to jurisdictions with unfamiliar regulatory climates requires jurisdiction-specific legal analysis and, in some cases, may require modified operational structures.</li>
+        <li><strong>Scaling the witness layer.</strong> Human-in-the-loop witnessing scales linearly with favour volume. At sufficient scale, this becomes a constraint. Instrumental witnessing (photographs, geolocation, lab confirmation) can substitute for many cases, but the protocol must continue to develop witness-automation that preserves trust while reducing human overhead.</li>
+        <li><strong>Governance capture.</strong> Any member-governed system carries a risk that well-resourced or highly-coordinated minorities will capture governance positions disproportionate to their actual contribution. The protocol mitigates this through rotation, reputation-weighted voting, and Group-level subsidiarity, but the risk is permanent and requires active management.</li>
+        <li><strong>Mesh network reliability.</strong> Consumer-grade mesh networking has well-known limitations (weather, terrain, spectrum congestion). The protocol's dependence on the mesh for infrastructure-future incentives does not extend to dependence for core operations — the protocol can run over conventional internet — but the mesh's growth is contingent on consistent delivery, and failures in early node cohorts could discourage operators.</li>
+        <li><strong>The price-stability question.</strong> The FavourBuck's reference rate to conventional currency is not a hard peg. If the cash-primed minting path sees large volume while favour-completion minting lags, the FB's effective purchasing power may drift. The Charity manages the reserve ratio to prevent extreme drift, but the protocol is not immune to monetary-policy-like challenges as it scales.</li>
+        <li><strong>Mission drift in practice.</strong> Legal mission-lock is necessary but not sufficient. Organisations can formally serve their charter while operationally drifting toward easier-to-measure proxies (membership count, transaction volume) at the expense of harder-to-measure goals (genuine mobilisation, community formation). The protocol's publication commitments and member-governance mechanisms mitigate this, but ongoing vigilance is required.</li>
+      </ul>
+
+      <p>This is not an exhaustive list. Subsequent versions of this document will evolve the risk register as the protocol is built and as real operational experience identifies issues the theoretical design did not anticipate.</p>
+    </section>
+
+    <section class="sub" id="e-changelog">
+      <p class="sub-eyebrow">Appendix E</p>
+      <h3>Version history.</h3>
+
+      <ul class="spec-list">
+        <li><strong>v0.1 · April 2026.</strong> Initial release. Defines the Logistic, Surface, Rider, Group, FavourBuck, Escrow, Witness layer, Mesh network, asymptotic payout curve, and governance structure. Publishes the breastmilk worked example and the phased roadmap. This is the canonical specification as of the document's publication date; all subsequent implementations and public materials should reference this version or its successors.</li>
+      </ul>
+
+      <p>Future versions will be numbered according to the following convention: minor releases (0.1 → 0.2) for refinements, clarifications, and non-breaking additions; major releases (0.x → 1.0, 1.x → 2.0) for structural changes to the protocol's core primitives or governance. Each release is published with a full changelog and a summary of the rationale for any changes.</p>
+    </section>
+
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════
+     CLOSING
+═══════════════════════════════════════════════════════ -->
+<section class="part">
+  <div class="page">
+    <div style="text-align: center; padding: 4rem 0;">
+      <p class="sub-eyebrow" style="margin-bottom: 2rem;">Closing</p>
+      <h2 style="max-width: 18ch; margin: 0 auto; font-family: var(--display); font-size: clamp(2.5rem, 6vw, 4.5rem); font-weight: 300; line-height: 1.1; letter-spacing: -0.02em;">
+        A <em style="color: var(--gold); font-style: italic;">mobilisation</em> protocol is not a promise.
+      </h2>
+      <p style="font-family: var(--display); font-style: italic; font-size: 1.3rem; color: var(--muted); margin-top: 2rem; max-width: 36ch; margin-left: auto; margin-right: auto; line-height: 1.4;">
+        It is a demonstration, repeated, until enough people have seen it that the demonstration becomes the economy.
+      </p>
+      <p style="margin-top: 3rem; color: rgba(244,244,244,0.75); font-size: 1.02rem; line-height: 1.7; max-width: 56ch; margin-left: auto; margin-right: auto;">
+        The Favour Economy will not be launched. It will be built, favour by favour, by people who look at the space between what is needed and what is given and decide to close it. The protocol described in these pages is the scaffolding. The economy itself is what happens when the scaffolding is used.
+      </p>
+      <p style="margin-top: 2rem; font-family: var(--display); font-style: italic; color: var(--gold); font-size: 1.15rem;">
+        Build. Fund. Join. Operate. Govern. Advocate.
+      </p>
+      <p style="margin-top: 0.5rem; font-family: var(--display); font-style: italic; color: var(--gold); font-size: 1.15rem;">
+        Or simply — ask someone for a favour, and return one in kind.
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════
+     FOOTER
+═══════════════════════════════════════════════════════ -->
+<footer class="footer">
+  <div class="footer-mark"></div>
+  <div class="footer-name">Favour Economy</div>
+  <p class="footer-tag">Every person. Every favour. Every future.</p>
+  <nav class="footer-links">
+    <a href="/">Cinematic Pitch</a>
+    <a href="/the-case.html">The Case</a>
+    <a href="#cover">Top of Whitepaper</a>
+    <a href="mailto:hello@favoureconomy.com">Contact</a>
+  </nav>
+  <div class="footer-sig">
+    PROTOCOL WHITEPAPER · VERSION 0.1 · APRIL 2026
+    <span class="sig">— T$TimeMoney</span>
+  </div>
+</footer>
+
+<!-- ═══════════════════════════════════════════════════════
+     SCRIPTS
+═══════════════════════════════════════════════════════ -->
+<script>
+// Progress bar
+const progress = document.getElementById('progress');
+window.addEventListener('scroll', () => {
+  const h = document.documentElement;
+  const scrolled = h.scrollTop / (h.scrollHeight - h.clientHeight);
+  progress.style.width = (scrolled * 100) + '%';
+}, { passive: true });
+
+// Side nav active tracking
+const navLinks = document.querySelectorAll('#side-nav a');
+const sections = [];
+navLinks.forEach(a => {
+  const id = a.getAttribute('href').substring(1);
+  const el = document.getElementById(id);
+  if (el) sections.push({ id, el, link: a });
+});
+
+function updateActiveNav() {
+  const y = window.scrollY + window.innerHeight / 3;
+  let current = sections[0];
+  for (const s of sections) {
+    if (s.el.offsetTop <= y) current = s;
+  }
+  navLinks.forEach(a => a.classList.remove('active'));
+  if (current) current.link.classList.add('active');
+}
+window.addEventListener('scroll', updateActiveNav, { passive: true });
+updateActiveNav();
+
+// Reveal animations (subtle)
+const revealIO = new IntersectionObserver(entries => {
+  entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('show'); });
+}, { threshold: 0.1 });
+
+document.querySelectorAll('section.sub, .callout, .diagram, .story, .trip-card, .define').forEach(el => {
+  revealIO.observe(el);
+});
+
+// Smooth anchor scroll offset for fixed progress bar
+document.querySelectorAll('a[href^="#"]').forEach(link => {
+  link.addEventListener('click', e => {
+    const target = document.querySelector(link.getAttribute('href'));
+    if (target) {
+      e.preventDefault();
+      window.scrollTo({ top: target.offsetTop - 20, behavior: 'smooth' });
+    }
+  });
+});
+</script>
+
+</body>
+</html>
