@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Favour Economy — The Revolution</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@200;300;400;500;600&display=swap" rel="stylesheet">
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -68,7 +69,7 @@
   /* ── AUDIO TOGGLE ── */
   #audio-toggle {
     position: fixed;
-    top: 1.5rem;
+    top: calc(1.5rem + 48px);
     right: 1.5rem;
     z-index: 9999;
     background: rgba(255,255,255,0.06);
@@ -849,7 +850,7 @@
   /* ── SCROLL PROGRESS ── */
   #progress-bar {
     position: fixed;
-    top: 0;
+    top: 48px;
     left: 0;
     height: 2px;
     background: linear-gradient(to right, var(--copper), var(--gold));
@@ -860,6 +861,27 @@
 </style>
 </head>
 <body>
+
+<!-- ═══ SITE NAV ═══ -->
+<nav id="site-nav" style="
+  position: fixed; top: 0; left: 0; right: 0; z-index: 10001;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 1.5rem; height: 48px;
+  background: rgba(5,5,8,0.85); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid rgba(201,168,76,0.08);
+  font-family: 'Outfit', -apple-system, sans-serif;
+">
+  <a href="index.html" style="font-size:0.7rem;letter-spacing:0.25em;text-transform:uppercase;color:#c9a84c;text-decoration:none;border:none;font-weight:400;">Favour Economy</a>
+  <div style="display:flex;gap:1.8rem;align-items:center;">
+    <a href="index.html" style="font-size:0.55rem;letter-spacing:0.2em;text-transform:uppercase;color:#505060;text-decoration:none;border:none;transition:color 0.3s;" onmouseover="this.style.color='#c9a84c'" onmouseout="this.style.color='#505060'">Vision</a>
+    <a href="brochure.html" style="font-size:0.55rem;letter-spacing:0.2em;text-transform:uppercase;color:#505060;text-decoration:none;border:none;transition:color 0.3s;" onmouseover="this.style.color='#c9a84c'" onmouseout="this.style.color='#505060'">The Case</a>
+    <a href="whitepaper.html" style="font-size:0.55rem;letter-spacing:0.2em;text-transform:uppercase;color:#505060;text-decoration:none;border:none;transition:color 0.3s;" onmouseover="this.style.color='#c9a84c'" onmouseout="this.style.color='#505060'">Whitepaper</a>
+    <a href="campaign.html" style="font-size:0.55rem;letter-spacing:0.2em;text-transform:uppercase;color:#505060;text-decoration:none;border:none;transition:color 0.3s;" onmouseover="this.style.color='#c9a84c'" onmouseout="this.style.color='#505060'">Campaign</a>
+    <a href="waitlist.html" style="font-size:0.55rem;letter-spacing:0.2em;text-transform:uppercase;color:#505060;text-decoration:none;border:none;transition:color 0.3s;" onmouseover="this.style.color='#c9a84c'" onmouseout="this.style.color='#505060'">Join</a>
+  </div>
+</nav>
+<div style="height:48px;"></div>
+<!-- ═══ /SITE NAV ═══ -->
 
 <div id="progress-bar"></div>
 <button id="audio-toggle" aria-label="Toggle audio">♪ SOUND OFF</button>
@@ -1466,6 +1488,21 @@
 </section>
 
 </div><!-- /cinematic-wrapper -->
+
+<!-- ═══ SITE FOOTER ═══ -->
+<div style="background:#050508;border-top:1px solid rgba(201,168,76,0.08);padding:3rem 1.5rem 2rem;text-align:center;font-family:'Outfit',-apple-system,sans-serif;">
+  <div style="display:flex;justify-content:center;gap:2rem;flex-wrap:wrap;margin-bottom:1.5rem;">
+    <a href="brochure.html" style="font-size:0.6rem;letter-spacing:0.2em;text-transform:uppercase;color:#505060;text-decoration:none;transition:color 0.3s;" onmouseover="this.style.color='#c9a84c'" onmouseout="this.style.color='#505060'">The Case</a>
+    <a href="whitepaper.html" style="font-size:0.6rem;letter-spacing:0.2em;text-transform:uppercase;color:#505060;text-decoration:none;transition:color 0.3s;" onmouseover="this.style.color='#c9a84c'" onmouseout="this.style.color='#505060'">Whitepaper</a>
+    <a href="campaign.html" style="font-size:0.6rem;letter-spacing:0.2em;text-transform:uppercase;color:#505060;text-decoration:none;transition:color 0.3s;" onmouseover="this.style.color='#c9a84c'" onmouseout="this.style.color='#505060'">Campaign</a>
+    <a href="storyboard.html" style="font-size:0.6rem;letter-spacing:0.2em;text-transform:uppercase;color:#505060;text-decoration:none;transition:color 0.3s;" onmouseover="this.style.color='#c9a84c'" onmouseout="this.style.color='#505060'">Storyboard</a>
+    <a href="animatic.html" style="font-size:0.6rem;letter-spacing:0.2em;text-transform:uppercase;color:#505060;text-decoration:none;transition:color 0.3s;" onmouseover="this.style.color='#c9a84c'" onmouseout="this.style.color='#505060'">Animatic</a>
+    <a href="waitlist.html" style="font-size:0.6rem;letter-spacing:0.2em;text-transform:uppercase;color:#505060;text-decoration:none;transition:color 0.3s;" onmouseover="this.style.color='#c9a84c'" onmouseout="this.style.color='#505060'">Join Waitlist</a>
+    <a href="sitemap.html" style="font-size:0.6rem;letter-spacing:0.2em;text-transform:uppercase;color:#505060;text-decoration:none;transition:color 0.3s;" onmouseover="this.style.color='#c9a84c'" onmouseout="this.style.color='#505060'">Sitemap</a>
+  </div>
+  <p style="font-size:0.55rem;color:#303040;letter-spacing:0.1em;">&copy; 2026 Favour Economy. All rights reserved.</p>
+</div>
+<!-- ═══ /SITE FOOTER ═══ -->
 
 <!-- ═══════════════════════════════════════════════════════
      TRAILER SCRIPT — Full Document

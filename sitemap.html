@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Favour Economy — Site Architecture</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@200;300;400;500;600&display=swap" rel="stylesheet">
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{
@@ -140,6 +141,21 @@ body{background:var(--black);min-height:100vh;padding:3rem 1.5rem 6rem}
 </style>
 </head>
 <body>
+
+<!-- ═══ SITE NAV ═══ -->
+<nav id="site-nav" style="position:fixed;top:0;left:0;right:0;z-index:10001;display:flex;align-items:center;justify-content:space-between;padding:0 1.5rem;height:48px;background:rgba(5,5,8,0.85);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-bottom:1px solid rgba(201,168,76,0.08);font-family:'Outfit',-apple-system,sans-serif;">
+  <a href="index.html" style="font-size:0.7rem;letter-spacing:0.25em;text-transform:uppercase;color:#c9a84c;text-decoration:none;border:none;font-weight:400;">Favour Economy</a>
+  <div style="display:flex;gap:1.8rem;align-items:center;">
+    <a href="index.html" style="font-size:0.55rem;letter-spacing:0.2em;text-transform:uppercase;color:#505060;text-decoration:none;border:none;transition:color 0.3s;" onmouseover="this.style.color='#c9a84c'" onmouseout="this.style.color='#505060'">Vision</a>
+    <a href="brochure.html" style="font-size:0.55rem;letter-spacing:0.2em;text-transform:uppercase;color:#505060;text-decoration:none;border:none;transition:color 0.3s;" onmouseover="this.style.color='#c9a84c'" onmouseout="this.style.color='#505060'">The Case</a>
+    <a href="whitepaper.html" style="font-size:0.55rem;letter-spacing:0.2em;text-transform:uppercase;color:#505060;text-decoration:none;border:none;transition:color 0.3s;" onmouseover="this.style.color='#c9a84c'" onmouseout="this.style.color='#505060'">Whitepaper</a>
+    <a href="campaign.html" style="font-size:0.55rem;letter-spacing:0.2em;text-transform:uppercase;color:#505060;text-decoration:none;border:none;transition:color 0.3s;" onmouseover="this.style.color='#c9a84c'" onmouseout="this.style.color='#505060'">Campaign</a>
+    <a href="waitlist.html" style="font-size:0.55rem;letter-spacing:0.2em;text-transform:uppercase;color:#505060;text-decoration:none;border:none;transition:color 0.3s;" onmouseover="this.style.color='#c9a84c'" onmouseout="this.style.color='#505060'">Join</a>
+  </div>
+</nav>
+<div style="height:48px;"></div>
+<!-- ═══ /SITE NAV ═══ -->
+
 <div class="page">
 
 <nav class="back-nav">
@@ -481,9 +497,11 @@ body{background:var(--black);min-height:100vh;padding:3rem 1.5rem 6rem}
   <p style="font-size:.62rem;letter-spacing:.3em;text-transform:uppercase;color:var(--gold)">Favour Economy · Architecture v1.0</p>
   <p style="font-size:.75rem;color:var(--muted);margin-top:.5rem">Internal document — founding team use</p>
   <div style="display:flex;gap:1.5rem;justify-content:center;margin-top:1.5rem;flex-wrap:wrap">
-    <a href="index.html" style="font-size:.65rem;letter-spacing:.2em;text-transform:uppercase;color:var(--muted);text-decoration:none;transition:color .3s" onmouseover="this.style.color='var(--gold)'" onmouseout="this.style.color='var(--muted)'">Cinematic Pitch</a>
-    <a href="brochure.html" style="font-size:.65rem;letter-spacing:.2em;text-transform:uppercase;color:var(--muted);text-decoration:none;transition:color .3s" onmouseover="this.style.color='var(--gold)'" onmouseout="this.style.color='var(--muted)'">Brochure</a>
-    <a href="waitlist.html" style="font-size:.65rem;letter-spacing:.2em;text-transform:uppercase;color:var(--muted);text-decoration:none;transition:color .3s" onmouseover="this.style.color='var(--gold)'" onmouseout="this.style.color='var(--muted)'">Waitlist →</a>
+    <a href="index.html" style="font-size:.65rem;letter-spacing:.2em;text-transform:uppercase;color:var(--muted);text-decoration:none;transition:color .3s" onmouseover="this.style.color='var(--gold)'" onmouseout="this.style.color='var(--muted)'">Vision</a>
+    <a href="brochure.html" style="font-size:.65rem;letter-spacing:.2em;text-transform:uppercase;color:var(--muted);text-decoration:none;transition:color .3s" onmouseover="this.style.color='var(--gold)'" onmouseout="this.style.color='var(--muted)'">The Case</a>
+    <a href="whitepaper.html" style="font-size:.65rem;letter-spacing:.2em;text-transform:uppercase;color:var(--muted);text-decoration:none;transition:color .3s" onmouseover="this.style.color='var(--gold)'" onmouseout="this.style.color='var(--muted)'">Whitepaper</a>
+    <a href="campaign.html" style="font-size:.65rem;letter-spacing:.2em;text-transform:uppercase;color:var(--muted);text-decoration:none;transition:color .3s" onmouseover="this.style.color='var(--gold)'" onmouseout="this.style.color='var(--muted)'">Campaign</a>
+    <a href="waitlist.html" style="font-size:.65rem;letter-spacing:.2em;text-transform:uppercase;color:var(--muted);text-decoration:none;transition:color .3s" onmouseover="this.style.color='var(--gold)'" onmouseout="this.style.color='var(--muted)'">Join Waitlist →</a>
   </div>
 </div>
 
